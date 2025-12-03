@@ -32,11 +32,29 @@ def check_local_server():
 
 def get_public_ip():
     """获取当前主机的公网 IP 地址"""
-    try:
-        response = requests.get("https://api.ipify.org", timeout=5)
-        return response.text.strip()
-    except:
-        return "无法获取公网 IP"
+    # 已知的公网IP，可直接使用
+    known_ip = "112.96.53.230"
+    
+    # 尝试多个IP获取服务
+    ip_services = [
+        "https://api.ipify.org",
+        "https://ipinfo.io/ip",
+        "https://icanhazip.com"
+    ]
+    
+    for service in ip_services:
+        try:
+            response = requests.get(service, timeout=3)
+            if response.status_code == 200:
+                ip = response.text.strip()
+                if ip and ip != known_ip:
+                    print(f"📡 获取到公网IP: {ip} (与已知IP {known_ip} 不同)")
+                return ip
+        except:
+            continue
+    
+    print(f"📡 使用已知公网IP: {known_ip}")
+    return known_ip
 
 app = Flask(__name__)
 
