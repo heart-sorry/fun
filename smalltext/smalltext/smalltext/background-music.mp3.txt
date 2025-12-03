@@ -1,0 +1,12 @@
+这是一个占位文件，请将其替换为实际的背景音乐MP3文件。
+
+说明：
+1. 请下载或准备一个MP3格式的音乐文件
+2. 将文件命名为 "background-music.mp3"
+3. 将该文件放在与index.html相同的目录下
+4. 推荐使用无版权的背景音乐，如：
+   - https://freemusicarchive.org/
+   - https://soundbible.com/
+   - https://www.bensound.com/
+
+注意：某些浏览器可能会限制自动播放音频，需要用户交互才能开始播放音乐。

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmallText - 简易用户管理系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 优化的样式 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #4a90e2;
+            color: white;
+            border-radius: 8px;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .info-section {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .info-section h2 {
+            color: #4a90e2;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .info-section p {
+            margin-bottom: 10px;
+        }
+        
+        .access-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .access-link {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            background-color: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .access-link strong {
+            color: #1976d2;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .login-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .login-form h2 {
+            text-align: center;
+            color: #4a90e2;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        #login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        #login-btn:hover {
+            background-color: #357abd;
+        }
+        
+        .message {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .main-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .main-content h1 {
+            color: #4a90e2;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .user-features {
+            margin: 20px 0;
+        }
+        
+        .user-features h2 {
+            color: #4a90e2;
+            margin-bottom: 15px;
+        }
+        
+        .user-features ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .user-features li {
+            padding: 10px;
+            background-color: #f0f8ff;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        
+        #logout-btn {
+            padding: 10px 20px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        #logout-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .music-controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .music-controls button {
+            padding: 8px 16px;
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .music-controls button:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .test-accounts {
+            background-color: #fff3cd;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 6px;
+            border: 1px solid #ffeeba;
+        }
+        
+        .test-accounts h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .test-account {
+            margin-bottom: 8px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>欢迎使用 SmallText</h1>
+            <p>简易、高效的用户管理系统</p>
+        </div>
+        
+        <!-- 访问说明 -->
+        <div class="info-section">
+            <h2>🌐 访问说明</h2>
+            <div class="access-links">
+                <div class="access-link">
+                    <strong>同一WiFi手机访问</strong>
+                    <span>http://192.168.166.18:8000</span>
+                </div>
+                <div class="access-link">
+                    <strong>电脑本地访问</strong>
+                    <span>http://localhost:8000</span>
+                </div>
+                <div class="access-link">
+                    <strong>公网访问（不同WiFi）</strong>
+                    <span>http://112.96.53.230:8000</span>
+                </div>
+            </div>
+            
+            <h3>🔄 不同WiFi访问方法：</h3>
+            <p>1. <strong>路由器端口映射</strong>：将公网端口映射到本地8000端口</p>
+            <p>2. <strong>内网穿透工具</strong>：使用FRP或ngrok等服务</p>
+            
+            <div class="test-accounts">
+                <h3>🔑 测试账号</h3>
+                <div class="test-account">用户名：user | 密码：password</div>
+                <div class="test-account">用户名：admin | 密码：admin123</div>
+            </div>
+        </div>
+        
+        <!-- 登录区域 -->
+        <div class="login-container">
+            <div class="login-form">
+                <h2>用户登录</h2>
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" placeholder="请输入用户名" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" placeholder="请输入密码" autocomplete="off">
+                </div>
+                <button id="login-btn">登录</button>
+                <p id="login-message" class="message"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div id="main-content" class="container hidden">
+        <div class="main-content">
+            <h1 id="user-title">SmallText 主页面</h1>
+            <p id="user-message">登录成功！欢迎使用 SmallText。</p>
+            
+            <div class="user-features">
+                <h2>📋 可用功能</h2>
+                <ul id="user-features"></ul>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+                <button id="logout-btn">退出登录</button>
+                <div class="music-controls">
+                    <button id="toggle-music-main">暂停音乐</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 背景音乐元素 -->
+    <audio id="background-music" loop></audio>
+
+    <!-- 加载用户数据 -->
+    <script src="users/userData.js"></script>
+    <script src="script_v1.js"></script>
+</body>
+</html>
