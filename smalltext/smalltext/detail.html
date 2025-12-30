@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>文档详情</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <a href="index.html" style="text-decoration:none;">&larr; 返回搜索首页</a>
+    <div id="doc-content" class="detail-content"></div>
+    <footer><small>Powered by lrj-sorry/fun</small></footer>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+    function getParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+    const fname = getParam('file');
+    const root = 'smalltext/smalltext/';
+    const contentDiv = document.getElementById('doc-content');
+    if (!fname) {
+      contentDiv.innerHTML = "<p>未指定文件名。</p>";
+    } else {
+      fetch(root + fname)
+        .then(r=>r.ok?r.text():Promise.reject("未找到"))
+        .then(text=>{
+          contentDiv.innerHTML =
+            `<h2>${fname}</h2><article>${marked.parse(text)}</article>`;
+        })
+        .catch(()=>{contentDiv.innerHTML='<p>文件未找到。</p>';});
+    }
+    </script>
+</body>
+</html>
