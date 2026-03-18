@@ -9,198 +9,113 @@
 
     body {
       min-height: 100vh;
-      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 30%, #a1c4fd 70%, #c2e9fb 100%);
+      background: linear-gradient(180deg, #f5f7fa 0%, #c3cfe2 100%);
       font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
-      overflow-x: hidden;
-    }
-
-    .floaters {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-    .floater {
-      position: absolute;
-      bottom: -50px;
-      font-size: 1.5rem;
-      animation: floatUp linear infinite;
-      opacity: 0.5;
-    }
-    @keyframes floatUp {
-      0%   { transform: translateY(0) rotate(0deg); opacity: 0.5; }
-      100% { transform: translateY(-110vh) rotate(20deg); opacity: 0; }
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
 
     .container {
-      position: relative;
-      z-index: 1;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 60px 20px 80px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      width: 100%;
+      max-width: 420px;
     }
 
     header {
       text-align: center;
       margin-bottom: 40px;
     }
-    header .emoji-big { 
-      font-size: 3.5rem; 
-      display: block; 
-      margin-bottom: 12px; 
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
     header h1 {
-      font-size: 2rem;
-      color: #fff;
-      text-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      font-size: 1.8rem;
+      color: #333;
       margin-bottom: 8px;
     }
     header p {
-      font-size: 1rem;
-      color: rgba(255,255,255,0.85);
-    }
-
-    .daily-quote {
-      background: rgba(255,255,255,0.25);
-      backdrop-filter: blur(8px);
-      border-radius: 16px;
-      padding: 16px 20px;
-      margin-bottom: 24px;
-      text-align: center;
-      border: 1px solid rgba(255,255,255,0.3);
-    }
-    .daily-quote .quote-icon { font-size: 1.2rem; margin-bottom: 4px; }
-    .daily-quote .quote-text {
       font-size: 0.95rem;
-      color: #fff;
-      font-style: italic;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      color: #666;
     }
 
     .search-box {
       position: relative;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
     .search-box input {
       width: 100%;
-      padding: 18px 24px 18px 56px;
-      font-size: 1.1rem;
+      padding: 16px 20px;
+      font-size: 1rem;
       border: none;
-      border-radius: 50px;
-      background: rgba(255,255,255,0.9);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
       outline: none;
-      transition: all 0.3s;
-    }
-    .search-box input:focus {
-      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-      transform: scale(1.02);
     }
     .search-box input::placeholder {
-      color: #999;
-    }
-    .search-box .search-icon {
-      position: absolute;
-      left: 22px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 1.3rem;
+      color: #aaa;
     }
 
     .results {
       display: none;
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-      animation: slideDown 0.3s ease;
-    }
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
     }
     .results.active { display: block; }
+
     .result-item {
-      padding: 16px 24px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
       cursor: pointer;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
+      transition: transform 0.2s;
+    }
+    .result-item:hover {
+      transform: translateY(-2px);
+    }
+    .result-item .r-top {
       display: flex;
       align-items: center;
       gap: 12px;
-      transition: all 0.2s;
+      margin-bottom: 12px;
     }
-    .result-item:last-child { border-bottom: none; }
-    .result-item:hover { 
-      background: rgba(255,255,255,0.5); 
-      transform: translateX(8px);
+    .result-item .r-avatar {
+      font-size: 2rem;
     }
-    .result-item .r-avatar { font-size: 1.8rem; }
-    .result-item .r-info { flex: 1; }
-    .result-item .r-name { font-weight: 600; color: #333; font-size: 1.05rem; }
-    .result-item .r-tag { font-size: 0.8rem; color: #888; }
-
-    .surprise-btn {
-      display: block;
-      width: 100%;
-      padding: 16px;
-      margin: 20px 0;
-      border: none;
-      border-radius: 50px;
-      background: linear-gradient(135deg, #ff6b9d, #ffa94d, #69db7c, #74c0fc);
-      background-size: 300% 300%;
-      color: #fff;
+    .result-item .r-name {
       font-size: 1.1rem;
       font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 8px 24px rgba(255,107,157,0.3);
-      animation: gradientShift 3s ease infinite;
-      transition: transform 0.2s;
+      color: #333;
     }
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    .result-item .r-tag {
+      font-size: 0.75rem;
+      color: #888;
     }
-    .surprise-btn:hover {
-      transform: scale(1.05);
-    }
-
-    .hint {
-      text-align: center;
-      color: rgba(255,255,255,0.7);
+    .result-item .r-preview {
+      color: #666;
       font-size: 0.9rem;
-      margin-top: 10px;
+      line-height: 1.6;
     }
 
     .not-found {
       display: none;
       text-align: center;
       padding: 40px 20px;
-      color: rgba(255,255,255,0.9);
+      color: #666;
     }
     .not-found.active { display: block; }
-    .not-found .big-emoji { font-size: 4rem; margin-bottom: 16px; }
-    .not-found p { font-size: 1.1rem; }
+
+    .hint {
+      text-align: center;
+      color: #888;
+      font-size: 0.85rem;
+      margin-top: 20px;
+    }
 
     /* 弹窗 */
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(6px);
+      background: rgba(0,0,0,0.5);
       z-index: 100;
       align-items: center;
       justify-content: center;
@@ -209,641 +124,255 @@
     .modal-overlay.active { display: flex; }
     .modal {
       background: #fff;
-      border-radius: 28px;
-      padding: 48px 36px;
-      max-width: 460px;
+      border-radius: 20px;
+      padding: 36px 28px;
+      max-width: 380px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.2);
-      animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      animation: popIn 0.3s ease;
     }
     @keyframes popIn {
-      from { transform: scale(0.7); opacity: 0; }
+      from { transform: scale(0.9); opacity: 0; }
       to   { transform: scale(1);   opacity: 1; }
     }
-    .modal .m-avatar { 
-      font-size: 4rem; 
-      margin-bottom: 12px; 
-      animation: bounce 1s ease infinite; 
-    }
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-    .modal .m-name   { font-size: 1.8rem; font-weight: 700; color: #333; margin-bottom: 6px; }
-    .modal .m-tag    { font-size: 0.9rem; color: #888; margin-bottom: 24px; padding: 4px 14px; background: #f5f5f5; border-radius: 20px; display: inline-block; }
-    .modal .m-text   { font-size: 1.1rem; color: #444; line-height: 2; padding: 20px; background: linear-gradient(135deg, #fff5f5, #f0f8ff); border-radius: 16px; }
+    .modal .m-avatar { font-size: 3rem; margin-bottom: 8px; }
+    .modal .m-name   { font-size: 1.4rem; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .modal .m-tag    { font-size: 0.8rem; color: #888; margin-bottom: 20px; }
+    .modal .m-text   { font-size: 1rem; color: #444; line-height: 2; text-align: left; }
     .modal .close-btn {
-      margin-top: 28px;
-      padding: 12px 40px;
+      margin-top: 24px;
+      padding: 10px 32px;
       border: none;
-      border-radius: 50px;
-      background: linear-gradient(135deg, #ff6b9d, #ffa94d);
+      border-radius: 25px;
+      background: #333;
       color: #fff;
-      font-size: 1.05rem;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .modal .close-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(255,107,157,0.4);
-    }
-
-    /* ====== 管理后台样式 ====== */
-    .admin-panel {
-      display: none;
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 24px;
-      padding: 30px 24px;
-      box-shadow: 0 12px 48px rgba(0,0,0,0.15);
-      margin-top: 20px;
-    }
-    .admin-panel.active { display: block; animation: slideDown 0.4s ease; }
-    
-    .admin-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 2px solid #f0f0f0;
-    }
-    .admin-header h2 {
-      font-size: 1.4rem;
-      color: #333;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .admin-header .logout-btn {
-      padding: 8px 20px;
-      border: none;
-      border-radius: 20px;
-      background: #f5f5f5;
-      color: #666;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-    .admin-header .logout-btn:hover { background: #eee; }
-
-    .admin-tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .admin-tab {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 20px;
-      background: #f5f5f5;
-      color: #666;
       font-size: 0.95rem;
       cursor: pointer;
-      transition: all 0.2s;
-    }
-    .admin-tab.active {
-      background: linear-gradient(135deg, #ff6b9d, #ffa94d);
-      color: #fff;
     }
 
-    .admin-content { display: none; }
-    .admin-content.active { display: block; }
-
-    /* 朋友列表 */
-    .friend-list { display: flex; flex-direction: column; gap: 12px; }
-    .friend-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
-      background: #f9f9f9;
-      border-radius: 14px;
+    /* 管理入口 */
+    .admin-link {
+      text-align: center;
+      margin-top: 40px;
+      opacity: 0.3;
+      font-size: 0.75rem;
+      color: #999;
       cursor: pointer;
-      transition: all 0.2s;
     }
-    .friend-card:hover { background: #f0f0f0; transform: translateX(4px); }
-    .friend-card .f-avatar { font-size: 1.6rem; }
-    .friend-card .f-info { flex: 1; }
-    .friend-card .f-name { font-weight: 600; color: #333; }
-    .friend-card .f-tag { font-size: 0.8rem; color: #888; }
-    .friend-card .f-edit { opacity: 0; transition: opacity 0.2s; }
-    .friend-card:hover .f-edit { opacity: 1; }
+    .admin-link:hover { opacity: 0.6; }
 
-    /* 添加按钮 */
-    .add-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 14px;
-      margin-top: 12px;
-      border: 2px dashed #ccc;
-      border-radius: 14px;
-      background: transparent;
-      color: #888;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .add-btn:hover {
-      border-color: #ff6b9d;
-      color: #ff6b9d;
-      background: rgba(255,107,157,0.05);
-    }
-
-    /* 编辑表单 */
-    .edit-form {
+    /* 管理后台 */
+    .admin-panel {
       display: none;
       background: #fff;
-      padding: 20px;
-      border-radius: 16px;
+      border-radius: 20px;
+      padding: 24px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
-    .edit-form.active { display: block; animation: slideDown 0.3s ease; }
-    .edit-form .form-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #333;
+    .admin-panel.active { display: block; }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
-      text-align: center;
     }
+    .admin-header h2 { font-size: 1.1rem; color: #333; }
+    .admin-header button {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 12px;
+      background: #f5f5f5;
+      color: #666;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .friend-list { display: flex; flex-direction: column; gap: 10px; }
+    .friend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: #f9f9f9;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .friend-item .f-avatar { font-size: 1.4rem; }
+    .friend-item .f-name { flex: 1; font-size: 0.95rem; color: #333; }
+    .friend-item .f-edit { font-size: 0.8rem; opacity: 0.5; }
+
+    .edit-form {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      background: #f5f5f5;
+      border-radius: 12px;
+    }
+    .edit-form.active { display: block; }
     .edit-form input,
     .edit-form textarea {
       width: 100%;
-      padding: 12px 16px;
-      margin-bottom: 14px;
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-family: inherit;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .edit-form input:focus,
-    .edit-form textarea:focus {
-      border-color: #ff6b9d;
-    }
-    .edit-form textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-    .edit-form .form-btns {
-      display: flex;
-      gap: 10px;
-    }
-    .edit-form .save-btn {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #ff6b9d, #ffa94d);
-      color: #fff;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    .edit-form .cancel-btn {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 12px;
-      background: #f5f5f5;
-      color: #666;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    .edit-form .delete-btn {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 12px;
-      background: #ff4757;
-      color: #fff;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    /* 每日一句管理 */
-    .quote-list { display: flex; flex-direction: column; gap: 10px; }
-    .quote-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      background: #f9f9f9;
-      border-radius: 12px;
-    }
-    .quote-item .q-text { flex: 1; color: #333; }
-    .quote-item .q-del {
-      padding: 4px 10px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
       border: none;
       border-radius: 8px;
-      background: #ff4757;
-      color: #fff;
-      font-size: 0.8rem;
-      cursor: pointer;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .quote-item:hover .q-del { opacity: 1; }
-    .add-quote-box {
-      display: flex;
-      gap: 10px;
-      margin-top: 16px;
-    }
-    .add-quote-box input {
-      flex: 1;
-      padding: 10px 14px;
-      border: 1px solid #e0e0e0;
-      border-radius: 10px;
-      font-size: 0.95rem;
-    }
-    .add-quote-box button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 10px;
-      background: #69db7c;
-      color: #fff;
-      cursor: pointer;
-    }
-
-    .confetti {
-      position: fixed;
-      pointer-events: none;
-      z-index: 9999;
-    }
-    .confetti-piece {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      animation: confetti-fall 3s ease-out forwards;
-    }
-    @keyframes confetti-fall {
-      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-    }
-
-    footer {
-      text-align: center;
-      margin-top: auto;
-      padding-top: 40px;
-      color: rgba(255,255,255,0.7);
       font-size: 0.9rem;
+    }
+    .edit-form textarea { min-height: 80px; resize: none; }
+    .edit-form .btns { display: flex; gap: 8px; }
+    .edit-form button {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .edit-form .save { background: #333; color: #fff; }
+    .edit-form .cancel { background: #ddd; color: #666; }
+    .edit-form .delete { background: #ff4757; color: #fff; }
+
+    .export-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-top: 16px;
+      border: none;
+      border-radius: 12px;
+      background: #f0f0f0;
+      color: #666;
+      font-size: 0.9rem;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-<div class="floaters" id="floaters"></div>
-
 <div class="container">
   <header>
-    <span class="emoji-big">💌</span>
-    <h1>致你的私语</h1>
-    <p>输入你的名字，看看我想对你说什么 ✨</p>
+    <h1>致你的私语 💌</h1>
+    <p>输入你的名字，看看我想对你说什么</p>
   </header>
 
-  <div class="daily-quote">
-    <div class="quote-icon">💫</div>
-    <div class="quote-text" id="dailyQuote">加载中...</div>
-  </div>
-
-  <!-- 搜索框 -->
   <div class="search-box">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="输入名字搜索..." autocomplete="off">
+    <input type="text" id="searchInput" placeholder="搜索名字..." autocomplete="off">
   </div>
 
-  <!-- 搜索结果 -->
   <div class="results" id="results"></div>
-
-  <!-- 神秘按钮 -->
-  <button class="surprise-btn" onclick="showSurprise()">🎁 点我有惊喜</button>
-
-  <!-- 未找到提示 -->
   <div class="not-found" id="notFound">
-    <div class="big-emoji">🤔</div>
-    <p>没有找到这个名字哦<br>检查一下是不是输错啦～</p>
+    <p>没有找到这个名字哦</p>
   </div>
 
-  <div class="hint">💡 试试搜索：朋友A、朋友B、朋友C...</div>
+  <div class="hint" id="hint">试试搜索：朋友A、朋友B...</div>
 
-  <!-- ====== 管理后台 ====== -->
+  <!-- 管理后台 -->
   <div class="admin-panel" id="adminPanel">
     <div class="admin-header">
-      <h2>🛠️ 管理后台</h2>
-      <button class="logout-btn" onclick="logoutAdmin()">退出</button>
+      <h2>🛠️ 管理</h2>
+      <button onclick="logoutAdmin()">退出</button>
     </div>
-    
-    <div class="admin-tabs">
-      <button class="admin-tab active" onclick="switchTab('friends')">朋友管理</button>
-      <button class="admin-tab" onclick="switchTab('quotes')">每日语录</button>
-      <button class="admin-tab" onclick="switchTab('export')">导出数据</button>
-    </div>
-
-    <!-- 朋友管理 -->
-    <div class="admin-content active" id="tab-friends">
-      <div class="friend-list" id="friendList"></div>
-      <button class="add-btn" onclick="showAddForm()">➕ 添加新朋友</button>
-      
-      <!-- 编辑表单 -->
-      <div class="edit-form" id="editForm">
-        <div class="form-title" id="formTitle">编辑朋友</div>
-        <input type="hidden" id="editIndex">
-        <input type="text" id="editAvatar" placeholder="头像 emoji（如 🌟）">
-        <input type="text" id="editName" placeholder="名字">
-        <input type="text" id="editTag" placeholder="标签（如 最好的朋友）">
-        <textarea id="editMessage" placeholder="想对TA说的话..."></textarea>
-        <div class="form-btns">
-          <button class="save-btn" onclick="saveFriend()">保存</button>
-          <button class="delete-btn" id="deleteBtn" onclick="deleteFriend()">删除</button>
-          <button class="cancel-btn" onclick="cancelEdit()">取消</button>
-        </div>
+    <div class="friend-list" id="friendList"></div>
+    <div class="edit-form" id="editForm">
+      <input type="hidden" id="editIndex">
+      <input type="text" id="editAvatar" placeholder="头像 emoji">
+      <input type="text" id="editName" placeholder="名字">
+      <input type="text" id="editTag" placeholder="标签">
+      <textarea id="editMessage" placeholder="想对TA说的话"></textarea>
+      <div class="btns">
+        <button class="save" onclick="saveFriend()">保存</button>
+        <button class="delete" onclick="deleteFriend()">删除</button>
+        <button class="cancel" onclick="cancelEdit()">取消</button>
       </div>
     </div>
-
-    <!-- 每日语录 -->
-    <div class="admin-content" id="tab-quotes">
-      <div class="quote-list" id="quoteList"></div>
-      <div class="add-quote-box">
-        <input type="text" id="newQuote" placeholder="添加新的每日语录...">
-        <button onclick="addQuote()">添加</button>
-      </div>
-    </div>
-
-    <!-- 导出数据 -->
-    <div class="admin-content" id="tab-export">
-      <p style="text-align: center; color: #666; margin-bottom: 20px;">点击下方按钮复制所有数据，你可以发给我帮你保存到代码里</p>
-      <button class="save-btn" onclick="copyData()">📋 复制所有数据</button>
-    </div>
+    <button class="export-btn" onclick="copyData()">📋 复制数据</button>
   </div>
 
-  <footer>
-    <p>用心写给每一个你 🌸</p>
-  </footer>
+  <div class="admin-link" id="adminLink" onclick="showAdmin()">.</div>
 </div>
 
 <!-- 弹窗 -->
 <div class="modal-overlay" id="modal" onclick="closeModal(event)">
-  <div class="modal">
+  <div class="modal" onclick="event.stopPropagation()">
     <div class="m-avatar" id="m-avatar"></div>
     <div class="m-name"   id="m-name"></div>
     <div class="m-tag"    id="m-tag"></div>
-    <div class="m-text"   id="m-text"></div>
-    <button class="close-btn" onclick="closeModalBtn()">收到 💕</button>
+    <div class="m-text"  id="m-text"></div>
+    <button class="close-btn" onclick="document.getElementById('modal').classList.remove('active')">收到</button>
   </div>
 </div>
 
 <script>
-// ====== 数据 ======
+// 数据
 let friends = [
-  { avatar: "🌟", name: "朋友A", tag: "最好的朋友", message: "（这里填写你对 朋友A 的心里话）" },
-  { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（这里填写你对 朋友B 的心里话）" },
-  { avatar: "🎵", name: "朋友C", tag: "音乐搭子", message: "（这里填写你对 朋友C 的心里话）" },
-  { avatar: "☕", name: "朋友D", tag: "咖啡搭子", message: "（这里填写你对 朋友D 的心里话）" },
-  { avatar: "🎮", name: "朋友E", tag: "游戏搭子", message: "（这里填写你对 朋友E 的心里话）" },
-  { avatar: "🌸", name: "朋友F", tag: "闺蜜", message: "（这里填写你对 朋友F 的心里话）" }
+  { avatar: "🌟", name: "朋友A", tag: "最好的朋友", message: "（这里填写心里话）" },
+  { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（这里填写心里话）" },
+  { avatar: "🎵", name: "朋友C", tag: "音乐搭子", message: "（这里填写心里话）" }
 ];
 
-let quotes = [
-  "今天的你，也是独一无二的美好 ✨",
-  "记得对身边的人说声谢谢 💕",
-  "你值得被这个世界温柔以待 🌸",
-  "每一个平凡的日子，都有不平凡的你 💫",
-  "朋友是生活中最温暖的光 ☀️",
-  "愿你的每一天都充满小确幸 🍀",
-  "有人想念你，有人在乎你 💌",
-  "世界因你而更美好 🌍"
-];
-
-// ====== 管理员密码 ======
-const ADMIN_PASSWORD = "5201314";  // 可修改
-
-// ====== 初始化 ======
-document.getElementById('dailyQuote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+const ADMIN_PASSWORD = "5201314";
 
 const searchInput = document.getElementById('searchInput');
 const resultsEl = document.getElementById('results');
 const notFoundEl = document.getElementById('notFound');
 const adminPanel = document.getElementById('adminPanel');
+const hintEl = document.getElementById('hint');
 
-// 搜索功能
+// 搜索
 searchInput.addEventListener('input', (e) => {
   const query = e.target.value.trim();
   
-  // 检查是否输入管理员密码
   if (query === ADMIN_PASSWORD) {
     showAdmin();
     return;
   }
   
-  const q = query.toLowerCase();
-  if (!q) {
+  if (!query) {
     resultsEl.classList.remove('active');
     notFoundEl.classList.remove('active');
-    adminPanel.classList.remove('active');
+    hintEl.style.display = 'block';
     return;
   }
-
+  
+  hintEl.style.display = 'none';
   const matches = friends.filter(f => 
-    f.name.toLowerCase().includes(q) ||
-    f.tag.toLowerCase().includes(q)
+    f.name.toLowerCase().includes(query.toLowerCase())
   );
-
+  
   if (matches.length === 0) {
     resultsEl.classList.remove('active');
     notFoundEl.classList.add('active');
   } else {
     notFoundEl.classList.remove('active');
-    resultsEl.innerHTML = matches.map((f, i) => `
+    resultsEl.innerHTML = matches.map(f => `
       <div class="result-item" onclick="openModal(${friends.indexOf(f)})">
-        <span class="r-avatar">${f.avatar}</span>
-        <div class="r-info">
-          <div class="r-name">${f.name}</div>
-          <div class="r-tag">${f.tag}</div>
+        <div class="r-top">
+          <span class="r-avatar">${f.avatar}</span>
+          <div>
+            <div class="r-name">${f.name}</div>
+            <div class="r-tag">${f.tag}</div>
+          </div>
         </div>
-        <span>👉</span>
+        <div class="r-preview">${f.message.substring(0, 30)}...</div>
       </div>
     `).join('');
     resultsEl.classList.add('active');
   }
 });
 
-// 回车
+// 回车搜索
 searchInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     const query = searchInput.value.trim();
     if (query === ADMIN_PASSWORD) {
       showAdmin();
-      return;
-    }
-    const match = friends.find(f => f.name.toLowerCase().includes(query.toLowerCase()));
-    if (match) {
-      openModal(friends.indexOf(match));
-      createConfetti();
+    } else {
+      const match = friends.find(f => f.name.toLowerCase().includes(query.toLowerCase()));
+      if (match) openModal(friends.indexOf(match));
     }
   }
 });
 
-// ====== 管理后台 ======
-function showAdmin() {
-  searchInput.value = '';
-  searchInput.blur();
-  resultsEl.classList.remove('active');
-  notFoundEl.classList.remove('active');
-  adminPanel.classList.add('active');
-  renderFriends();
-  renderQuotes();
-  createConfetti();
-}
-
-function logoutAdmin() {
-  adminPanel.classList.remove('active');
-  switchTab('friends');
-}
-
-function switchTab(tab) {
-  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('tab-' + tab).classList.add('active');
-}
-
-// 渲染朋友列表
-function renderFriends() {
-  const list = document.getElementById('friendList');
-  list.innerHTML = friends.map((f, i) => `
-    <div class="friend-card" onclick="editFriend(${i})">
-      <span class="f-avatar">${f.avatar}</span>
-      <div class="f-info">
-        <div class="f-name">${f.name}</div>
-        <div class="f-tag">${f.tag}</div>
-      </div>
-      <span class="f-edit">✏️</span>
-    </div>
-  `).join('');
-}
-
-// 渲染语录列表
-function renderQuotes() {
-  const list = document.getElementById('quoteList');
-  list.innerHTML = quotes.map((q, i) => `
-    <div class="quote-item">
-      <span class="q-text">${q}</span>
-      <button class="q-del" onclick="deleteQuote(${i})">删除</button>
-    </div>
-  `).join('');
-}
-
-// 添加朋友
-function showAddForm() {
-  document.getElementById('formTitle').textContent = '添加新朋友';
-  document.getElementById('editIndex').value = -1;
-  document.getElementById('editAvatar').value = '';
-  document.getElementById('editName').value = '';
-  document.getElementById('editTag').value = '';
-  document.getElementById('editMessage').value = '';
-  document.getElementById('deleteBtn').style.display = 'none';
-  document.getElementById('editForm').classList.add('active');
-}
-
-// 编辑朋友
-function editFriend(i) {
-  const f = friends[i];
-  document.getElementById('formTitle').textContent = '编辑朋友';
-  document.getElementById('editIndex').value = i;
-  document.getElementById('editAvatar').value = f.avatar;
-  document.getElementById('editName').value = f.name;
-  document.getElementById('editTag').value = f.tag;
-  document.getElementById('editMessage').value = f.message;
-  document.getElementById('deleteBtn').style.display = 'block';
-  document.getElementById('editForm').classList.add('active');
-}
-
-function saveFriend() {
-  const idx = parseInt(document.getElementById('editIndex').value);
-  const newFriend = {
-    avatar: document.getElementById('editAvatar').value || '👤',
-    name: document.getElementById('editName').value || '未命名',
-    tag: document.getElementById('editTag').value || '',
-    message: document.getElementById('editMessage').value || ''
-  };
-  
-  if (idx === -1) {
-    friends.push(newFriend);
-  } else {
-    friends[idx] = newFriend;
-  }
-  
-  cancelEdit();
-  renderFriends();
-  alert('保存成功！记得复制数据发给我帮你永久保存哦 💾');
-}
-
-function cancelEdit() {
-  document.getElementById('editForm').classList.remove('active');
-}
-
-function deleteFriend() {
-  const idx = parseInt(document.getElementById('editIndex').value);
-  if (confirm('确定要删除这个朋友吗？')) {
-    friends.splice(idx, 1);
-    cancelEdit();
-    renderFriends();
-  }
-}
-
-// 语录管理
-function addQuote() {
-  const text = document.getElementById('newQuote').value.trim();
-  if (text) {
-    quotes.push(text);
-    document.getElementById('newQuote').value = '';
-    renderQuotes();
-  }
-}
-
-function deleteQuote(i) {
-  if (confirm('确定删除这条语录？')) {
-    quotes.splice(i, 1);
-    renderQuotes();
-  }
-}
-
-// 导出数据
-function copyData() {
-  const data = `// 朋友数据
-const friends = ${JSON.stringify(friends, null, 2)};
-
-// 每日语录
-const quotes = ${JSON.stringify(quotes, null, 2)};`;
-  
-  navigator.clipboard.writeText(data).then(() => {
-    alert('✅ 数据已复制！请发给我帮你保存到网站代码里');
-  });
-}
-
-// ====== 惊喜 ======
-const surprises = [
-  { emoji: "🎉", text: "恭喜你！今天会是很棒的一天！" },
-  { emoji: "🌟", text: "你就是最闪亮的那颗星！" },
-  { emoji: "💖", text: "有人正在偷偷想你哦～" },
-  { emoji: "🍀", text: "好运正在向你走来！" },
-  { emoji: "🎁", text: "你收到了一份虚拟拥抱！" },
-  { emoji: "✨", text: "相信自己，你可以做到任何事！" },
-  { emoji: "🌈", text: "风雨过后，总会有彩虹～" },
-  { emoji: "💎", text: "你是独一无二的宝藏！" }
-];
-
-function showSurprise() {
-  const s = surprises[Math.floor(Math.random() * surprises.length)];
-  document.getElementById('m-avatar').textContent = s.emoji;
-  document.getElementById('m-name').textContent = "惊喜时刻 ✨";
-  document.getElementById('m-tag').textContent = "给你的专属祝福";
-  document.getElementById('m-text').textContent = s.text;
-  document.getElementById('modal').classList.add('active');
-  createConfetti();
-}
-
+// 弹窗
 function openModal(i) {
   const f = friends[i];
   document.getElementById('m-avatar').textContent = f.avatar;
@@ -851,49 +380,78 @@ function openModal(i) {
   document.getElementById('m-tag').textContent = f.tag;
   document.getElementById('m-text').textContent = f.message;
   document.getElementById('modal').classList.add('active');
-  searchInput.blur();
-  createConfetti();
 }
 
 function closeModal(e) {
   if (e.target.id === 'modal') document.getElementById('modal').classList.remove('active');
 }
 
-function closeModalBtn() {
-  document.getElementById('modal').classList.remove('active');
+// 管理后台
+function showAdmin() {
+  searchInput.value = '';
+  resultsEl.classList.remove('active');
+  notFoundEl.classList.remove('active');
+  hintEl.style.display = 'none';
+  adminPanel.classList.add('active');
+  renderFriends();
 }
 
-function createConfetti() {
-  const colors = ['#ff6b9d', '#ffa94d', '#69db7c', '#74c0fc', '#da77f2', '#ffd43b'];
-  const container = document.createElement('div');
-  container.className = 'confetti';
-  document.body.appendChild(container);
-  
-  for (let i = 0; i < 30; i++) {
-    const piece = document.createElement('div');
-    piece.className = 'confetti-piece';
-    piece.style.left = Math.random() * 100 + 'vw';
-    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-    piece.style.animationDelay = Math.random() * 0.5 + 's';
-    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-    container.appendChild(piece);
+function logoutAdmin() {
+  adminPanel.classList.remove('active');
+  hintEl.style.display = 'block';
+}
+
+function renderFriends() {
+  document.getElementById('friendList').innerHTML = friends.map((f, i) => `
+    <div class="friend-item" onclick="editFriend(${i})">
+      <span class="f-avatar">${f.avatar}</span>
+      <span class="f-name">${f.name}</span>
+      <span class="f-edit">✏️</span>
+    </div>
+  `).join('');
+}
+
+function editFriend(i) {
+  const f = friends[i];
+  document.getElementById('editIndex').value = i;
+  document.getElementById('editAvatar').value = f.avatar;
+  document.getElementById('editName').value = f.name;
+  document.getElementById('editTag').value = f.tag;
+  document.getElementById('editMessage').value = f.message;
+  document.getElementById('editForm').classList.add('active');
+}
+
+function saveFriend() {
+  const i = parseInt(document.getElementById('editIndex').value);
+  friends[i] = {
+    avatar: document.getElementById('editAvatar').value || '👤',
+    name: document.getElementById('editName').value || '未命名',
+    tag: document.getElementById('editTag').value || '',
+    message: document.getElementById('editMessage').value || ''
+  };
+  cancelEdit();
+  renderFriends();
+  alert('保存成功！点击"复制数据"发给我帮你更新网站～');
+}
+
+function cancelEdit() {
+  document.getElementById('editForm').classList.remove('active');
+}
+
+function deleteFriend() {
+  const i = parseInt(document.getElementById('editIndex').value);
+  if (confirm('确定删除？')) {
+    friends.splice(i, 1);
+    cancelEdit();
+    renderFriends();
   }
-  
-  setTimeout(() => container.remove(), 3500);
 }
 
-// 漂浮装饰
-const emojis = ['💖','💕','✨','🌸','💫','🎀','💝','🌟','🎈','💌'];
-const floatersEl = document.getElementById('floaters');
-for (let i = 0; i < 15; i++) {
-  const el = document.createElement('div');
-  el.className = 'floater';
-  el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-  el.style.left = Math.random() * 100 + 'vw';
-  el.style.fontSize = (1 + Math.random() * 1.2) + 'rem';
-  el.style.animationDuration = (8 + Math.random() * 12) + 's';
-  el.style.animationDelay = Math.random() * 10 + 's';
-  floatersEl.appendChild(el);
+function copyData() {
+  const data = `const friends = ${JSON.stringify(friends, null, 2)};`;
+  navigator.clipboard.writeText(data).then(() => {
+    alert('✅ 已复制！发给我帮你更新网站～');
+  });
 }
 </script>
 </body>
