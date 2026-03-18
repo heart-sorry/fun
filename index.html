@@ -266,13 +266,22 @@
     .edit-form input,
     .edit-form textarea {
       width: 100%;
-      padding: 8px 10px;
-      margin-bottom: 6px;
-      border: none;
-      border-radius: 6px;
-      font-size: 0.8rem;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      display: block;
     }
-    .edit-form textarea { min-height: 50px; }
+    .edit-form textarea { min-height: 60px; resize: vertical; }
+    .edit-form label {
+      display: block;
+      font-size: 0.7rem;
+      color: #888;
+      margin-bottom: 2px;
+      margin-top: 4px;
+    }
     .edit-form .btns { display: flex; gap: 6px; }
     .edit-form button {
       flex: 1;
@@ -348,13 +357,20 @@
     <div class="friend-list" id="friendList"></div>
     <div class="edit-form" id="editForm">
       <input type="hidden" id="editIndex">
-      <input type="text" id="editAvatar" placeholder="头像">
-      <input type="text" id="editName" placeholder="名字">
-      <input type="text" id="editTag" placeholder="标签">
-      <input type="date" id="editMeetDate" placeholder="认识日期">
-      <input type="text" id="editSecretCode" placeholder="专属暗号">
-      <textarea id="editMessage" placeholder="搜索显示的话"></textarea>
-      <textarea id="editSecretMessage" placeholder="暗号专属的悄悄话"></textarea>
+      <label>头像 emoji</label>
+      <input type="text" id="editAvatar" placeholder="如 🌟">
+      <label>名字</label>
+      <input type="text" id="editName" placeholder="朋友名字">
+      <label>标签</label>
+      <input type="text" id="editTag" placeholder="如 最好的朋友">
+      <label>认识日期</label>
+      <input type="date" id="editMeetDate">
+      <label>专属暗号</label>
+      <input type="text" id="editSecretCode" placeholder="输入暗号才能看到悄悄话">
+      <label>搜索显示的话（公开）</label>
+      <textarea id="editMessage" placeholder="在搜索框输入名字后看到的内容"></textarea>
+      <label>暗号专属悄悄话（私密）</label>
+      <textarea id="editSecretMessage" placeholder="输入暗号后看到的专属内容"></textarea>
       <div class="btns">
         <button class="save" onclick="saveFriend()">保存</button>
         <button class="cancel" onclick="cancelEdit()">取消</button>
