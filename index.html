@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>致你的私语 💌</title>
+  <title>致我们 💌</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       min-height: 100vh;
-      background: linear-gradient(180deg, #f5f7fa 0%, #c3cfe2 100%);
+      background: linear-gradient(180deg, #f5f7fa 0%, #e4e8ec 100%);
       font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
       display: flex;
       align-items: center;
@@ -24,30 +24,50 @@
 
     header {
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 32px;
     }
     header h1 {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       color: #333;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     header p {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: #666;
+    }
+
+    /* 相识天数 */
+    .days-counter {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 24px;
+      color: #fff;
+    }
+    .days-counter .days {
+      font-size: 2.8rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .days-counter .label {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      margin-top: 4px;
     }
 
     .search-box {
       position: relative;
-      margin-bottom: 30px;
+      margin-bottom: 24px;
     }
     .search-box input {
       width: 100%;
-      padding: 16px 20px;
-      font-size: 1rem;
+      padding: 14px 18px;
+      font-size: 0.95rem;
       border: none;
-      border-radius: 16px;
+      border-radius: 14px;
       background: #fff;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
       outline: none;
     }
     .search-box input::placeholder {
@@ -61,53 +81,36 @@
 
     .result-item {
       background: #fff;
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
       cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .result-item:hover {
-      transform: translateY(-2px);
     }
     .result-item .r-top {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
-    .result-item .r-avatar {
-      font-size: 2rem;
-    }
-    .result-item .r-name {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #333;
-    }
-    .result-item .r-tag {
-      font-size: 0.75rem;
-      color: #888;
-    }
-    .result-item .r-preview {
-      color: #666;
-      font-size: 0.9rem;
-      line-height: 1.6;
-    }
+    .result-item .r-avatar { font-size: 1.8rem; }
+    .result-item .r-name { font-size: 1rem; font-weight: 600; color: #333; }
+    .result-item .r-tag { font-size: 0.7rem; color: #888; }
+    .result-item .r-preview { color: #666; font-size: 0.85rem; }
 
     .not-found {
       display: none;
       text-align: center;
-      padding: 40px 20px;
-      color: #666;
+      padding: 30px 20px;
+      color: #888;
     }
     .not-found.active { display: block; }
 
     .hint {
       text-align: center;
-      color: #888;
-      font-size: 0.85rem;
-      margin-top: 20px;
+      color: #999;
+      font-size: 0.8rem;
+      margin-top: 16px;
     }
 
     /* 弹窗 */
@@ -115,7 +118,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.4);
       z-index: 100;
       align-items: center;
       justify-content: center;
@@ -124,124 +127,138 @@
     .modal-overlay.active { display: flex; }
     .modal {
       background: #fff;
-      border-radius: 20px;
-      padding: 36px 28px;
-      max-width: 380px;
+      border-radius: 18px;
+      padding: 32px 24px;
+      max-width: 360px;
       width: 100%;
       text-align: center;
-      animation: popIn 0.3s ease;
     }
-    @keyframes popIn {
-      from { transform: scale(0.9); opacity: 0; }
-      to   { transform: scale(1);   opacity: 1; }
-    }
-    .modal .m-avatar { font-size: 3rem; margin-bottom: 8px; }
-    .modal .m-name   { font-size: 1.4rem; font-weight: 600; color: #333; margin-bottom: 4px; }
-    .modal .m-tag    { font-size: 0.8rem; color: #888; margin-bottom: 20px; }
-    .modal .m-text   { font-size: 1rem; color: #444; line-height: 2; text-align: left; }
+    .modal .m-avatar { font-size: 2.8rem; margin-bottom: 6px; }
+    .modal .m-name { font-size: 1.3rem; font-weight: 600; color: #333; margin-bottom: 3px; }
+    .modal .m-tag { font-size: 0.75rem; color: #888; margin-bottom: 18px; }
+    .modal .m-text { font-size: 0.95rem; color: #444; line-height: 1.9; text-align: left; }
     .modal .close-btn {
-      margin-top: 24px;
-      padding: 10px 32px;
+      margin-top: 22px;
+      padding: 10px 36px;
       border: none;
       border-radius: 25px;
       background: #333;
       color: #fff;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       cursor: pointer;
     }
+
+    /* 秘密暗号 */
+    .secret-hint {
+      text-align: center;
+      margin-top: 30px;
+      padding: 16px;
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      border-radius: 12px;
+      color: #555;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .secret-input {
+      display: none;
+      margin-top: 12px;
+    }
+    .secret-input input {
+      width: 100%;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+    }
+    .secret-input.active { display: block; }
 
     /* 管理入口 */
     .admin-link {
       text-align: center;
       margin-top: 40px;
-      opacity: 0.3;
-      font-size: 0.75rem;
-      color: #999;
+      opacity: 0.2;
+      font-size: 0.7rem;
+      color: #ccc;
       cursor: pointer;
     }
-    .admin-link:hover { opacity: 0.6; }
 
     /* 管理后台 */
     .admin-panel {
       display: none;
       background: #fff;
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 2px 14px rgba(0,0,0,0.08);
     }
     .admin-panel.active { display: block; }
     .admin-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
-    .admin-header h2 { font-size: 1.1rem; color: #333; }
+    .admin-header h2 { font-size: 1rem; color: #333; }
     .admin-header button {
-      padding: 6px 14px;
+      padding: 5px 12px;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       background: #f5f5f5;
       color: #666;
-      font-size: 0.8rem;
-      cursor: pointer;
+      font-size: 0.75rem;
     }
 
-    .friend-list { display: flex; flex-direction: column; gap: 10px; }
+    .friend-list { display: flex; flex-direction: column; gap: 8px; }
     .friend-item {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 12px;
+      gap: 8px;
+      padding: 10px;
       background: #f9f9f9;
-      border-radius: 12px;
+      border-radius: 10px;
       cursor: pointer;
     }
-    .friend-item .f-avatar { font-size: 1.4rem; }
-    .friend-item .f-name { flex: 1; font-size: 0.95rem; color: #333; }
-    .friend-item .f-edit { font-size: 0.8rem; opacity: 0.5; }
+    .friend-item .f-avatar { font-size: 1.2rem; }
+    .friend-item .f-name { flex: 1; font-size: 0.9rem; color: #333; }
 
     .edit-form {
       display: none;
-      margin-top: 16px;
-      padding: 16px;
+      margin-top: 14px;
+      padding: 14px;
       background: #f5f5f5;
-      border-radius: 12px;
+      border-radius: 10px;
     }
     .edit-form.active { display: block; }
     .edit-form input,
     .edit-form textarea {
       width: 100%;
-      padding: 10px 12px;
-      margin-bottom: 10px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
       border: none;
-      border-radius: 8px;
-      font-size: 0.9rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
     }
-    .edit-form textarea { min-height: 80px; resize: none; }
-    .edit-form .btns { display: flex; gap: 8px; }
+    .edit-form textarea { min-height: 60px; }
+    .edit-form .btns { display: flex; gap: 6px; }
     .edit-form button {
       flex: 1;
-      padding: 8px;
+      padding: 6px;
       border: none;
-      border-radius: 8px;
-      font-size: 0.85rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
       cursor: pointer;
     }
     .edit-form .save { background: #333; color: #fff; }
     .edit-form .cancel { background: #ddd; color: #666; }
-    .edit-form .delete { background: #ff4757; color: #fff; }
 
     .export-btn {
       display: block;
       width: 100%;
-      padding: 12px;
-      margin-top: 16px;
+      padding: 10px;
+      margin-top: 14px;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       background: #f0f0f0;
       color: #666;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       cursor: pointer;
     }
   </style>
@@ -250,9 +267,15 @@
 
 <div class="container">
   <header>
-    <h1>致你的私语 💌</h1>
+    <h1>致我们 💌</h1>
     <p>致我们共同的回忆</p>
   </header>
+
+  <!-- 相识天数 -->
+  <div class="days-counter" id="daysCounter">
+    <div class="days" id="daysNum">--</div>
+    <div class="label">我们认识的日子</div>
+  </div>
 
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="搜索名字..." autocomplete="off">
@@ -260,10 +283,18 @@
 
   <div class="results" id="results"></div>
   <div class="not-found" id="notFound">
-    <p>没有找到这个名字哦</p>
+    <p>没有找到这个人哦</p>
   </div>
 
   <div class="hint" id="hint">在这里留下我们的回忆</div>
+
+  <!-- 秘密暗号 -->
+  <div class="secret-hint" onclick="toggleSecret()">
+    💫 输入秘密暗号解锁惊喜
+    <div class="secret-input" id="secretInput">
+      <input type="text" id="secretCode" placeholder="输入暗号..." onkeypress="checkSecret(event)">
+    </div>
+  </div>
 
   <!-- 管理后台 -->
   <div class="admin-panel" id="adminPanel">
@@ -274,13 +305,12 @@
     <div class="friend-list" id="friendList"></div>
     <div class="edit-form" id="editForm">
       <input type="hidden" id="editIndex">
-      <input type="text" id="editAvatar" placeholder="头像 emoji">
+      <input type="text" id="editAvatar" placeholder="头像">
       <input type="text" id="editName" placeholder="名字">
       <input type="text" id="editTag" placeholder="标签">
       <textarea id="editMessage" placeholder="想对TA说的话"></textarea>
       <div class="btns">
         <button class="save" onclick="saveFriend()">保存</button>
-        <button class="delete" onclick="deleteFriend()">删除</button>
         <button class="cancel" onclick="cancelEdit()">取消</button>
       </div>
     </div>
@@ -294,10 +324,20 @@
 <div class="modal-overlay" id="modal" onclick="closeModal(event)">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="m-avatar" id="m-avatar"></div>
-    <div class="m-name"   id="m-name"></div>
-    <div class="m-tag"    id="m-tag"></div>
-    <div class="m-text"  id="m-text"></div>
+    <div class="m-name" id="m-name"></div>
+    <div class="m-tag" id="m-tag"></div>
+    <div class="m-text" id="m-text"></div>
     <button class="close-btn" onclick="document.getElementById('modal').classList.remove('active')">收到</button>
+  </div>
+</div>
+
+<!-- 秘密弹窗 -->
+<div class="modal-overlay" id="secretModal" onclick="closeSecret(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="m-avatar" id="s-emoji">🎁</div>
+    <div class="m-name" id="s-title">惊喜时刻！</div>
+    <div class="m-text" id="s-text"></div>
+    <button class="close-btn" onclick="document.getElementById('secretModal').classList.remove('active')">太棒了</button>
   </div>
 </div>
 
@@ -305,8 +345,23 @@
 // 数据
 let friends = [
   { avatar: "🌟", name: "朋友A", tag: "最好的朋友", message: "（这里填写心里话）" },
-  { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（这里填写心里话）" },
-  { avatar: "🎵", name: "朋友C", tag: "音乐搭子", message: "（这里填写心里话）" }
+  { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（这里填写心里话）" }
+];
+
+// 相识日期（改成你们认识的日子）
+const MEET_DATE = "2024-01-01";
+
+// 秘密暗号（改成你们知道的暗号）
+const SECRET_CODE = "520";
+const SECRET_MESSAGES = [
+  "你是我最珍贵的朋友 💕",
+  "不管发生什么，我都在你身边 🌟",
+  "记得我们的约定吗？一起加油！✨",
+  "你是唯一一个让我笑的人 😂",
+  "我们一定要一直一直在一起 💖",
+  "无论多远，我都会想着你 🌙",
+  "你是我的独家记忆 📸",
+  "感谢遇见你，这是我最大的幸运 🍀"
 ];
 
 const ADMIN_PASSWORD = "5201314";
@@ -316,6 +371,15 @@ const resultsEl = document.getElementById('results');
 const notFoundEl = document.getElementById('notFound');
 const adminPanel = document.getElementById('adminPanel');
 const hintEl = document.getElementById('hint');
+
+// 计算相识天数
+function initDays() {
+  const meet = new Date(MEET_DATE);
+  const today = new Date();
+  const diff = Math.floor((today - meet) / (1000 * 60 * 60 * 24));
+  document.getElementById('daysNum').textContent = diff > 0 ? diff : 0;
+}
+initDays();
 
 // 搜索
 searchInput.addEventListener('input', (e) => {
@@ -334,9 +398,7 @@ searchInput.addEventListener('input', (e) => {
   }
   
   hintEl.style.display = 'none';
-  const matches = friends.filter(f => 
-    f.name.toLowerCase().includes(query.toLowerCase())
-  );
+  const matches = friends.filter(f => f.name.toLowerCase().includes(query.toLowerCase()));
   
   if (matches.length === 0) {
     resultsEl.classList.remove('active');
@@ -352,14 +414,13 @@ searchInput.addEventListener('input', (e) => {
             <div class="r-tag">${f.tag}</div>
           </div>
         </div>
-        <div class="r-preview">${f.message.substring(0, 30)}...</div>
+        <div class="r-preview">${f.message.substring(0, 20)}...</div>
       </div>
     `).join('');
     resultsEl.classList.add('active');
   }
 });
 
-// 回车搜索
 searchInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     const query = searchInput.value.trim();
@@ -386,6 +447,30 @@ function closeModal(e) {
   if (e.target.id === 'modal') document.getElementById('modal').classList.remove('active');
 }
 
+// 秘密暗号
+function toggleSecret() {
+  document.getElementById('secretInput').classList.toggle('active');
+}
+
+function checkSecret(e) {
+  if (e.key === 'Enter') {
+    const code = document.getElementById('secretCode').value.trim();
+    if (code === SECRET_CODE) {
+      const msg = SECRET_MESSAGES[Math.floor(Math.random() * SECRET_MESSAGES.length)];
+      document.getElementById('s-text').textContent = msg;
+      document.getElementById('secretModal').classList.add('active');
+      document.getElementById('secretInput').classList.remove('active');
+      document.getElementById('secretCode').value = '';
+    } else {
+      alert('暗号不对哦～再想想？');
+    }
+  }
+}
+
+function closeSecret(e) {
+  if (e.target.id === 'secretModal') document.getElementById('secretModal').classList.remove('active');
+}
+
 // 管理后台
 function showAdmin() {
   searchInput.value = '';
@@ -406,7 +491,6 @@ function renderFriends() {
     <div class="friend-item" onclick="editFriend(${i})">
       <span class="f-avatar">${f.avatar}</span>
       <span class="f-name">${f.name}</span>
-      <span class="f-edit">✏️</span>
     </div>
   `).join('');
 }
@@ -431,26 +515,17 @@ function saveFriend() {
   };
   cancelEdit();
   renderFriends();
-  alert('保存成功！点击"复制数据"发给我帮你更新网站～');
+  alert('保存成功！点击"复制数据"发给我～');
 }
 
 function cancelEdit() {
   document.getElementById('editForm').classList.remove('active');
 }
 
-function deleteFriend() {
-  const i = parseInt(document.getElementById('editIndex').value);
-  if (confirm('确定删除？')) {
-    friends.splice(i, 1);
-    cancelEdit();
-    renderFriends();
-  }
-}
-
 function copyData() {
-  const data = `const friends = ${JSON.stringify(friends, null, 2)};`;
+  const data = `const friends = ${JSON.stringify(friends, null, 2)};\nconst MEET_DATE = "${MEET_DATE}";\nconst SECRET_CODE = "${SECRET_CODE}";`;
   navigator.clipboard.writeText(data).then(() => {
-    alert('✅ 已复制！发给我帮你更新网站～');
+    alert('✅ 已复制！发给我帮你更新～');
   });
 }
 </script>
