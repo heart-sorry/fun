@@ -14,8 +14,8 @@
       overflow-x: hidden;
     }
 
-    /* 漂浮的小爱心 */
-    .hearts {
+    /* 漂浮小元素 */
+    .floaters {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
@@ -23,163 +23,176 @@
       z-index: 0;
       overflow: hidden;
     }
-    .heart {
+    .floater {
       position: absolute;
       bottom: -50px;
       font-size: 1.5rem;
       animation: floatUp linear infinite;
-      opacity: 0.6;
+      opacity: 0.5;
     }
     @keyframes floatUp {
-      0%   { transform: translateY(0) rotate(0deg); opacity: 0.6; }
+      0%   { transform: translateY(0) rotate(0deg); opacity: 0.5; }
       100% { transform: translateY(-110vh) rotate(20deg); opacity: 0; }
     }
 
-    /* 主体 */
     .container {
       position: relative;
       z-index: 1;
-      max-width: 900px;
+      max-width: 600px;
       margin: 0 auto;
       padding: 60px 20px 80px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     header {
       text-align: center;
-      margin-bottom: 60px;
+      margin-bottom: 40px;
     }
-    header .emoji-big { font-size: 4rem; display: block; margin-bottom: 12px; }
+    header .emoji-big { font-size: 3.5rem; display: block; margin-bottom: 12px; }
     header h1 {
-      font-size: 2.4rem;
+      font-size: 2rem;
       color: #fff;
       text-shadow: 0 2px 12px rgba(0,0,0,0.15);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     header p {
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: rgba(255,255,255,0.85);
     }
 
-    /* 卡片网格 */
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 28px;
-    }
-
-    .card {
-      background: rgba(255,255,255,0.75);
-      backdrop-filter: blur(10px);
-      border-radius: 24px;
-      padding: 32px 28px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      cursor: pointer;
+    /* 搜索框 */
+    .search-box {
       position: relative;
-      overflow: hidden;
+      margin-bottom: 30px;
     }
-    .card::before {
-      content: '';
+    .search-box input {
+      width: 100%;
+      padding: 18px 24px 18px 56px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 50px;
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      outline: none;
+      transition: box-shadow 0.3s;
+    }
+    .search-box input:focus {
+      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    }
+    .search-box input::placeholder {
+      color: #999;
+    }
+    .search-box .search-icon {
       position: absolute;
-      top: -40px; right: -40px;
-      width: 120px; height: 120px;
-      border-radius: 50%;
-      opacity: 0.12;
-    }
-    .card:hover {
-      transform: translateY(-6px) scale(1.02);
-      box-shadow: 0 16px 48px rgba(0,0,0,0.14);
+      left: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.3rem;
     }
 
-    /* 每张卡片不同颜色 */
-    .card:nth-child(1)  { border-top: 4px solid #ff6b9d; }
-    .card:nth-child(1)::before { background: #ff6b9d; }
-    .card:nth-child(2)  { border-top: 4px solid #ffa94d; }
-    .card:nth-child(2)::before { background: #ffa94d; }
-    .card:nth-child(3)  { border-top: 4px solid #69db7c; }
-    .card:nth-child(3)::before { background: #69db7c; }
-    .card:nth-child(4)  { border-top: 4px solid #74c0fc; }
-    .card:nth-child(4)::before { background: #74c0fc; }
-    .card:nth-child(5)  { border-top: 4px solid #da77f2; }
-    .card:nth-child(5)::before { background: #da77f2; }
-    .card:nth-child(6)  { border-top: 4px solid #f783ac; }
-    .card:nth-child(6)::before { background: #f783ac; }
-
-    .card .avatar {
-      font-size: 3rem;
-      margin-bottom: 14px;
-      display: block;
-    }
-    .card .name {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #333;
-      margin-bottom: 6px;
-    }
-    .card .tag {
-      display: inline-block;
-      font-size: 0.75rem;
-      padding: 3px 10px;
+    /* 搜索结果列表 */
+    .results {
+      display: none;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(10px);
       border-radius: 20px;
-      background: rgba(0,0,0,0.06);
-      color: #666;
-      margin-bottom: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
     }
-    .card .message {
-      font-size: 0.95rem;
-      color: #555;
-      line-height: 1.8;
-      font-style: italic;
+    .results.active { display: block; }
+    .result-item {
+      padding: 16px 24px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.2s;
     }
-    .card .message::before { content: '"'; font-size: 1.4rem; color: #ccc; line-height: 0; vertical-align: -6px; margin-right: 2px; }
-    .card .message::after  { content: '"'; font-size: 1.4rem; color: #ccc; line-height: 0; vertical-align: -6px; margin-left: 2px; }
+    .result-item:last-child { border-bottom: none; }
+    .result-item:hover { background: rgba(255,255,255,0.5); }
+    .result-item .r-avatar { font-size: 1.8rem; }
+    .result-item .r-info { flex: 1; }
+    .result-item .r-name { font-weight: 600; color: #333; font-size: 1.05rem; }
+    .result-item .r-tag { font-size: 0.8rem; color: #888; }
+
+    /* 提示文字 */
+    .hint {
+      text-align: center;
+      color: rgba(255,255,255,0.7);
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
 
     /* 弹窗 */
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.35);
-      backdrop-filter: blur(4px);
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(6px);
       z-index: 100;
       align-items: center;
       justify-content: center;
+      padding: 20px;
     }
     .modal-overlay.active { display: flex; }
     .modal {
       background: #fff;
       border-radius: 28px;
-      padding: 48px 40px;
-      max-width: 480px;
-      width: 90%;
+      padding: 48px 36px;
+      max-width: 460px;
+      width: 100%;
       text-align: center;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.18);
-      animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+      animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
     }
     @keyframes popIn {
       from { transform: scale(0.7); opacity: 0; }
       to   { transform: scale(1);   opacity: 1; }
     }
-    .modal .m-avatar { font-size: 4rem; margin-bottom: 12px; }
-    .modal .m-name   { font-size: 1.8rem; font-weight: 700; color: #333; margin-bottom: 8px; }
-    .modal .m-tag    { font-size: 0.85rem; color: #999; margin-bottom: 24px; }
-    .modal .m-text   { font-size: 1.05rem; color: #444; line-height: 2; }
+    .modal .m-avatar { font-size: 4rem; margin-bottom: 12px; animation: bounce 1s ease infinite; }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .modal .m-name   { font-size: 1.8rem; font-weight: 700; color: #333; margin-bottom: 6px; }
+    .modal .m-tag    { font-size: 0.9rem; color: #888; margin-bottom: 24px; padding: 4px 14px; background: #f5f5f5; border-radius: 20px; display: inline-block; }
+    .modal .m-text   { font-size: 1.1rem; color: #444; line-height: 2; padding: 20px; background: linear-gradient(135deg, #fff5f5, #f0f8ff); border-radius: 16px; }
     .modal .close-btn {
       margin-top: 28px;
-      padding: 10px 32px;
+      padding: 12px 40px;
       border: none;
       border-radius: 50px;
-      background: linear-gradient(135deg, #fcb69f, #a1c4fd);
+      background: linear-gradient(135deg, #ff6b9d, #ffa94d);
       color: #fff;
-      font-size: 1rem;
+      font-size: 1.05rem;
       cursor: pointer;
-      transition: opacity 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-    .modal .close-btn:hover { opacity: 0.85; }
+    .modal .close-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255,107,157,0.4);
+    }
+
+    /* 未找到提示 */
+    .not-found {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+      color: rgba(255,255,255,0.9);
+    }
+    .not-found.active { display: block; }
+    .not-found .big-emoji { font-size: 4rem; margin-bottom: 16px; }
+    .not-found p { font-size: 1.1rem; }
 
     footer {
       text-align: center;
-      margin-top: 70px;
+      margin-top: auto;
+      padding-top: 40px;
       color: rgba(255,255,255,0.7);
       font-size: 0.9rem;
     }
@@ -187,19 +200,32 @@
 </head>
 <body>
 
-<!-- 漂浮爱心 -->
-<div class="hearts" id="hearts"></div>
+<!-- 漂浮装饰 -->
+<div class="floaters" id="floaters"></div>
 
 <div class="container">
   <header>
     <span class="emoji-big">💌</span>
     <h1>我想对你说的话</h1>
-    <p>点开属于你的那张卡片，看看我想对你说什么 ✨</p>
+    <p>输入你的名字，看看我写了什么给你 ✨</p>
   </header>
 
-  <div class="cards" id="cards">
-    <!-- 卡片由 JS 渲染 -->
+  <!-- 搜索框 -->
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="输入名字搜索..." autocomplete="off">
   </div>
+
+  <!-- 搜索结果 -->
+  <div class="results" id="results"></div>
+
+  <!-- 未找到提示 -->
+  <div class="not-found" id="notFound">
+    <div class="big-emoji">🤔</div>
+    <p>没有找到这个名字哦<br>检查一下是不是输错啦～</p>
+  </div>
+
+  <div class="hint">💡 试试搜索：朋友A、朋友B、朋友C...</div>
 
   <footer>
     <p>用心写给每一个你 🌸</p>
@@ -213,7 +239,7 @@
     <div class="m-name"   id="m-name"></div>
     <div class="m-tag"    id="m-tag"></div>
     <div class="m-text"   id="m-text"></div>
-    <button class="close-btn" onclick="document.getElementById('modal').classList.remove('active')">关闭 💫</button>
+    <button class="close-btn" onclick="document.getElementById('modal').classList.remove('active')">收到 💕</button>
   </div>
 </div>
 
@@ -226,57 +252,86 @@ const friends = [
     avatar: "🌟",
     name: "朋友A",
     tag: "最好的朋友",
-    preview: "点击查看我想对你说的话...",
     message: "（这里填写你对 朋友A 的心里话）"
   },
   {
     avatar: "🌈",
     name: "朋友B",
     tag: "老朋友",
-    preview: "点击查看我想对你说的话...",
     message: "（这里填写你对 朋友B 的心里话）"
   },
   {
     avatar: "🎵",
     name: "朋友C",
     tag: "音乐搭子",
-    preview: "点击查看我想对你说的话...",
     message: "（这里填写你对 朋友C 的心里话）"
   },
   {
     avatar: "☕",
     name: "朋友D",
     tag: "咖啡搭子",
-    preview: "点击查看我想对你说的话...",
     message: "（这里填写你对 朋友D 的心里话）"
   },
   {
     avatar: "🎮",
     name: "朋友E",
     tag: "游戏搭子",
-    preview: "点击查看我想对你说的话...",
     message: "（这里填写你对 朋友E 的心里话）"
   },
   {
     avatar: "🌸",
     name: "朋友F",
     tag: "闺蜜",
-    preview: "点击查看我想对你说的话...",
     message: "（这里填写你对 朋友F 的心里话）"
   }
 ];
 // =============================================
 
-// 渲染卡片
-const cardsEl = document.getElementById('cards');
-friends.forEach((f, i) => {
-  cardsEl.innerHTML += `
-    <div class="card" onclick="openModal(${i})">
-      <span class="avatar">${f.avatar}</span>
-      <div class="name">${f.name}</div>
-      <span class="tag">${f.tag}</span>
-      <div class="message">${f.preview}</div>
-    </div>`;
+const searchInput = document.getElementById('searchInput');
+const resultsEl = document.getElementById('results');
+const notFoundEl = document.getElementById('notFound');
+
+// 搜索功能
+searchInput.addEventListener('input', (e) => {
+  const query = e.target.value.trim().toLowerCase();
+  
+  if (!query) {
+    resultsEl.classList.remove('active');
+    notFoundEl.classList.remove('active');
+    return;
+  }
+
+  const matches = friends.filter(f => 
+    f.name.toLowerCase().includes(query) ||
+    f.tag.toLowerCase().includes(query)
+  );
+
+  if (matches.length === 0) {
+    resultsEl.classList.remove('active');
+    notFoundEl.classList.add('active');
+  } else {
+    notFoundEl.classList.remove('active');
+    resultsEl.innerHTML = matches.map((f, i) => `
+      <div class="result-item" onclick="openModal(${friends.indexOf(f)})">
+        <span class="r-avatar">${f.avatar}</span>
+        <div class="r-info">
+          <div class="r-name">${f.name}</div>
+          <div class="r-tag">${f.tag}</div>
+        </div>
+        <span>👉</span>
+      </div>
+    `).join('');
+    resultsEl.classList.add('active');
+  }
+});
+
+// 回车直接打开第一个结果
+searchInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    const query = searchInput.value.trim().toLowerCase();
+    const match = friends.find(f => f.name.toLowerCase().includes(query));
+    if (match) openModal(friends.indexOf(match));
+  }
 });
 
 // 弹窗
@@ -287,23 +342,27 @@ function openModal(i) {
   document.getElementById('m-tag').textContent    = f.tag;
   document.getElementById('m-text').textContent   = f.message;
   document.getElementById('modal').classList.add('active');
-}
-function closeModal(e) {
-  if (e.target.id === 'modal') document.getElementById('modal').classList.remove('active');
+  searchInput.blur();
 }
 
-// 漂浮爱心
-const emojis = ['💖','💕','✨','🌸','💫','🎀','💝','🌟'];
-const heartsEl = document.getElementById('hearts');
-for (let i = 0; i < 18; i++) {
-  const h = document.createElement('div');
-  h.className = 'heart';
-  h.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-  h.style.left     = Math.random() * 100 + 'vw';
-  h.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
-  h.style.animationDuration  = (6 + Math.random() * 10) + 's';
-  h.style.animationDelay     = (Math.random() * 8) + 's';
-  heartsEl.appendChild(h);
+function closeModal(e) {
+  if (e.target.id === 'modal') {
+    document.getElementById('modal').classList.remove('active');
+  }
+}
+
+// 漂浮装饰
+const emojis = ['💖','💕','✨','🌸','💫','🎀','💝','🌟','🎈','💌'];
+const floatersEl = document.getElementById('floaters');
+for (let i = 0; i < 15; i++) {
+  const el = document.createElement('div');
+  el.className = 'floater';
+  el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+  el.style.left = Math.random() * 100 + 'vw';
+  el.style.fontSize = (1 + Math.random() * 1.2) + 'rem';
+  el.style.animationDuration = (8 + Math.random() * 12) + 's';
+  el.style.animationDelay = Math.random() * 10 + 's';
+  floatersEl.appendChild(el);
 }
 </script>
 </body>
