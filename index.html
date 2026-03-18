@@ -50,7 +50,16 @@
       text-align: center;
       margin-bottom: 40px;
     }
-    header .emoji-big { font-size: 3.5rem; display: block; margin-bottom: 12px; }
+    header .emoji-big { 
+      font-size: 3.5rem; 
+      display: block; 
+      margin-bottom: 12px; 
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
     header h1 {
       font-size: 2rem;
       color: #fff;
@@ -62,10 +71,28 @@
       color: rgba(255,255,255,0.85);
     }
 
+    /* 每日一句 */
+    .daily-quote {
+      background: rgba(255,255,255,0.25);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .daily-quote .quote-icon { font-size: 1.2rem; margin-bottom: 4px; }
+    .daily-quote .quote-text {
+      font-size: 0.95rem;
+      color: #fff;
+      font-style: italic;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
     /* 搜索框 */
     .search-box {
       position: relative;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
     .search-box input {
       width: 100%;
@@ -76,10 +103,11 @@
       background: rgba(255,255,255,0.9);
       box-shadow: 0 8px 32px rgba(0,0,0,0.1);
       outline: none;
-      transition: box-shadow 0.3s;
+      transition: all 0.3s;
     }
     .search-box input:focus {
       box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+      transform: scale(1.02);
     }
     .search-box input::placeholder {
       color: #999;
@@ -101,6 +129,11 @@
       overflow: hidden;
       box-shadow: 0 8px 32px rgba(0,0,0,0.1);
       margin-bottom: 20px;
+      animation: slideDown 0.3s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .results.active { display: block; }
     .result-item {
@@ -110,14 +143,44 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      transition: background 0.2s;
+      transition: all 0.2s;
     }
     .result-item:last-child { border-bottom: none; }
-    .result-item:hover { background: rgba(255,255,255,0.5); }
+    .result-item:hover { 
+      background: rgba(255,255,255,0.5); 
+      transform: translateX(8px);
+    }
     .result-item .r-avatar { font-size: 1.8rem; }
     .result-item .r-info { flex: 1; }
     .result-item .r-name { font-weight: 600; color: #333; font-size: 1.05rem; }
     .result-item .r-tag { font-size: 0.8rem; color: #888; }
+
+    /* 神秘按钮 */
+    .surprise-btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      margin: 20px 0;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(135deg, #ff6b9d, #ffa94d, #69db7c, #74c0fc);
+      background-size: 300% 300%;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(255,107,157,0.3);
+      animation: gradientShift 3s ease infinite;
+      transition: transform 0.2s;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .surprise-btn:hover {
+      transform: scale(1.05);
+    }
 
     /* 提示文字 */
     .hint {
@@ -126,6 +189,17 @@
       font-size: 0.9rem;
       margin-top: 10px;
     }
+
+    /* 未找到提示 */
+    .not-found {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+      color: rgba(255,255,255,0.9);
+    }
+    .not-found.active { display: block; }
+    .not-found .big-emoji { font-size: 4rem; margin-bottom: 16px; }
+    .not-found p { font-size: 1.1rem; }
 
     /* 弹窗 */
     .modal-overlay {
@@ -149,12 +223,17 @@
       text-align: center;
       box-shadow: 0 24px 80px rgba(0,0,0,0.2);
       animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      position: relative;
     }
     @keyframes popIn {
       from { transform: scale(0.7); opacity: 0; }
       to   { transform: scale(1);   opacity: 1; }
     }
-    .modal .m-avatar { font-size: 4rem; margin-bottom: 12px; animation: bounce 1s ease infinite; }
+    .modal .m-avatar { 
+      font-size: 4rem; 
+      margin-bottom: 12px; 
+      animation: bounce 1s ease infinite; 
+    }
     @keyframes bounce {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-8px); }
@@ -178,16 +257,29 @@
       box-shadow: 0 8px 20px rgba(255,107,157,0.4);
     }
 
-    /* 未找到提示 */
-    .not-found {
-      display: none;
-      text-align: center;
-      padding: 40px 20px;
-      color: rgba(255,255,255,0.9);
+    /* 彩带动画 */
+    .confetti {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
     }
-    .not-found.active { display: block; }
-    .not-found .big-emoji { font-size: 4rem; margin-bottom: 16px; }
-    .not-found p { font-size: 1.1rem; }
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      animation: confetti-fall 3s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* 彩蛋弹窗 */
+    .egg-modal .m-text {
+      font-size: 1.3rem;
+      color: #ff6b9d;
+      font-weight: 600;
+    }
 
     footer {
       text-align: center;
@@ -210,6 +302,12 @@
     <p>输入你的名字，看看我写了什么给你 ✨</p>
   </header>
 
+  <!-- 每日一句 -->
+  <div class="daily-quote">
+    <div class="quote-icon">💫</div>
+    <div class="quote-text" id="dailyQuote">加载中...</div>
+  </div>
+
   <!-- 搜索框 -->
   <div class="search-box">
     <span class="search-icon">🔍</span>
@@ -218,6 +316,9 @@
 
   <!-- 搜索结果 -->
   <div class="results" id="results"></div>
+
+  <!-- 神秘惊喜按钮 -->
+  <button class="surprise-btn" onclick="showSurprise()">🎁 点我有惊喜</button>
 
   <!-- 未找到提示 -->
   <div class="not-found" id="notFound">
@@ -234,12 +335,12 @@
 
 <!-- 弹窗 -->
 <div class="modal-overlay" id="modal" onclick="closeModal(event)">
-  <div class="modal">
+  <div class="modal" id="modalContent">
     <div class="m-avatar" id="m-avatar"></div>
     <div class="m-name"   id="m-name"></div>
     <div class="m-tag"    id="m-tag"></div>
     <div class="m-text"   id="m-text"></div>
-    <button class="close-btn" onclick="document.getElementById('modal').classList.remove('active')">收到 💕</button>
+    <button class="close-btn" onclick="closeModalBtn()">收到 💕</button>
   </div>
 </div>
 
@@ -287,6 +388,19 @@ const friends = [
 ];
 // =============================================
 
+// 每日一句
+const quotes = [
+  "今天的你，也是独一无二的美好 ✨",
+  "记得对身边的人说声谢谢 💕",
+  "你值得被这个世界温柔以待 🌸",
+  "每一个平凡的日子，都有不平凡的你 💫",
+  "朋友是生活中最温暖的光 ☀️",
+  "愿你的每一天都充满小确幸 🍀",
+  "有人想念你，有人在乎你 💌",
+  "世界因你而更美好 🌍"
+];
+document.getElementById('dailyQuote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+
 const searchInput = document.getElementById('searchInput');
 const resultsEl = document.getElementById('results');
 const notFoundEl = document.getElementById('notFound');
@@ -330,9 +444,34 @@ searchInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     const query = searchInput.value.trim().toLowerCase();
     const match = friends.find(f => f.name.toLowerCase().includes(query));
-    if (match) openModal(friends.indexOf(match));
+    if (match) {
+      openModal(friends.indexOf(match));
+      createConfetti();
+    }
   }
 });
+
+// 神秘惊喜
+const surprises = [
+  { emoji: "🎉", text: "恭喜你！今天会是很棒的一天！" },
+  { emoji: "🌟", text: "你就是最闪亮的那颗星！" },
+  { emoji: "💖", text: "有人正在偷偷想你哦～" },
+  { emoji: "🍀", text: "好运正在向你走来！" },
+  { emoji: "🎁", text: "你收到了一份虚拟拥抱！" },
+  { emoji: "✨", text: "相信自己，你可以做到任何事！" },
+  { emoji: "🌈", text: "风雨过后，总会有彩虹～" },
+  { emoji: "💎", text: "你是独一无二的宝藏！" }
+];
+
+function showSurprise() {
+  const s = surprises[Math.floor(Math.random() * surprises.length)];
+  document.getElementById('m-avatar').textContent = s.emoji;
+  document.getElementById('m-name').textContent = "惊喜时刻 ✨";
+  document.getElementById('m-tag').textContent = "给你的专属祝福";
+  document.getElementById('m-text').textContent = s.text;
+  document.getElementById('modal').classList.add('active');
+  createConfetti();
+}
 
 // 弹窗
 function openModal(i) {
@@ -343,12 +482,37 @@ function openModal(i) {
   document.getElementById('m-text').textContent   = f.message;
   document.getElementById('modal').classList.add('active');
   searchInput.blur();
+  createConfetti();
 }
 
 function closeModal(e) {
   if (e.target.id === 'modal') {
     document.getElementById('modal').classList.remove('active');
   }
+}
+
+function closeModalBtn() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+// 彩带动画
+function createConfetti() {
+  const colors = ['#ff6b9d', '#ffa94d', '#69db7c', '#74c0fc', '#da77f2', '#ffd43b'];
+  const container = document.createElement('div');
+  container.className = 'confetti';
+  document.body.appendChild(container);
+  
+  for (let i = 0; i < 30; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = Math.random() * 0.5 + 's';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    container.appendChild(piece);
+  }
+  
+  setTimeout(() => container.remove(), 3500);
 }
 
 // 漂浮装饰
