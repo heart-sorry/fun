@@ -24,41 +24,21 @@
 
     header {
       text-align: center;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
     header h1 {
-      font-size: 1.6rem;
+      font-size: 1.5rem;
       color: #333;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     header p {
-      font-size: 0.9rem;
-      color: #666;
-    }
-
-    /* 相识天数 */
-    .days-counter {
-      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
-      border-radius: 16px;
-      padding: 20px;
-      text-align: center;
-      margin-bottom: 24px;
-      color: #fff;
-    }
-    .days-counter .days {
-      font-size: 2.8rem;
-      font-weight: 700;
-      line-height: 1;
-    }
-    .days-counter .label {
       font-size: 0.85rem;
-      opacity: 0.9;
-      margin-top: 4px;
+      color: #666;
     }
 
     .search-box {
       position: relative;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     .search-box input {
       width: 100%;
@@ -74,16 +54,14 @@
       color: #aaa;
     }
 
-    .results {
-      display: none;
-    }
+    .results { display: none; }
     .results.active { display: block; }
 
     .result-item {
       background: #fff;
       border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 14px;
+      padding: 18px;
+      margin-bottom: 12px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.04);
       cursor: pointer;
     }
@@ -91,17 +69,17 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
-    .result-item .r-avatar { font-size: 1.8rem; }
-    .result-item .r-name { font-size: 1rem; font-weight: 600; color: #333; }
-    .result-item .r-tag { font-size: 0.7rem; color: #888; }
-    .result-item .r-preview { color: #666; font-size: 0.85rem; }
+    .result-item .r-avatar { font-size: 1.6rem; }
+    .result-item .r-name { font-size: 0.95rem; font-weight: 600; color: #333; }
+    .result-item .r-tag { font-size: 0.65rem; color: #888; }
+    .result-item .r-preview { color: #666; font-size: 0.8rem; }
 
     .not-found {
       display: none;
       text-align: center;
-      padding: 30px 20px;
+      padding: 24px 20px;
       color: #888;
     }
     .not-found.active { display: block; }
@@ -109,8 +87,90 @@
     .hint {
       text-align: center;
       color: #999;
+      font-size: 0.75rem;
+      margin-top: 14px;
+    }
+
+    /* 默契问答 */
+    .quiz-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+      color: #fff;
+      cursor: pointer;
+    }
+    .quiz-section .q-title { font-size: 0.95rem; margin-bottom: 6px; }
+    .quiz-section .q-desc { font-size: 0.7rem; opacity: 0.85; }
+
+    .quiz-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .quiz-modal.active { display: flex; }
+    .quiz-modal .modal {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 360px;
+      width: 100%;
+    }
+    .quiz-modal .q-number { font-size: 0.75rem; color: #888; margin-bottom: 8px; }
+    .quiz-modal .q-text { font-size: 1.1rem; color: #333; margin-bottom: 20px; font-weight: 600; }
+    .quiz-modal .options { display: flex; flex-direction: column; gap: 10px; }
+    .quiz-modal .option {
+      padding: 14px;
+      border: 2px solid #eee;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+    .quiz-modal .option:hover { border-color: #667eea; }
+    .quiz-modal .option.selected { border-color: #667eea; background: #f5f7ff; }
+    .quiz-modal .close-q { margin-top: 16px; width: 100%; padding: 10px; border: none; border-radius: 10px; background: #f0f0f0; color: #666; cursor: pointer; }
+
+    /* 纪念日 */
+    .anniversary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+    .anniversary .a-title { font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .anniversary .a-countdown { font-size: 1.8rem; font-weight: 700; }
+    .anniversary .a-label { font-size: 0.65rem; opacity: 0.85; }
+
+    /* 秘密暗号 */
+    .secret-hint {
+      text-align: center;
+      margin-top: 24px;
+      padding: 14px;
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      border-radius: 12px;
+      color: #555;
       font-size: 0.8rem;
-      margin-top: 16px;
+      cursor: pointer;
+    }
+    .secret-input {
+      display: none;
+      margin-top: 10px;
+    }
+    .secret-input.active { display: block; }
+    .secret-input input {
+      width: 100%;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.85rem;
     }
 
     /* 弹窗 */
@@ -127,57 +187,33 @@
     .modal-overlay.active { display: flex; }
     .modal {
       background: #fff;
-      border-radius: 18px;
-      padding: 32px 24px;
-      max-width: 360px;
+      border-radius: 16px;
+      padding: 28px 22px;
+      max-width: 340px;
       width: 100%;
       text-align: center;
     }
-    .modal .m-avatar { font-size: 2.8rem; margin-bottom: 6px; }
-    .modal .m-name { font-size: 1.3rem; font-weight: 600; color: #333; margin-bottom: 3px; }
-    .modal .m-tag { font-size: 0.75rem; color: #888; margin-bottom: 18px; }
-    .modal .m-text { font-size: 0.95rem; color: #444; line-height: 1.9; text-align: left; }
+    .modal .m-avatar { font-size: 2.6rem; margin-bottom: 4px; }
+    .modal .m-name { font-size: 1.2rem; font-weight: 600; color: #333; margin-bottom: 2px; }
+    .modal .m-tag { font-size: 0.7rem; color: #888; margin-bottom: 16px; }
+    .modal .m-text { font-size: 0.9rem; color: #444; line-height: 1.8; text-align: left; }
     .modal .close-btn {
-      margin-top: 22px;
-      padding: 10px 36px;
+      margin-top: 20px;
+      padding: 10px 32px;
       border: none;
       border-radius: 25px;
       background: #333;
       color: #fff;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-
-    /* 秘密暗号 */
-    .secret-hint {
-      text-align: center;
-      margin-top: 30px;
-      padding: 16px;
-      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-      border-radius: 12px;
-      color: #555;
       font-size: 0.85rem;
       cursor: pointer;
     }
-    .secret-input {
-      display: none;
-      margin-top: 12px;
-    }
-    .secret-input input {
-      width: 100%;
-      padding: 10px 14px;
-      border: none;
-      border-radius: 10px;
-      font-size: 0.9rem;
-    }
-    .secret-input.active { display: block; }
 
     /* 管理入口 */
     .admin-link {
       text-align: center;
-      margin-top: 40px;
-      opacity: 0.2;
-      font-size: 0.7rem;
+      margin-top: 36px;
+      opacity: 0.15;
+      font-size: 0.65rem;
       color: #ccc;
       cursor: pointer;
     }
@@ -186,43 +222,43 @@
     .admin-panel {
       display: none;
       background: #fff;
-      border-radius: 18px;
-      padding: 20px;
+      border-radius: 16px;
+      padding: 18px;
       box-shadow: 0 2px 14px rgba(0,0,0,0.08);
     }
     .admin-panel.active { display: block; }
     .admin-header {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
-    .admin-header h2 { font-size: 1rem; color: #333; }
+    .admin-header h2 { font-size: 0.95rem; color: #333; }
     .admin-header button {
-      padding: 5px 12px;
+      padding: 4px 10px;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       background: #f5f5f5;
       color: #666;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
     }
 
-    .friend-list { display: flex; flex-direction: column; gap: 8px; }
+    .friend-list { display: flex; flex-direction: column; gap: 6px; }
     .friend-item {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 10px;
+      padding: 8px;
       background: #f9f9f9;
       border-radius: 10px;
       cursor: pointer;
     }
-    .friend-item .f-avatar { font-size: 1.2rem; }
-    .friend-item .f-name { flex: 1; font-size: 0.9rem; color: #333; }
+    .friend-item .f-avatar { font-size: 1.1rem; }
+    .friend-item .f-name { flex: 1; font-size: 0.85rem; color: #333; }
 
     .edit-form {
       display: none;
-      margin-top: 14px;
-      padding: 14px;
+      margin-top: 12px;
+      padding: 12px;
       background: #f5f5f5;
       border-radius: 10px;
     }
@@ -231,19 +267,19 @@
     .edit-form textarea {
       width: 100%;
       padding: 8px 10px;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       border: none;
       border-radius: 6px;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
     }
-    .edit-form textarea { min-height: 60px; }
+    .edit-form textarea { min-height: 50px; }
     .edit-form .btns { display: flex; gap: 6px; }
     .edit-form button {
       flex: 1;
       padding: 6px;
       border: none;
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       cursor: pointer;
     }
     .edit-form .save { background: #333; color: #fff; }
@@ -253,12 +289,12 @@
       display: block;
       width: 100%;
       padding: 10px;
-      margin-top: 14px;
+      margin-top: 12px;
       border: none;
       border-radius: 10px;
       background: #f0f0f0;
       color: #666;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       cursor: pointer;
     }
   </style>
@@ -271,7 +307,18 @@
     <p>致我们共同的回忆</p>
   </header>
 
-  
+  <!-- 纪念日 -->
+  <div class="anniversary" id="anniversary">
+    <div class="a-title">🎄 距离圣诞节还有</div>
+    <div class="a-countdown" id="countdown">--</div>
+    <div class="a-label">天</div>
+  </div>
+
+  <!-- 默契问答 -->
+  <div class="quiz-section" onclick="startQuiz()">
+    <div class="q-title">💫 默契问答</div>
+    <div class="q-desc">约好和朋友同时打开，看我们的默契有多高</div>
+  </div>
 
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="搜索名字..." autocomplete="off">
@@ -340,16 +387,35 @@
   </div>
 </div>
 
+<!-- 默契问答弹窗 -->
+<div class="quiz-modal" id="quizModal">
+  <div class="modal">
+    <div class="q-number" id="qNumber">第 1/5 题</div>
+    <div class="q-text" id="qText">问题内容</div>
+    <div class="options" id="qOptions"></div>
+    <button class="close-q" onclick="closeQuiz()">关闭</button>
+  </div>
+</div>
+
 <script>
 // 数据
-// message = 搜索框显示的内容
-// secretMessage = 暗号显示的专属内容（可以更私密）
 let friends = [
   { avatar: "🌟", name: "朋友A", tag: "最好的朋友", message: "（搜索显示的话）", meetDate: "2024-01-01", secretCode: "暗号A", secretMessage: "（暗号专属的悄悄话）" },
   { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（搜索显示的话）", meetDate: "2023-06-15", secretCode: "暗号B", secretMessage: "（暗号专属的悄悄话）" }
 ];
 
-// 管理密码
+// 纪念日（设置你们的重要日期）
+const ANNIVERSARY_DATE = "2025-12-25"; // 改成纪念日日期
+
+// 默契问答题目
+const quizQuestions = [
+  { q: "我们第一次见面是在？", options: ["学校", "网上", "朋友聚会", "其他"] },
+  { q: "我们最常一起做什么？", options: ["吃饭", "打游戏", "聊天", "逛街"] },
+  { q: "对方最打动你的优点是？", options: ["幽默", "善良", "真诚", "有趣"] },
+  { q: "如果一起去旅行，最想去？", options: ["海边", "山里", "城市", "国外"] },
+  { q: "认识对方后最大的改变是？", options: ["更开心", "更成熟", "更勇敢", "更懂得珍惜"] }
+];
+
 const ADMIN_PASSWORD = "5201314";
 
 const searchInput = document.getElementById('searchInput');
@@ -366,6 +432,15 @@ function getDays(dateStr) {
   const diff = Math.floor((today - meet) / (1000 * 60 * 60 * 24));
   return diff > 0 ? diff : 0;
 }
+
+// 纪念日倒计时
+function initAnniversary() {
+  const target = new Date(ANNIVERSARY_DATE);
+  const today = new Date();
+  const diff = Math.floor((target - today) / (1000 * 60 * 60 * 24));
+  document.getElementById('countdown').textContent = diff > 0 ? diff : 0;
+}
+initAnniversary();
 
 // 搜索
 searchInput.addEventListener('input', (e) => {
@@ -400,7 +475,7 @@ searchInput.addEventListener('input', (e) => {
             <div class="r-tag">${f.tag} · 认识${getDays(f.meetDate)}天</div>
           </div>
         </div>
-        <div class="r-preview">${f.message.substring(0, 20)}...</div>
+        <div class="r-preview">${f.message ? f.message.substring(0, 20) : '...'}</div>
       </div>
     `).join('');
     resultsEl.classList.add('active');
@@ -424,7 +499,7 @@ function openModal(i) {
   const f = friends[i];
   document.getElementById('m-avatar').textContent = f.avatar;
   document.getElementById('m-name').textContent = f.name;
-  document.getElementById('m-tag').textContent = f.tag;
+  document.getElementById('m-tag').textContent = f.tag + (f.meetDate ? ' · 认识' + getDays(f.meetDate) + '天' : '');
   document.getElementById('m-text').textContent = f.message;
   document.getElementById('modal').classList.add('active');
 }
@@ -441,7 +516,6 @@ function toggleSecret() {
 function checkSecret(e) {
   if (e.key === 'Enter') {
     const code = document.getElementById('secretCode').value.trim();
-    // 检查是否匹配某个朋友的专属暗号
     const matchedFriend = friends.find(f => f.secretCode && f.secretCode === code);
     if (matchedFriend) {
       document.getElementById('s-emoji').textContent = matchedFriend.avatar;
@@ -462,6 +536,50 @@ function checkSecret(e) {
 
 function closeSecret(e) {
   if (e.target.id === 'secretModal') document.getElementById('secretModal').classList.remove('active');
+}
+
+// 默契问答
+let currentQ = 0;
+let answers = [];
+
+function startQuiz() {
+  currentQ = 0;
+  answers = [];
+  showQuestion();
+  document.getElementById('quizModal').classList.add('active');
+}
+
+function showQuestion() {
+  const q = quizQuestions[currentQ];
+  document.getElementById('qNumber').textContent = `第 ${currentQ + 1}/${quizQuestions.length} 题`;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('qOptions').innerHTML = q.options.map((opt, i) => 
+    `<div class="option" onclick="selectOption(${i})">${opt}</div>`
+  ).join('');
+}
+
+function selectOption(i) {
+  answers.push(i);
+  if (currentQ < quizQuestions.length - 1) {
+    currentQ++;
+    showQuestion();
+  } else {
+    // 答完了，生成结果
+    const same = answers.filter((a, b, idx) => answers.indexOf(a) === idx).length;
+    const percent = Math.round((same / quizQuestions.length) * 100);
+    let result = "";
+    if (percent === 100) result = "完美默契！🎉 我们真的心有灵犀！";
+    else if (percent >= 60) result = "很有默契！😊 我们想法很接近～";
+    else if (percent >= 40) result = "一般默契😐 但没关系，友谊不变～";
+    else result = "哈哈我们是互补型！😂 正好互补～";
+    
+    document.getElementById('qText').textContent = `默契度：${percent}%`;
+    document.getElementById('qOptions').innerHTML = `<div style="padding:20px;text-align:center;color:#667eea;font-weight:600">${result}</div>`;
+  }
+}
+
+function closeQuiz() {
+  document.getElementById('quizModal').classList.remove('active');
 }
 
 // 管理后台
