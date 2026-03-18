@@ -306,7 +306,8 @@
       <input type="text" id="editTag" placeholder="标签">
       <input type="date" id="editMeetDate" placeholder="认识日期">
       <input type="text" id="editSecretCode" placeholder="专属暗号">
-      <textarea id="editMessage" placeholder="想对TA说的话"></textarea>
+      <textarea id="editMessage" placeholder="搜索显示的话"></textarea>
+      <textarea id="editSecretMessage" placeholder="暗号专属的悄悄话"></textarea>
       <div class="btns">
         <button class="save" onclick="saveFriend()">保存</button>
         <button class="cancel" onclick="cancelEdit()">取消</button>
@@ -340,10 +341,12 @@
 </div>
 
 <script>
-// 数据（每个朋友可以设置不同的认识日期和专属暗号）
+// 数据
+// message = 搜索框显示的内容
+// secretMessage = 暗号显示的专属内容（可以更私密）
 let friends = [
-  { avatar: "🌟", name: "朋友A", tag: "最好的朋友", message: "（这里填写心里话）", meetDate: "2024-01-01", secretCode: "暗号A" },
-  { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（这里填写心里话）", meetDate: "2023-06-15", secretCode: "暗号B" }
+  { avatar: "🌟", name: "朋友A", tag: "最好的朋友", message: "（搜索显示的话）", meetDate: "2024-01-01", secretCode: "暗号A", secretMessage: "（暗号专属的悄悄话）" },
+  { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（搜索显示的话）", meetDate: "2023-06-15", secretCode: "暗号B", secretMessage: "（暗号专属的悄悄话）" }
 ];
 
 // 管理密码
@@ -443,7 +446,7 @@ function checkSecret(e) {
     if (matchedFriend) {
       document.getElementById('s-emoji').textContent = matchedFriend.avatar;
       document.getElementById('s-title').textContent = matchedFriend.name + '的专属惊喜！';
-      document.getElementById('s-text').textContent = matchedFriend.message || "你找到了我们的秘密暗号！";
+      document.getElementById('s-text').textContent = matchedFriend.secretMessage || matchedFriend.message || "你找到了我们的秘密暗号！";
       document.getElementById('secretModal').classList.add('active');
       document.getElementById('secretInput').classList.remove('active');
       document.getElementById('secretCode').value = '';
@@ -493,7 +496,8 @@ function editFriend(i) {
   document.getElementById('editTag').value = f.tag;
   document.getElementById('editMeetDate').value = f.meetDate || '';
   document.getElementById('editSecretCode').value = f.secretCode || '';
-  document.getElementById('editMessage').value = f.message;
+  document.getElementById('editMessage').value = f.message || '';
+  document.getElementById('editSecretMessage').value = f.secretMessage || '';
   document.getElementById('editForm').classList.add('active');
 }
 
@@ -505,7 +509,8 @@ function saveFriend() {
     tag: document.getElementById('editTag').value || '',
     meetDate: document.getElementById('editMeetDate').value || '',
     secretCode: document.getElementById('editSecretCode').value || '',
-    message: document.getElementById('editMessage').value || ''
+    message: document.getElementById('editMessage').value || '',
+    secretMessage: document.getElementById('editSecretMessage').value || ''
   };
   cancelEdit();
   renderFriends();
