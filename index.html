@@ -271,11 +271,7 @@
     <p>致我们共同的回忆</p>
   </header>
 
-  <!-- 相识天数 -->
-  <div class="days-counter" id="daysCounter">
-    <div class="days" id="daysNum">--</div>
-    <div class="label">我们认识的日子</div>
-  </div>
+  
 
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="搜索名字..." autocomplete="off">
@@ -308,6 +304,7 @@
       <input type="text" id="editAvatar" placeholder="头像">
       <input type="text" id="editName" placeholder="名字">
       <input type="text" id="editTag" placeholder="标签">
+      <input type="date" id="editMeetDate" placeholder="认识日期">
       <textarea id="editMessage" placeholder="想对TA说的话"></textarea>
       <div class="btns">
         <button class="save" onclick="saveFriend()">保存</button>
@@ -342,14 +339,11 @@
 </div>
 
 <script>
-// 数据
+// 数据（每个朋友可以设置不同的认识日期）
 let friends = [
-  { avatar: "🌟", name: "朋友A", tag: "最好的朋友", message: "（这里填写心里话）" },
-  { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（这里填写心里话）" }
+  { avatar: "🌟", name: "朋友A", tag: "最好的朋友", message: "（这里填写心里话）", meetDate: "2024-01-01" },
+  { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（这里填写心里话）", meetDate: "2023-06-15" }
 ];
-
-// 相识日期（改成你们认识的日子）
-const MEET_DATE = "2024-01-01";
 
 // 秘密暗号（改成你们知道的暗号）
 const SECRET_CODE = "520";
@@ -373,13 +367,13 @@ const adminPanel = document.getElementById('adminPanel');
 const hintEl = document.getElementById('hint');
 
 // 计算相识天数
-function initDays() {
-  const meet = new Date(MEET_DATE);
+function getDays(dateStr) {
+  if (!dateStr) return 0;
+  const meet = new Date(dateStr);
   const today = new Date();
   const diff = Math.floor((today - meet) / (1000 * 60 * 60 * 24));
-  document.getElementById('daysNum').textContent = diff > 0 ? diff : 0;
+  return diff > 0 ? diff : 0;
 }
-initDays();
 
 // 搜索
 searchInput.addEventListener('input', (e) => {
@@ -411,7 +405,7 @@ searchInput.addEventListener('input', (e) => {
           <span class="r-avatar">${f.avatar}</span>
           <div>
             <div class="r-name">${f.name}</div>
-            <div class="r-tag">${f.tag}</div>
+            <div class="r-tag">${f.tag} · 认识${getDays(f.meetDate)}天</div>
           </div>
         </div>
         <div class="r-preview">${f.message.substring(0, 20)}...</div>
@@ -501,6 +495,7 @@ function editFriend(i) {
   document.getElementById('editAvatar').value = f.avatar;
   document.getElementById('editName').value = f.name;
   document.getElementById('editTag').value = f.tag;
+  document.getElementById('editMeetDate').value = f.meetDate || '';
   document.getElementById('editMessage').value = f.message;
   document.getElementById('editForm').classList.add('active');
 }
@@ -511,6 +506,7 @@ function saveFriend() {
     avatar: document.getElementById('editAvatar').value || '👤',
     name: document.getElementById('editName').value || '未命名',
     tag: document.getElementById('editTag').value || '',
+    meetDate: document.getElementById('editMeetDate').value || '',
     message: document.getElementById('editMessage').value || ''
   };
   cancelEdit();
@@ -523,7 +519,7 @@ function cancelEdit() {
 }
 
 function copyData() {
-  const data = `const friends = ${JSON.stringify(friends, null, 2)};\nconst MEET_DATE = "${MEET_DATE}";\nconst SECRET_CODE = "${SECRET_CODE}";`;
+  const data = `const friends = ${JSON.stringify(friends, null, 2)};\nconst SECRET_CODE = "${SECRET_CODE}";`;
   navigator.clipboard.writeText(data).then(() => {
     alert('✅ 已复制！发给我帮你更新～');
   });
