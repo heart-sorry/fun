@@ -524,20 +524,49 @@ const hintEl = document.getElementById('hint');
 let audio = new Audio(musicUrl);
 audio.loop = true;
 let isPlaying = false;
+let autoPlayAttempted = false;
+
+// 尝试自动播放
+function tryAutoPlay() {
+  if (autoPlayAttempted) return;
+  autoPlayAttempted = true;
+  
+  audio.play().then(() => {
+    isPlaying = true;
+    document.getElementById('playBtn').textContent = '⏸';
+    document.getElementById('musicTitle').textContent = '正在播放...';
+  }).catch(() => {
+    // 自动播放被阻止，等待用户点击
+    document.getElementById('musicTitle').textContent = '点击播放音乐 🎵';
+  });
+}
+
+// 页面加载后尝试自动播放
+window.addEventListener('load', tryAutoPlay);
+
+// 用户第一次点击页面时再次尝试
+document.addEventListener('click', function autoPlayOnClick() {
+  if (!isPlaying) {
+    tryAutoPlay();
+  }
+  document.removeEventListener('click', autoPlayOnClick);
+}, { once: true });
 
 function toggleMusic() {
   if (isPlaying) {
     audio.pause();
     document.getElementById('playBtn').textContent = '▶';
-    document.getElementById('musicTitle').textContent = '点击播放音乐';
+    document.getElementById('musicTitle').textContent = '已暂停';
+    isPlaying = false;
   } else {
-    audio.play().catch(() => {
-      alert('请点击页面后再试，浏览器禁止自动播放～');
+    audio.play().then(() => {
+      document.getElementById('playBtn').textContent = '⏸';
+      document.getElementById('musicTitle').textContent = '正在播放...';
+      isPlaying = true;
+    }).catch(() => {
+      alert('浏览器禁止自动播放，请点击页面任意位置后再试～');
     });
-    document.getElementById('playBtn').textContent = '⏸';
-    document.getElementById('musicTitle').textContent = '正在播放...';
   }
-  isPlaying = !isPlaying;
 }
 
 audio.ontimeupdate = () => {
