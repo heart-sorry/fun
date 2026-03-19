@@ -24,7 +24,7 @@
 
     header {
       text-align: center;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
     header h1 {
       font-size: 1.5rem;
@@ -36,141 +36,212 @@
       color: #666;
     }
 
+    /* 音乐播放器 */
+    .music-player {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+    .music-player .play-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    .music-player .music-info {
+      flex: 1;
+      color: #fff;
+    }
+    .music-player .music-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .music-player .music-artist {
+      font-size: 0.7rem;
+      opacity: 0.85;
+    }
+    .music-player .music-time {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* 纪念日 */
+    .anniversary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+    .anniversary .a-title { font-size: 0.8rem; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .anniversary .a-countdown { font-size: 1.6rem; font-weight: 700; }
+    .anniversary .a-label { font-size: 0.6rem; opacity: 0.85; }
+
+    /* 默契问答 */
+    .quiz-section {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      color: #fff;
+      cursor: pointer;
+    }
+    .quiz-section .q-title { font-size: 0.9rem; margin-bottom: 4px; }
+    .quiz-section .q-desc { font-size: 0.65rem; opacity: 0.85; }
+
     .search-box {
       position: relative;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .search-box input {
       width: 100%;
-      padding: 14px 18px;
-      font-size: 0.95rem;
+      padding: 12px 16px;
+      font-size: 0.9rem;
       border: none;
-      border-radius: 14px;
+      border-radius: 12px;
       background: #fff;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
       outline: none;
     }
-    .search-box input::placeholder {
-      color: #aaa;
-    }
+    .search-box input::placeholder { color: #aaa; }
 
     .results { display: none; }
     .results.active { display: block; }
 
     .result-item {
       background: #fff;
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
       cursor: pointer;
     }
     .result-item .r-top {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
+      gap: 8px;
+      margin-bottom: 6px;
     }
-    .result-item .r-avatar { font-size: 1.6rem; }
-    .result-item .r-name { font-size: 0.95rem; font-weight: 600; color: #333; }
-    .result-item .r-tag { font-size: 0.65rem; color: #888; }
-    .result-item .r-preview { color: #666; font-size: 0.8rem; }
+    .result-item .r-avatar { font-size: 1.4rem; }
+    .result-item .r-name { font-size: 0.9rem; font-weight: 600; color: #333; }
+    .result-item .r-tag { font-size: 0.6rem; color: #888; }
+    .result-item .r-preview { color: #666; font-size: 0.75rem; }
 
-    .not-found {
-      display: none;
-      text-align: center;
-      padding: 24px 20px;
-      color: #888;
-    }
+    .not-found { display: none; text-align: center; padding: 20px; color: #888; }
     .not-found.active { display: block; }
 
     .hint {
       text-align: center;
       color: #999;
-      font-size: 0.75rem;
-      margin-top: 14px;
+      font-size: 0.7rem;
+      margin-top: 12px;
     }
 
-    /* 默契问答 */
-    .quiz-section {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 16px;
-      color: #fff;
-      cursor: pointer;
-    }
-    .quiz-section .q-title { font-size: 0.95rem; margin-bottom: 6px; }
-    .quiz-section .q-desc { font-size: 0.7rem; opacity: 0.85; }
-
-    .quiz-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 200;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .quiz-modal.active { display: flex; }
-    .quiz-modal .modal {
+    /* 留言板 */
+    .message-board {
       background: #fff;
-      border-radius: 16px;
-      padding: 24px;
-      max-width: 360px;
-      width: 100%;
-    }
-    .quiz-modal .q-number { font-size: 0.75rem; color: #888; margin-bottom: 8px; }
-    .quiz-modal .q-text { font-size: 1.1rem; color: #333; margin-bottom: 20px; font-weight: 600; }
-    .quiz-modal .options { display: flex; flex-direction: column; gap: 10px; }
-    .quiz-modal .option {
-      padding: 14px;
-      border: 2px solid #eee;
-      border-radius: 12px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 0.9rem;
-    }
-    .quiz-modal .option:hover { border-color: #667eea; }
-    .quiz-modal .option.selected { border-color: #667eea; background: #f5f7ff; }
-    .quiz-modal .close-q { margin-top: 16px; width: 100%; padding: 10px; border: none; border-radius: 10px; background: #f0f0f0; color: #666; cursor: pointer; }
-
-    /* 纪念日 */
-    .anniversary {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
       border-radius: 14px;
       padding: 16px;
-      margin-bottom: 16px;
-      color: #fff;
+      margin-top: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
     }
-    .anniversary .a-title { font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-    .anniversary .a-countdown { font-size: 1.8rem; font-weight: 700; }
-    .anniversary .a-label { font-size: 0.65rem; opacity: 0.85; }
+    .message-board .mb-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .message-board .mb-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      resize: none;
+      min-height: 60px;
+      font-family: inherit;
+      margin-bottom: 8px;
+    }
+    .message-board .mb-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .message-board .mb-name {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+    .message-board .mb-btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .message-board .mb-msgs {
+      margin-top: 16px;
+      border-top: 1px solid #eee;
+      padding-top: 12px;
+    }
+    .message-board .mb-msg {
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .message-board .mb-msg .msg-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #667eea;
+    }
+    .message-board .mb-msg .msg-text {
+      font-size: 0.8rem;
+      color: #555;
+      margin-top: 4px;
+    }
+    .message-board .mb-msg .msg-time {
+      font-size: 0.6rem;
+      color: #aaa;
+      margin-top: 4px;
+    }
 
     /* 秘密暗号 */
     .secret-hint {
       text-align: center;
-      margin-top: 24px;
-      padding: 14px;
+      margin-top: 20px;
+      padding: 12px;
       background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
       border-radius: 12px;
       color: #555;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       cursor: pointer;
     }
-    .secret-input {
-      display: none;
-      margin-top: 10px;
-    }
+    .secret-input { display: none; margin-top: 8px; }
     .secret-input.active { display: block; }
     .secret-input input {
       width: 100%;
-      padding: 10px 14px;
+      padding: 8px 12px;
       border: none;
-      border-radius: 10px;
-      font-size: 0.85rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
     }
 
     /* 弹窗 */
@@ -188,32 +259,32 @@
     .modal {
       background: #fff;
       border-radius: 16px;
-      padding: 28px 22px;
-      max-width: 340px;
+      padding: 24px 20px;
+      max-width: 320px;
       width: 100%;
       text-align: center;
     }
-    .modal .m-avatar { font-size: 2.6rem; margin-bottom: 4px; }
-    .modal .m-name { font-size: 1.2rem; font-weight: 600; color: #333; margin-bottom: 2px; }
-    .modal .m-tag { font-size: 0.7rem; color: #888; margin-bottom: 16px; }
-    .modal .m-text { font-size: 0.9rem; color: #444; line-height: 1.8; text-align: left; }
+    .modal .m-avatar { font-size: 2.4rem; margin-bottom: 4px; }
+    .modal .m-name { font-size: 1.1rem; font-weight: 600; color: #333; }
+    .modal .m-tag { font-size: 0.65rem; color: #888; margin-bottom: 14px; }
+    .modal .m-text { font-size: 0.85rem; color: #444; line-height: 1.7; text-align: left; }
     .modal .close-btn {
-      margin-top: 20px;
-      padding: 10px 32px;
+      margin-top: 18px;
+      padding: 10px 28px;
       border: none;
       border-radius: 25px;
       background: #333;
       color: #fff;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       cursor: pointer;
     }
 
     /* 管理入口 */
     .admin-link {
       text-align: center;
-      margin-top: 36px;
-      opacity: 0.15;
-      font-size: 0.65rem;
+      margin-top: 32px;
+      opacity: 0.12;
+      font-size: 0.6rem;
       color: #ccc;
       cursor: pointer;
     }
@@ -222,24 +293,24 @@
     .admin-panel {
       display: none;
       background: #fff;
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: 0 2px 14px rgba(0,0,0,0.08);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     }
     .admin-panel.active { display: block; }
     .admin-header {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
-    .admin-header h2 { font-size: 0.95rem; color: #333; }
+    .admin-header h2 { font-size: 0.9rem; color: #333; }
     .admin-header button {
       padding: 4px 10px;
       border: none;
       border-radius: 8px;
       background: #f5f5f5;
       color: #666;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
     }
 
     .friend-list { display: flex; flex-direction: column; gap: 6px; }
@@ -252,13 +323,13 @@
       border-radius: 10px;
       cursor: pointer;
     }
-    .friend-item .f-avatar { font-size: 1.1rem; }
-    .friend-item .f-name { flex: 1; font-size: 0.85rem; color: #333; }
+    .friend-item .f-avatar { font-size: 1rem; }
+    .friend-item .f-name { flex: 1; font-size: 0.8rem; color: #333; }
 
     .edit-form {
       display: none;
-      margin-top: 12px;
-      padding: 12px;
+      margin-top: 10px;
+      padding: 10px;
       background: #f5f5f5;
       border-radius: 10px;
     }
@@ -266,29 +337,21 @@
     .edit-form input,
     .edit-form textarea {
       width: 100%;
-      padding: 10px 12px;
-      margin-bottom: 8px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
       border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 0.85rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
       font-family: inherit;
-      display: block;
     }
-    .edit-form textarea { min-height: 60px; resize: vertical; }
-    .edit-form label {
-      display: block;
-      font-size: 0.7rem;
-      color: #888;
-      margin-bottom: 2px;
-      margin-top: 4px;
-    }
+    .edit-form textarea { min-height: 40px; }
     .edit-form .btns { display: flex; gap: 6px; }
     .edit-form button {
       flex: 1;
       padding: 6px;
       border: none;
       border-radius: 6px;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       cursor: pointer;
     }
     .edit-form .save { background: #333; color: #fff; }
@@ -297,13 +360,13 @@
     .export-btn {
       display: block;
       width: 100%;
-      padding: 10px;
-      margin-top: 12px;
+      padding: 8px;
+      margin-top: 10px;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       background: #f0f0f0;
       color: #666;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       cursor: pointer;
     }
   </style>
@@ -316,8 +379,18 @@
     <p>致我们共同的回忆</p>
   </header>
 
+  <!-- 音乐播放器 -->
+  <div class="music-player" onclick="toggleMusic()">
+    <div class="play-btn" id="playBtn">▶</div>
+    <div class="music-info">
+      <div class="music-title" id="musicTitle">点击播放音乐</div>
+      <div class="music-artist">背景音乐</div>
+    </div>
+    <div class="music-time" id="musicTime">0:00</div>
+  </div>
+
   <!-- 纪念日 -->
-  <div class="anniversary" id="anniversary">
+  <div class="anniversary">
     <div class="a-title">🎄 距离圣诞节还有</div>
     <div class="a-countdown" id="countdown">--</div>
     <div class="a-label">天</div>
@@ -326,7 +399,7 @@
   <!-- 默契问答 -->
   <div class="quiz-section" onclick="startQuiz()">
     <div class="q-title">💫 默契问答</div>
-    <div class="q-desc">约好和朋友同时打开，看我们的默契有多高</div>
+    <div class="q-desc">和朋友同时打开，看默契有多高</div>
   </div>
 
   <div class="search-box">
@@ -339,6 +412,17 @@
   </div>
 
   <div class="hint" id="hint">在这里留下我们的回忆</div>
+
+  <!-- 留言板 -->
+  <div class="message-board">
+    <div class="mb-title">💬 留言板</div>
+    <input type="text" class="mb-name" id="msgName" placeholder="你的名字">
+    <textarea class="mb-input" id="msgText" placeholder="写下你想说的话..."></textarea>
+    <button class="mb-btn" onclick="submitMessage()">提交留言</button>
+    <div class="mb-msgs" id="mbMsgs">
+      <!-- 留言显示在这里 -->
+    </div>
+  </div>
 
   <!-- 秘密暗号 -->
   <div class="secret-hint" onclick="toggleSecret()">
@@ -357,20 +441,13 @@
     <div class="friend-list" id="friendList"></div>
     <div class="edit-form" id="editForm">
       <input type="hidden" id="editIndex">
-      <label>头像 emoji</label>
-      <input type="text" id="editAvatar" placeholder="如 🌟">
-      <label>名字</label>
-      <input type="text" id="editName" placeholder="朋友名字">
-      <label>标签</label>
-      <input type="text" id="editTag" placeholder="如 最好的朋友">
-      <label>认识日期</label>
+      <input type="text" id="editAvatar" placeholder="头像">
+      <input type="text" id="editName" placeholder="名字">
+      <input type="text" id="editTag" placeholder="标签">
       <input type="date" id="editMeetDate">
-      <label>专属暗号</label>
-      <input type="text" id="editSecretCode" placeholder="输入暗号才能看到悄悄话">
-      <label>搜索显示的话（公开）</label>
-      <textarea id="editMessage" placeholder="在搜索框输入名字后看到的内容"></textarea>
-      <label>暗号专属悄悄话（私密）</label>
-      <textarea id="editSecretMessage" placeholder="输入暗号后看到的专属内容"></textarea>
+      <input type="text" id="editSecretCode" placeholder="暗号">
+      <textarea id="editMessage" placeholder="公开消息"></textarea>
+      <textarea id="editSecretMessage" placeholder="暗号消息"></textarea>
       <div class="btns">
         <button class="save" onclick="saveFriend()">保存</button>
         <button class="cancel" onclick="cancelEdit()">取消</button>
@@ -404,12 +481,12 @@
 </div>
 
 <!-- 默契问答弹窗 -->
-<div class="quiz-modal" id="quizModal">
+<div class="modal-overlay" id="quizModal">
   <div class="modal">
-    <div class="q-number" id="qNumber">第 1/5 题</div>
-    <div class="q-text" id="qText">问题内容</div>
+    <div class="q-number" id="qNumber" style="font-size:0.7rem;color:#888;margin-bottom:8px">第 1/5 题</div>
+    <div class="q-text" id="qText" style="font-size:1rem;color:#333;margin-bottom:16px;font-weight:600">问题内容</div>
     <div class="options" id="qOptions"></div>
-    <button class="close-q" onclick="closeQuiz()">关闭</button>
+    <button class="close-q" onclick="closeQuiz()" style="margin-top:14px;width:100%;padding:8px;border:none;border-radius:8px;background:#f0f0f0;color:#666;cursor:pointer">关闭</button>
   </div>
 </div>
 
@@ -420,10 +497,10 @@ let friends = [
   { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（搜索显示的话）", meetDate: "2023-06-15", secretCode: "暗号B", secretMessage: "（暗号专属的悄悄话）" }
 ];
 
-// 纪念日（设置你们的重要日期）
-const ANNIVERSARY_DATE = "2025-12-25"; // 改成纪念日日期
+// 纪念日
+const ANNIVERSARY_DATE = "2025-12-25";
 
-// 默契问答题目
+// 默契问答
 const quizQuestions = [
   { q: "我们第一次见面是在？", options: ["学校", "网上", "朋友聚会", "其他"] },
   { q: "我们最常一起做什么？", options: ["吃饭", "打游戏", "聊天", "逛街"] },
@@ -432,6 +509,9 @@ const quizQuestions = [
   { q: "认识对方后最大的改变是？", options: ["更开心", "更成熟", "更勇敢", "更懂得珍惜"] }
 ];
 
+// 背景音乐（使用免费的在线音乐）
+const musicUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+
 const ADMIN_PASSWORD = "5201314";
 
 const searchInput = document.getElementById('searchInput');
@@ -439,6 +519,34 @@ const resultsEl = document.getElementById('results');
 const notFoundEl = document.getElementById('notFound');
 const adminPanel = document.getElementById('adminPanel');
 const hintEl = document.getElementById('hint');
+
+// 音频
+let audio = new Audio(musicUrl);
+audio.loop = true;
+let isPlaying = false;
+
+function toggleMusic() {
+  if (isPlaying) {
+    audio.pause();
+    document.getElementById('playBtn').textContent = '▶';
+    document.getElementById('musicTitle').textContent = '点击播放音乐';
+  } else {
+    audio.play().catch(() => {
+      alert('请点击页面后再试，浏览器禁止自动播放～');
+    });
+    document.getElementById('playBtn').textContent = '⏸';
+    document.getElementById('musicTitle').textContent = '正在播放...';
+  }
+  isPlaying = !isPlaying;
+}
+
+audio.ontimeupdate = () => {
+  if (isPlaying) {
+    const m = Math.floor(audio.currentTime / 60);
+    const s = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
+    document.getElementById('musicTime').textContent = `${m}:${s}`;
+  }
+};
 
 // 计算相识天数
 function getDays(dateStr) {
@@ -491,7 +599,7 @@ searchInput.addEventListener('input', (e) => {
             <div class="r-tag">${f.tag} · 认识${getDays(f.meetDate)}天</div>
           </div>
         </div>
-        <div class="r-preview">${f.message ? f.message.substring(0, 20) : '...'}</div>
+        <div class="r-preview">${f.message ? f.message.substring(0, 15) : '...'}...</div>
       </div>
     `).join('');
     resultsEl.classList.add('active');
@@ -570,7 +678,7 @@ function showQuestion() {
   document.getElementById('qNumber').textContent = `第 ${currentQ + 1}/${quizQuestions.length} 题`;
   document.getElementById('qText').textContent = q.q;
   document.getElementById('qOptions').innerHTML = q.options.map((opt, i) => 
-    `<div class="option" onclick="selectOption(${i})">${opt}</div>`
+    `<div class="option" onclick="selectOption(${i})" style="padding:12px;border:2px solid #eee;border-radius:10px;text-align:center;cursor:pointer;margin-bottom:8px;transition:all 0.2s">${opt}</div>`
   ).join('');
 }
 
@@ -580,7 +688,6 @@ function selectOption(i) {
     currentQ++;
     showQuestion();
   } else {
-    // 答完了，生成结果
     const same = answers.filter((a, b, idx) => answers.indexOf(a) === idx).length;
     const percent = Math.round((same / quizQuestions.length) * 100);
     let result = "";
@@ -596,6 +703,37 @@ function selectOption(i) {
 
 function closeQuiz() {
   document.getElementById('quizModal').classList.remove('active');
+}
+
+// 留言板
+function submitMessage() {
+  const name = document.getElementById('msgName').value.trim();
+  const text = document.getElementById('msgText').value.trim();
+  
+  if (!name || !text) {
+    alert('请填写名字和留言～');
+    return;
+  }
+  
+  // 添加留言到本地显示
+  const msgs = document.getElementById('mbMsgs');
+  const now = new Date();
+  const time = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
+  
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'mb-msg';
+  msgDiv.innerHTML = `
+    <div class="msg-name">${name}</div>
+    <div class="msg-text">${text}</div>
+    <div class="msg-time">${time}</div>
+  `;
+  msgs.insertBefore(msgDiv, msgs.firstChild);
+  
+  // 清空输入
+  document.getElementById('msgName').value = '';
+  document.getElementById('msgText').value = '';
+  
+  alert('留言成功！💕');
 }
 
 // 管理后台
