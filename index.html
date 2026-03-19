@@ -46,7 +46,9 @@
       align-items: center;
       gap: 12px;
       cursor: pointer;
+      transition: transform 0.2s;
     }
+    .music-player:active { transform: scale(0.98); }
     .music-player .play-btn {
       width: 36px;
       height: 36px;
@@ -72,6 +74,8 @@
     .music-player .music-time {
       font-size: 0.7rem;
       color: rgba(255,255,255,0.7);
+      min-width: 36px;
+      text-align: right;
     }
 
     /* 纪念日 */
@@ -94,7 +98,9 @@
       margin-bottom: 16px;
       color: #fff;
       cursor: pointer;
+      transition: transform 0.2s;
     }
+    .quiz-section:active { transform: scale(0.98); }
     .quiz-section .q-title { font-size: 0.9rem; margin-bottom: 4px; }
     .quiz-section .q-desc { font-size: 0.65rem; opacity: 0.85; }
 
@@ -520,23 +526,40 @@ const notFoundEl = document.getElementById('notFound');
 const adminPanel = document.getElementById('adminPanel');
 const hintEl = document.getElementById('hint');
 
-// 音频
-let audio = new Audio(musicUrl);
-audio.loop = true;
+// 音频（延迟初始化）
+let audio = null;
 let isPlaying = false;
 
-// 音频加载错误处理
-audio.onerror = () => {
-  document.getElementById('musicTitle').textContent = '音乐加载失败';
-  console.error('音频加载失败:', musicUrl);
-};
-
-// 音频加载成功
-audio.oncanplay = () => {
-  document.getElementById('musicTitle').textContent = '点击播放音乐 🎵';
-};
+// 初始化音频（懒加载）
+function initAudio() {
+  if (audio) return;
+  audio = new Audio(musicUrl);
+  audio.loop = true;
+  audio.preload = 'metadata';
+  
+  audio.onerror = () => {
+    document.getElementById('musicTitle').textContent = '音乐加载失败';
+  };
+  
+  audio.oncanplay = () => {
+    document.getElementById('musicTitle').textContent = '点击播放音乐 🎵';
+  };
+  
+  // 优化：每秒更新一次时间，减少重绘
+  let lastTime = 0;
+  audio.ontimeupdate = () => {
+    if (!isPlaying) return;
+    const now = Date.now();
+    if (now - lastTime < 1000) return;
+    lastTime = now;
+    const m = Math.floor(audio.currentTime / 60);
+    const s = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
+    document.getElementById('musicTime').textContent = `${m}:${s}`;
+  };
+}
 
 function toggleMusic() {
+  initAudio();
   if (isPlaying) {
     audio.pause();
     document.getElementById('playBtn').textContent = '▶';
@@ -553,36 +576,39 @@ function toggleMusic() {
   }
 }
 
-audio.ontimeupdate = () => {
-  if (isPlaying) {
-    const m = Math.floor(audio.currentTime / 60);
-    const s = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
-    document.getElementById('musicTime').textContent = `${m}:${s}`;
-  }
-};
+// 搜索防抖
+function debounce(fn, delay = 200) {
+  let timer = null;
+  return function(...args) {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
 
-// 计算相识天数
+// 计算相识天数（缓存）
+const daysCache = new Map();
 function getDays(dateStr) {
   if (!dateStr) return 0;
+  if (daysCache.has(dateStr)) return daysCache.get(dateStr);
   const meet = new Date(dateStr);
   const today = new Date();
-  const diff = Math.floor((today - meet) / (1000 * 60 * 60 * 24));
-  return diff > 0 ? diff : 0;
+  const diff = Math.floor((today - meet) / 86400000);
+  const result = diff > 0 ? diff : 0;
+  daysCache.set(dateStr, result);
+  return result;
 }
 
 // 纪念日倒计时
 function initAnniversary() {
   const target = new Date(ANNIVERSARY_DATE);
   const today = new Date();
-  const diff = Math.floor((target - today) / (1000 * 60 * 60 * 24));
+  const diff = Math.floor((target - today) / 86400000);
   document.getElementById('countdown').textContent = diff > 0 ? diff : 0;
 }
 initAnniversary();
 
-// 搜索
-searchInput.addEventListener('input', (e) => {
-  const query = e.target.value.trim();
-  
+// 搜索（防抖优化）
+const handleSearch = debounce((query) => {
   if (query === ADMIN_PASSWORD) {
     showAdmin();
     return;
@@ -596,15 +622,20 @@ searchInput.addEventListener('input', (e) => {
   }
   
   hintEl.style.display = 'none';
-  const matches = friends.filter(f => f.name.toLowerCase().includes(query.toLowerCase()));
+  const lowerQuery = query.toLowerCase();
+  const matches = friends.filter(f => f.name.toLowerCase().includes(lowerQuery));
   
   if (matches.length === 0) {
     resultsEl.classList.remove('active');
     notFoundEl.classList.add('active');
   } else {
     notFoundEl.classList.remove('active');
-    resultsEl.innerHTML = matches.map(f => `
-      <div class="result-item" onclick="openModal(${friends.indexOf(f)})">
+    // 使用 DocumentFragment 减少重排
+    const fragment = document.createDocumentFragment();
+    matches.forEach(f => {
+      const div = document.createElement('div');
+      div.className = 'result-item';
+      div.innerHTML = `
         <div class="r-top">
           <span class="r-avatar">${f.avatar}</span>
           <div>
@@ -613,11 +644,17 @@ searchInput.addEventListener('input', (e) => {
           </div>
         </div>
         <div class="r-preview">${f.message ? f.message.substring(0, 15) : '...'}...</div>
-      </div>
-    `).join('');
+      `;
+      div.onclick = () => openModal(friends.indexOf(f));
+      fragment.appendChild(div);
+    });
+    resultsEl.innerHTML = '';
+    resultsEl.appendChild(fragment);
     resultsEl.classList.add('active');
   }
-});
+}, 200);
+
+searchInput.addEventListener('input', (e) => handleSearch(e.target.value.trim()));
 
 searchInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
