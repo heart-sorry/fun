@@ -510,7 +510,7 @@ const quizQuestions = [
 ];
 
 // 背景音乐 - 鸟之诗八音盒版
-const musicUrl = "music.mp3";
+const musicUrl = "./music.mp3";
 
 const ADMIN_PASSWORD = "5201314";
 
@@ -524,47 +524,31 @@ const hintEl = document.getElementById('hint');
 let audio = new Audio(musicUrl);
 audio.loop = true;
 let isPlaying = false;
-let autoPlayAttempted = false;
 
-// 尝试自动播放
-function tryAutoPlay() {
-  if (autoPlayAttempted) return;
-  autoPlayAttempted = true;
-  
-  audio.play().then(() => {
-    isPlaying = true;
-    document.getElementById('playBtn').textContent = '⏸';
-    document.getElementById('musicTitle').textContent = '正在播放...';
-  }).catch(() => {
-    // 自动播放被阻止，等待用户点击
-    document.getElementById('musicTitle').textContent = '点击播放音乐 🎵';
-  });
-}
+// 音频加载错误处理
+audio.onerror = () => {
+  document.getElementById('musicTitle').textContent = '音乐加载失败';
+  console.error('音频加载失败:', musicUrl);
+};
 
-// 页面加载后尝试自动播放
-window.addEventListener('load', tryAutoPlay);
-
-// 用户第一次点击页面时再次尝试
-document.addEventListener('click', function autoPlayOnClick() {
-  if (!isPlaying) {
-    tryAutoPlay();
-  }
-  document.removeEventListener('click', autoPlayOnClick);
-}, { once: true });
+// 音频加载成功
+audio.oncanplay = () => {
+  document.getElementById('musicTitle').textContent = '点击播放音乐 🎵';
+};
 
 function toggleMusic() {
   if (isPlaying) {
     audio.pause();
     document.getElementById('playBtn').textContent = '▶';
-    document.getElementById('musicTitle').textContent = '已暂停';
+    document.getElementById('musicTitle').textContent = '点击播放音乐 🎵';
     isPlaying = false;
   } else {
     audio.play().then(() => {
       document.getElementById('playBtn').textContent = '⏸';
-      document.getElementById('musicTitle').textContent = '正在播放...';
+      document.getElementById('musicTitle').textContent = '🎵 鸟之诗';
       isPlaying = true;
     }).catch(() => {
-      alert('浏览器禁止自动播放，请点击页面任意位置后再试～');
+      alert('音乐播放失败，请检查网络后重试');
     });
   }
 }
