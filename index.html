@@ -577,11 +577,78 @@
 </div>
 
 <script>
-// 数据
-let friends = [
-  { avatar: "🌟", name: "朋友A", tag: "最好的朋友", message: "（搜索显示的话）", meetDate: "2024-01-01", secretCode: "暗号A", secretMessage: "（暗号专属的悄悄话）" },
-  { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（搜索显示的话）", meetDate: "2023-06-15", secretCode: "暗号B", secretMessage: "（暗号专属的悄悄话）" }
-];
+// 数据（从API加载）
+let friends = [];
+let messages = [];
+
+// API 配置（Cloudflare Worker）
+const API_URL = "https://fun.timtx.workers.dev";
+
+// 加载数据
+async function loadData() {
+  try {
+    // 加载朋友数据
+    const friendsRes = await fetch(`${API_URL}/api/friends`);
+    friends = await friendsRes.json();
+    
+    // 加载留言
+    const msgsRes = await fetch(`${API_URL}/api/messages`);
+    messages = await msgsRes.json();
+    
+    // 渲染留言板
+    renderMessages();
+  } catch (e) {
+    console.log('加载数据失败，使用默认数据');
+    friends = [
+      { avatar: "🌟", name: "朋友A", tag: "最好的朋友", message: "（搜索显示的话）", meetDate: "2024-01-01", secretCode: "暗号A", secretMessage: "（暗号专属的悄悄话）" },
+      { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（搜索显示的话）", meetDate: "2023-06-15", secretCode: "暗号B", secretMessage: "（暗号专属的悄悄话）" }
+    ];
+  }
+}
+
+// 保存朋友数据
+async function saveFriends() {
+  try {
+    await fetch(`${API_URL}/api/friends`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(friends)
+    });
+  } catch (e) {
+    console.log('保存失败');
+  }
+}
+
+// 添加留言
+async function addMessage(name, text, time) {
+  const msg = { name, text, time };
+  messages.push(msg);
+  if (messages.length > 100) messages = messages.slice(-100);
+  try {
+    await fetch(`${API_URL}/api/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(msg)
+    });
+  } catch (e) {
+    console.log('留言保存失败');
+  }
+}
+
+// 渲染留言板
+function renderMessages() {
+  const msgs = document.getElementById('mbMsgs');
+  msgs.innerHTML = messages.map(m => `
+    <div class="mb-msg">
+      <div class="msg-name">${m.name}</div>
+      <div class="msg-text">${m.text}</div>
+      <div class="msg-time">${m.time}</div>
+    </div>
+  `).join('');
+}
+
+// 页面加载时获取数据
+loadData();
 
 // 纪念日
 const ANNIVERSARY_DATE = "2025-12-25";
@@ -938,19 +1005,14 @@ function submitMessage() {
     return;
   }
   
-  // 添加留言到本地显示
-  const msgs = document.getElementById('mbMsgs');
   const now = new Date();
   const time = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
   
-  const msgDiv = document.createElement('div');
-  msgDiv.className = 'mb-msg';
-  msgDiv.innerHTML = `
-    <div class="msg-name">${name}</div>
-    <div class="msg-text">${text}</div>
-    <div class="msg-time">${time}</div>
-  `;
-  msgs.insertBefore(msgDiv, msgs.firstChild);
+  // 添加留言
+  addMessage(name, text, time);
+  
+  // 重新渲染留言板
+  renderMessages();
   
   // 清空输入
   document.getElementById('msgName').value = '';
@@ -1009,7 +1071,8 @@ function saveFriend() {
   };
   cancelEdit();
   renderFriends();
-  alert('保存成功！点击"复制数据"发给我～');
+  saveFriends();
+  alert('保存成功！✅');
 }
 
 function cancelEdit() {
