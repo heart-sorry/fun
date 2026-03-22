@@ -526,40 +526,33 @@ const notFoundEl = document.getElementById('notFound');
 const adminPanel = document.getElementById('adminPanel');
 const hintEl = document.getElementById('hint');
 
-// 音频（延迟初始化）
-let audio = null;
+// 音频
+let audio = new Audio(musicUrl);
+audio.loop = true;
+audio.preload = 'auto';
 let isPlaying = false;
 
-// 初始化音频（懒加载）
-function initAudio() {
-  if (audio) return;
-  audio = new Audio(musicUrl);
-  audio.loop = true;
-  audio.preload = 'metadata';
-  
-  audio.onerror = () => {
-    document.getElementById('musicTitle').textContent = '音乐加载失败';
-  };
-  
-  audio.oncanplay = () => {
-    document.getElementById('musicTitle').textContent = '点击播放音乐 🎵';
-  };
-  
-  // 优化：每秒更新一次时间，减少重绘
-  let lastTime = 0;
-  audio.ontimeupdate = () => {
-    if (!isPlaying) return;
-    const now = Date.now();
-    if (now - lastTime < 1000) return;
-    lastTime = now;
-    const m = Math.floor(audio.currentTime / 60);
-    const s = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
-    document.getElementById('musicTime').textContent = `${m}:${s}`;
-  };
-}
+audio.onerror = () => {
+  document.getElementById('musicTitle').textContent = '音乐加载失败';
+};
+
+audio.oncanplay = () => {
+  document.getElementById('musicTitle').textContent = '点击播放音乐 🎵';
+};
+
+// 每秒更新一次时间
+let lastTime = 0;
+audio.ontimeupdate = () => {
+  if (!isPlaying) return;
+  const now = Date.now();
+  if (now - lastTime < 1000) return;
+  lastTime = now;
+  const m = Math.floor(audio.currentTime / 60);
+  const s = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
+  document.getElementById('musicTime').textContent = `${m}:${s}`;
+};
 
 function toggleMusic() {
-  initAudio();
   if (isPlaying) {
     audio.pause();
     document.getElementById('playBtn').textContent = '▶';
