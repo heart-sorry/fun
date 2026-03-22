@@ -527,16 +527,20 @@ const adminPanel = document.getElementById('adminPanel');
 const hintEl = document.getElementById('hint');
 
 // 音频
-let audio = new Audio(musicUrl);
+let audio = new Audio();
+audio.src = musicUrl;
 audio.loop = true;
 audio.preload = 'auto';
+audio.load(); // 立即开始加载
 let isPlaying = false;
+let audioReady = false;
 
 audio.onerror = () => {
   document.getElementById('musicTitle').textContent = '音乐加载失败';
 };
 
 audio.oncanplay = () => {
+  audioReady = true;
   document.getElementById('musicTitle').textContent = '点击播放音乐 🎵';
 };
 
