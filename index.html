@@ -20,6 +20,75 @@
     .container {
       width: 100%;
       max-width: 420px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .container.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 开场帘子 */
+    .curtain {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .curtain.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(1.1);
+    }
+    .curtain-title {
+      font-size: 2rem;
+      color: #fff;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .curtain-hint {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+      animation: pulse 2s infinite;
+    }
+    .curtain-note {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+      margin-top: 30px;
+      text-align: center;
+      max-width: 280px;
+      line-height: 1.5;
+    }
+    .curtain-music {
+      position: absolute;
+      bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.9);
+      font-size: 0.8rem;
+    }
+    .curtain-music .dot {
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      border-radius: 50%;
+      animation: bounce 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
     }
 
     header {
@@ -379,7 +448,18 @@
 </head>
 <body>
 
-<div class="container">
+<!-- 开场帘子 -->
+<div class="curtain" id="curtain" onclick="openCurtain()">
+  <div class="curtain-title">💌 致我们</div>
+  <div class="curtain-hint">点击进入</div>
+  <div class="curtain-note">🎵 点击即入场，音乐将自动播放<br>让我们一起开启这段回忆之旅...</div>
+  <div class="curtain-music">
+    <div class="dot"></div>
+    <span>音乐加载中...</span>
+  </div>
+</div>
+
+<div class="container" id="mainContainer">
   <header>
     <h1>致我们 💌</h1>
     <p>致我们共同的回忆</p>
@@ -555,15 +635,17 @@ audio.loop = true;
 audio.preload = 'auto';
 audio.load(); // 立即开始加载
 let isPlaying = false;
-let audioReady = false;
+let curtainOpened = false;
 
 audio.onerror = () => {
   document.getElementById('musicTitle').textContent = '音乐加载失败';
 };
 
 audio.oncanplay = () => {
-  audioReady = true;
   document.getElementById('musicTitle').textContent = '点击播放音乐 🎵';
+  // 更新帘子上的文字
+  const musicNote = document.querySelector('.curtain-music span');
+  if (musicNote) musicNote.textContent = '🎵 音乐已就绪';
 };
 
 // 每秒更新一次时间
@@ -578,6 +660,29 @@ audio.ontimeupdate = () => {
   document.getElementById('musicTime').textContent = `${m}:${s}`;
 };
 
+// 拉开帘子
+function openCurtain() {
+  if (curtainOpened) return;
+  curtainOpened = true;
+  
+  // 播放音乐
+  audio.play().then(() => {
+    isPlaying = true;
+    document.getElementById('playBtn').textContent = '⏸';
+    document.getElementById('musicTitle').textContent = '🎵 鸟之诗';
+  }).catch(() => {
+    // 播放失败，静默处理
+  });
+  
+  // 隐藏帘子
+  document.getElementById('curtain').classList.add('hidden');
+  
+  // 显示内容
+  setTimeout(() => {
+    document.getElementById('mainContainer').classList.add('visible');
+  }, 300);
+}
+
 function toggleMusic() {
   if (isPlaying) {
     audio.pause();
@@ -590,7 +695,7 @@ function toggleMusic() {
       document.getElementById('musicTitle').textContent = '🎵 鸟之诗';
       isPlaying = true;
     }).catch(() => {
-      alert('音乐播放失败，请检查网络后重试');
+      document.getElementById('musicTitle').textContent = '点击重试播放';
     });
   }
 }
