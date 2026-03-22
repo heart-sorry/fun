@@ -402,10 +402,10 @@
     <div class="a-label">天</div>
   </div>
 
-  <!-- 默契问答 -->
+  <!-- MBTI 测试 -->
   <div class="quiz-section" onclick="startQuiz()">
-    <div class="q-title">💫 默契问答</div>
-    <div class="q-desc">和朋友同时打开，看默契有多高</div>
+    <div class="q-title">🧠 MBTI 测试</div>
+    <div class="q-desc">20道题测出你的MBTI，和朋友对比默契度</div>
   </div>
 
   <div class="search-box">
@@ -508,11 +508,30 @@ const ANNIVERSARY_DATE = "2025-12-25";
 
 // 默契问答
 const quizQuestions = [
-  { q: "我们第一次见面是在？", options: ["学校", "网上", "朋友聚会", "其他"] },
-  { q: "我们最常一起做什么？", options: ["吃饭", "打游戏", "聊天", "逛街"] },
-  { q: "对方最打动你的优点是？", options: ["幽默", "善良", "真诚", "有趣"] },
-  { q: "如果一起去旅行，最想去？", options: ["海边", "山里", "城市", "国外"] },
-  { q: "认识对方后最大的改变是？", options: ["更开心", "更成熟", "更勇敢", "更懂得珍惜"] }
+  // E/I 维度
+  { q: "你更喜欢哪种社交方式？", options: ["一群人出去玩", "一个人待着"] },
+  { q: "周末你一般会？", options: ["约朋友出去", "在家休息"] },
+  { q: "和陌生人交谈让你？", options: ["充满能量", "消耗精力"] },
+  { q: "你更喜欢说还是听？", options: ["说", "听"] },
+  { q: "你更容易从哪获得能量？", options: ["和他人互动", "独处思考"] },
+  // S/N 维度
+  { q: "你更注重？", options: ["具体的事实", "抽象的可能"] },
+  { q: "你更喜欢？", options: ["实实在在的东西", "充满想象的世界"] },
+  { q: "看小说时你更关注？", options: ["情节发展", "背后的含义"] },
+  { q: "你更擅长？", options: ["记住具体细节", "发现规律联系"] },
+  { q: "面对问题时你倾向？", options: ["看具体情况", "想很多可能性"] },
+  // T/F 维度
+  { q: "做决定时你更看重？", options: ["逻辑道理", "人际感受"] },
+  { q: "当朋友倾诉烦恼时你更想说？", options: ["这事应该怎么解决", "我能理解你的感受"] },
+  { q: "你觉得自己更？", options: ["理性冷静", "感性温柔"] },
+  { q: "你更在意？", options: ["公平公正", "和谐和睦"] },
+  { q: "你觉得批评应该？", options: ["直接指出问题", "委婉一点"] },
+  // J/P 维度
+  { q: "你更喜欢？", options: ["有计划地做事", "随性而为"] },
+  { q: "你更倾向？", options: ["按清单做事", "想做什么做什么"] },
+  { q: "出门旅游你一般？", options: ["提前订好行程", ["临时看情况"] },
+  { q: "你更喜欢？", options: ["确定的事", "新鲜刺激的事"] },
+  { q: "你觉得截止日期？", options: ["是必须遵守的", ["灵活一点也行"] }
 ];
 
 // 背景音乐 - 鸟之诗八音盒版
@@ -722,7 +741,9 @@ function startQuiz() {
 
 function showQuestion() {
   const q = quizQuestions[currentQ];
-  document.getElementById('qNumber').textContent = `第 ${currentQ + 1}/${quizQuestions.length} 题`;
+  const dimNames = ['E/I 外向-内向', 'S/N 实际-直觉', 'T/F 理性-感性', 'J/P 判断-灵活'];
+  const dim = Math.floor(currentQ / 5);
+  document.getElementById('qNumber').textContent = `第 ${currentQ + 1}/${quizQuestions.length} 题 · ${dimNames[dim]}`;
   document.getElementById('qText').textContent = q.q;
   document.getElementById('qOptions').innerHTML = q.options.map((opt, i) => 
     `<div class="option" onclick="selectOption(${i})" style="padding:12px;border:2px solid #eee;border-radius:10px;text-align:center;cursor:pointer;margin-bottom:8px;transition:all 0.2s">${opt}</div>`
@@ -735,18 +756,65 @@ function selectOption(i) {
     currentQ++;
     showQuestion();
   } else {
-    const same = answers.filter((a, b, idx) => answers.indexOf(a) === idx).length;
-    const percent = Math.round((same / quizQuestions.length) * 100);
-    let result = "";
-    if (percent === 100) result = "完美默契！🎉 我们真的心有灵犀！";
-    else if (percent >= 60) result = "很有默契！😊 我们想法很接近～";
-    else if (percent >= 40) result = "一般默契😐 但没关系，友谊不变～";
-    else result = "哈哈我们是互补型！😂 正好互补～";
+    // 计算 MBTI
+    const mbti = calculateMBTI(answers);
+    const match = compareMBTI(mbti, userMBTI);
     
-    document.getElementById('qText').textContent = `默契度：${percent}%`;
-    document.getElementById('qOptions').innerHTML = `<div style="padding:20px;text-align:center;color:#667eea;font-weight:600">${result}</div>`;
+    const mbtiDesc = {
+      'INTJ': '建筑师', 'INTP': '逻辑学家', 'ENTJ': '指挥官', 'ENTP': '辩论家',
+      'INFJ': '提倡者', 'INFP': '调停者', 'ENFJ': '主人公', 'ENFP': '竞选者',
+      'ISTJ': '物流师', 'ISFJ': '守卫者', 'ESTJ': '总经理', 'ESFJ': '执政官',
+      'ISTP': '鉴赏家', 'ISFP': '探险家', 'ESTP': '企业家', 'ESFP': '表演者'
+    };
+    
+    const yourType = mbtiDesc[mbti] || '';
+    const friendType = mbtiDesc[userMBTI] || '';
+    const matchDesc = getMatchDescription(match, mbti, userMBTI, yourType, friendType);
+    
+    document.getElementById('qText').textContent = `你的MBTI: ${mbti} ${yourType}`;
+    document.getElementById('qOptions').innerHTML = `
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2rem;margin-bottom:12px">${match}%</div>
+        <div style="font-size:0.85rem;color:#666;margin-bottom:16px">${matchDesc}</div>
+        <div style="font-size:0.75rem;color:#888;padding:12px;background:#f5f5f5;border-radius:8px">
+          <div>你的类型: <b>${mbti}</b> (${yourType})</div>
+          <div style="margin-top:6px">对方的类型: <b>${userMBTI}</b> (${friendType})</div>
+        </div>
+      </div>
+    `;
   }
 }
+
+function calculateMBTI(answers) {
+  // 每个维度取多数票: 前5题E/I, 中5题S/N, 后5题T/F, 最后5题J/P
+  // 选第一个选项多 -> E/S/T/J, 选第二个多 -> I/N/F/P
+  const e = answers.slice(0, 5).filter(a => a === 0).length;
+  const s = answers.slice(5, 10).filter(a => a === 0).length;
+  const t = answers.slice(10, 15).filter(a => a === 0).length;
+  const j = answers.slice(15, 20).filter(a => a === 0).length;
+  
+  return (e >= 3 ? 'E' : 'I') + (s >= 3 ? 'S' : 'N') + (t >= 3 ? 'T' : 'F') + (j >= 3 ? 'J' : 'P');
+}
+
+function compareMBTI(yourMBTI, friendMBTI) {
+  // 计算四个维度匹配的百分比
+  let match = 0;
+  for (let i = 0; i < 4; i++) {
+    if (yourMBTI[i] === friendMBTI[i]) match += 25;
+  }
+  return match;
+}
+
+function getMatchDescription(match, yourMBTI, friendMBTI, yourType, friendType) {
+  if (match === 100) return `完全相同！🎉 你们是完美搭档，性格高度一致！`;
+  if (match >= 75) return `高度契合！😊 你们在${match/4}个维度相同，非常默契～`;
+  if (match >= 50) return `部分契合 🤔 你们有${match/4}个维度相同，各有千秋～`;
+  if (match >= 25) return `互补型 💫 你们在${match/4}个维度不同，恰好互补～`;
+  return `完全互补！🌟 你们性格完全相反，却是最佳拍档！`;
+}
+
+// 你的MBTI类型（可从管理后台修改）
+const userMBTI = "ISTP";
 
 function closeQuiz() {
   document.getElementById('quizModal').classList.remove('active');
