@@ -577,9 +577,13 @@
 </div>
 
 <script>
-// 数据（本地存储）
+// 数据（本地存储 + GitHub Gist 跨设备同步）
 let friends = [];
 let messages = [];
+
+// GitHub Gist 配置
+const GIST_ID = '838d91ca55ba46a1071a84fc274c699b';
+const GIST_URL = `https://api.github.com/gists/${GIST_ID}`;
 
 // 默认朋友数据
 const DEFAULT_FRIENDS = [
@@ -587,39 +591,90 @@ const DEFAULT_FRIENDS = [
   { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（搜索显示的话）", meetDate: "2023-06-15", secretCode: "暗号B", secretMessage: "（暗号专属的悄悄话）" }
 ];
 
-// 加载数据（从本地存储）
-function loadData() {
+// 从 Gist 加载数据
+async function loadFromGist() {
   try {
-    const savedFriends = localStorage.getItem('fun_friends');
-    const savedMessages = localStorage.getItem('fun_messages');
+    const response = await fetch(GIST_URL);
+    const data = await response.json();
+    const content = JSON.parse(data.files['data.json'].content);
+    return content;
+  } catch (e) {
+    console.log('Gist 加载失败');
+    return null;
+  }
+}
+
+// 保存数据到 Gist
+async function saveToGist(data) {
+  try {
+    const response = await fetch(GIST_URL, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        files: {
+          'data.json': {
+            content: JSON.stringify(data, null, 2)
+          }
+        }
+      })
+    });
+    return response.ok;
+  } catch (e) {
+    console.log('Gist 保存失败');
+    return false;
+  }
+}
+
+// 加载数据（优先从 Gist 同步，失败则用本地存储）
+async function loadData() {
+  try {
+    // 先尝试从 Gist 加载
+    const gistData = await loadFromGist();
     
-    friends = savedFriends ? JSON.parse(savedFriends) : DEFAULT_FRIENDS;
-    messages = savedMessages ? JSON.parse(savedMessages) : [];
+    if (gistData) {
+      friends = gistData.friends || DEFAULT_FRIENDS;
+      messages = gistData.messages || [];
+      
+      // 保存到本地作为备份
+      localStorage.setItem('fun_friends', JSON.stringify(friends));
+      localStorage.setItem('fun_messages', JSON.stringify(messages));
+    } else {
+      // Gist 失败，用本地存储
+      const savedFriends = localStorage.getItem('fun_friends');
+      const savedMessages = localStorage.getItem('fun_messages');
+      friends = savedFriends ? JSON.parse(savedFriends) : DEFAULT_FRIENDS;
+      messages = savedMessages ? JSON.parse(savedMessages) : [];
+    }
     
     renderMessages();
   } catch (e) {
     console.log('加载数据失败，使用默认数据');
     friends = DEFAULT_FRIENDS;
     messages = [];
+    renderMessages();
   }
 }
 
-// 保存朋友数据（到本地存储）
-function saveFriends() {
+// 保存朋友数据（到本地 + Gist）
+async function saveFriends() {
   try {
     localStorage.setItem('fun_friends', JSON.stringify(friends));
+    await saveToGist({ friends, messages });
   } catch (e) {
     console.log('保存失败');
   }
 }
 
-// 添加留言（到本地存储）
-function addMessage(name, text, time) {
+// 添加留言（到本地 + Gist）
+async function addMessage(name, text, time) {
   const msg = { name, text, time };
   messages.push(msg);
   if (messages.length > 100) messages = messages.slice(-100);
   try {
     localStorage.setItem('fun_messages', JSON.stringify(messages));
+    await saveToGist({ friends, messages });
   } catch (e) {
     console.log('留言保存失败');
   }
