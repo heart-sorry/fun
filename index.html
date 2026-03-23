@@ -179,7 +179,7 @@
     }
     .search-box input {
       width: 100%;
-      padding: 12px 16px;
+      padding: 12px 50px 12px 16px;
       font-size: 0.9rem;
       border: none;
       border-radius: 12px;
@@ -188,6 +188,23 @@
       outline: none;
     }
     .search-box input::placeholder { color: #aaa; }
+    .search-box .search-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
     .results { display: none; }
     .results.active { display: block; }
@@ -560,6 +577,7 @@
 
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="搜索名字..." autocomplete="off">
+    <button class="search-btn" onclick="doSearch()">🔍</button>
   </div>
 
   <div class="results" id="results"></div>
@@ -951,7 +969,41 @@ function initAnniversary() {
 }
 initAnniversary();
 
-// 搜索（防抖优化）
+// 搜索函数（供按钮和回车调用）
+function doSearch() {
+  const query = searchInput.value.trim();
+  
+  if (!query) {
+    hintEl.style.display = 'block';
+    return;
+  }
+  
+  // 管理员密码
+  if (query === ADMIN_PASSWORD) {
+    showAdmin();
+    searchInput.value = '';
+    return;
+  }
+  
+  // 搜索朋友
+  const match = friends.find(f => f.name.toLowerCase().includes(query.toLowerCase()));
+  if (match) {
+    openModal(friends.indexOf(match));
+    searchInput.value = '';
+  } else {
+    notFoundEl.classList.add('active');
+    hintEl.style.display = 'none';
+    // 3秒后自动隐藏
+    setTimeout(() => {
+      notFoundEl.classList.remove('active');
+      if (friends.length > 0) {
+        hintEl.style.display = 'block';
+      }
+    }, 3000);
+  }
+}
+
+// 搜索框输入时隐藏列表
 searchInput.addEventListener('input', (e) => {
   const query = e.target.value.trim();
   
@@ -962,38 +1014,15 @@ searchInput.addEventListener('input', (e) => {
     return;
   }
   
-  // 搜索时隐藏列表，只在按回车时打开
+  // 输入时隐藏列表，只有点击搜索按钮或按回车时才搜索
   resultsEl.classList.remove('active');
   notFoundEl.classList.remove('active');
 });
 
+// 按回车搜索
 searchInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
-    const query = searchInput.value.trim();
-    
-    // 管理员密码
-    if (query === ADMIN_PASSWORD) {
-      showAdmin();
-      searchInput.value = '';
-      return;
-    }
-    
-    // 搜索朋友
-    const match = friends.find(f => f.name.toLowerCase().includes(query.toLowerCase()));
-    if (match) {
-      openModal(friends.indexOf(match));
-      searchInput.value = '';
-    } else {
-      notFoundEl.classList.add('active');
-      hintEl.style.display = 'none';
-      // 3秒后自动隐藏
-      setTimeout(() => {
-        notFoundEl.classList.remove('active');
-        if (friends.length > 0) {
-          hintEl.style.display = 'block';
-        }
-      }, 3000);
-    }
+    doSearch();
   }
 });
 
