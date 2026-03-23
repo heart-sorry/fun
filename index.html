@@ -952,11 +952,8 @@ function initAnniversary() {
 initAnniversary();
 
 // 搜索（防抖优化）
-const handleSearch = debounce((query) => {
-  if (query === ADMIN_PASSWORD) {
-    showAdmin();
-    return;
-  }
+searchInput.addEventListener('input', (e) => {
+  const query = e.target.value.trim();
   
   if (!query) {
     resultsEl.classList.remove('active');
@@ -965,49 +962,37 @@ const handleSearch = debounce((query) => {
     return;
   }
   
-  hintEl.style.display = 'none';
-  const lowerQuery = query.toLowerCase();
-  const matches = friends.filter(f => f.name.toLowerCase().includes(lowerQuery));
-  
-  if (matches.length === 0) {
-    resultsEl.classList.remove('active');
-    notFoundEl.classList.add('active');
-  } else {
-    notFoundEl.classList.remove('active');
-    // 使用 DocumentFragment 减少重排
-    const fragment = document.createDocumentFragment();
-    matches.forEach(f => {
-      const div = document.createElement('div');
-      div.className = 'result-item';
-      div.innerHTML = `
-        <div class="r-top">
-          <span class="r-avatar">${f.avatar}</span>
-          <div>
-            <div class="r-name">${f.name}</div>
-            <div class="r-tag">${f.tag} · 认识${getDays(f.meetDate)}天</div>
-          </div>
-        </div>
-        <div class="r-preview">${f.message ? f.message.substring(0, 15) : '...'}...</div>
-      `;
-      div.onclick = () => openModal(friends.indexOf(f));
-      fragment.appendChild(div);
-    });
-    resultsEl.innerHTML = '';
-    resultsEl.appendChild(fragment);
-    resultsEl.classList.add('active');
-  }
-}, 200);
-
-searchInput.addEventListener('input', (e) => handleSearch(e.target.value.trim()));
+  // 搜索时隐藏列表，只在按回车时打开
+  resultsEl.classList.remove('active');
+  notFoundEl.classList.remove('active');
+});
 
 searchInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     const query = searchInput.value.trim();
+    
+    // 管理员密码
     if (query === ADMIN_PASSWORD) {
       showAdmin();
+      searchInput.value = '';
+      return;
+    }
+    
+    // 搜索朋友
+    const match = friends.find(f => f.name.toLowerCase().includes(query.toLowerCase()));
+    if (match) {
+      openModal(friends.indexOf(match));
+      searchInput.value = '';
     } else {
-      const match = friends.find(f => f.name.toLowerCase().includes(query.toLowerCase()));
-      if (match) openModal(friends.indexOf(match));
+      notFoundEl.classList.add('active');
+      hintEl.style.display = 'none';
+      // 3秒后自动隐藏
+      setTimeout(() => {
+        notFoundEl.classList.remove('active');
+        if (friends.length > 0) {
+          hintEl.style.display = 'block';
+        }
+      }, 3000);
     }
   }
 });
