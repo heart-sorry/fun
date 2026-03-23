@@ -444,6 +444,72 @@
       font-size: 0.75rem;
       cursor: pointer;
     }
+
+    /* 管理后台增强样式 */
+    .admin-section {
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    .admin-section h3 {
+      font-size: 0.85rem;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .admin-btn {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 6px;
+      background: #667eea;
+      color: #fff;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .admin-btn:hover { background: #5568d3; }
+    .admin-btn.danger {
+      background: #ff6b6b;
+    }
+    .admin-btn.danger:hover { background: #ff5252; }
+    
+    .msg-list {
+      max-height: 150px;
+      overflow-y: auto;
+      margin-bottom: 8px;
+    }
+    .msg-item {
+      padding: 6px;
+      background: #f9f9f9;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      font-size: 0.7rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .msg-item .msg-content {
+      flex: 1;
+    }
+    .msg-item .msg-name {
+      font-weight: 600;
+      color: #333;
+    }
+    .msg-item .msg-text {
+      color: #666;
+      margin-top: 2px;
+    }
+    .msg-item .delete-btn {
+      padding: 2px 6px;
+      background: #ff6b6b;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.65rem;
+    }
   </style>
 </head>
 <body>
@@ -477,7 +543,7 @@
 
   <!-- 纪念日 -->
   <div class="anniversary">
-    <div class="a-title">🎄 距离圣诞节还有</div>
+    <div class="a-title" id="anniversaryTitle">🎄 距离纪念日还有</div>
     <div class="a-countdown" id="countdown">--</div>
     <div class="a-label">天</div>
   </div>
@@ -521,13 +587,36 @@
   <!-- 管理后台 -->
   <div class="admin-panel" id="adminPanel">
     <div class="admin-header">
-      <h2>🛠️ 管理</h2>
+      <h2>🛠️ 管理后台</h2>
       <button onclick="logoutAdmin()">退出</button>
     </div>
-    <div class="friend-list" id="friendList"></div>
+    
+    <!-- 纪念日设置 -->
+    <div class="admin-section">
+      <h3>📅 纪念日设置</h3>
+      <input type="date" id="adminAnniversary" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.8rem">
+      <button class="admin-btn" onclick="saveAnniversary()">保存纪念日</button>
+    </div>
+    
+    <!-- 留言管理 -->
+    <div class="admin-section">
+      <h3>💬 留言管理 <span id="msgCount"></span></h3>
+      <div class="msg-list" id="msgList"></div>
+      <button class="admin-btn danger" onclick="clearAllMessages()">🗑️ 清空所有留言</button>
+    </div>
+    
+    <!-- 朋友管理 -->
+    <div class="admin-section">
+      <h3>👥 朋友管理</h3>
+      <div class="friend-list" id="friendList"></div>
+      <button class="admin-btn" onclick="addNewFriend()">➕ 添加朋友</button>
+    </div>
+    
+    <!-- 编辑表单 -->
     <div class="edit-form" id="editForm">
+      <h3 id="editTitle">编辑朋友</h3>
       <input type="hidden" id="editIndex">
-      <input type="text" id="editAvatar" placeholder="头像">
+      <input type="text" id="editAvatar" placeholder="头像（ emoji）">
       <input type="text" id="editName" placeholder="名字">
       <input type="text" id="editTag" placeholder="标签">
       <input type="date" id="editMeetDate">
@@ -538,8 +627,15 @@
         <button class="save" onclick="saveFriend()">保存</button>
         <button class="cancel" onclick="cancelEdit()">取消</button>
       </div>
+      <button class="admin-btn danger" id="deleteFriendBtn" onclick="deleteFriend()">🗑️ 删除此朋友</button>
     </div>
-    <button class="export-btn" onclick="copyData()">📋 复制数据</button>
+    
+    <!-- 数据操作 -->
+    <div class="admin-section">
+      <h3>⚙️ 数据操作</h3>
+      <button class="admin-btn" onclick="copyAllData()">📋 导出所有数据</button>
+      <button class="admin-btn danger" onclick="resetAllData()">⚠️ 重置所有数据</button>
+    </div>
   </div>
 
   <div class="admin-link" id="adminLink" onclick="showAdmin()">.</div>
@@ -580,6 +676,9 @@
 // 数据（本地存储 + GitHub Gist 跨设备同步）
 let friends = [];
 let messages = [];
+let settings = {
+  anniversaryDate: '2025-12-25'  // 默认纪念日
+};
 
 // GitHub Gist 配置
 const GIST_ID = '838d91ca55ba46a1071a84fc274c699b';
@@ -636,35 +735,45 @@ async function loadData() {
     if (gistData) {
       friends = gistData.friends || DEFAULT_FRIENDS;
       messages = gistData.messages || [];
+      settings = gistData.settings || settings;
       
       // 保存到本地作为备份
       localStorage.setItem('fun_friends', JSON.stringify(friends));
       localStorage.setItem('fun_messages', JSON.stringify(messages));
+      localStorage.setItem('fun_settings', JSON.stringify(settings));
     } else {
       // Gist 失败，用本地存储
       const savedFriends = localStorage.getItem('fun_friends');
       const savedMessages = localStorage.getItem('fun_messages');
+      const savedSettings = localStorage.getItem('fun_settings');
       friends = savedFriends ? JSON.parse(savedFriends) : DEFAULT_FRIENDS;
       messages = savedMessages ? JSON.parse(savedMessages) : [];
+      settings = savedSettings ? JSON.parse(savedSettings) : settings;
     }
     
+    updateAnniversary();
     renderMessages();
   } catch (e) {
     console.log('加载数据失败，使用默认数据');
     friends = DEFAULT_FRIENDS;
     messages = [];
+    updateAnniversary();
     renderMessages();
   }
 }
 
+// 保存所有数据（到本地 + Gist）
+async function saveAllData() {
+  const data = { friends, messages, settings };
+  localStorage.setItem('fun_friends', JSON.stringify(friends));
+  localStorage.setItem('fun_messages', JSON.stringify(messages));
+  localStorage.setItem('fun_settings', JSON.stringify(settings));
+  await saveToGist(data);
+}
+
 // 保存朋友数据（到本地 + Gist）
 async function saveFriends() {
-  try {
-    localStorage.setItem('fun_friends', JSON.stringify(friends));
-    await saveToGist({ friends, messages });
-  } catch (e) {
-    console.log('保存失败');
-  }
+  await saveAllData();
 }
 
 // 添加留言（到本地 + Gist）
@@ -672,12 +781,7 @@ async function addMessage(name, text, time) {
   const msg = { name, text, time };
   messages.push(msg);
   if (messages.length > 100) messages = messages.slice(-100);
-  try {
-    localStorage.setItem('fun_messages', JSON.stringify(messages));
-    await saveToGist({ friends, messages });
-  } catch (e) {
-    console.log('留言保存失败');
-  }
+  await saveAllData();
 }
 
 // 渲染留言板
@@ -1073,25 +1177,137 @@ function showAdmin() {
   notFoundEl.classList.remove('active');
   hintEl.style.display = 'none';
   adminPanel.classList.add('active');
+  
+  // 加载设置
+  document.getElementById('adminAnniversary').value = settings.anniversaryDate;
+  
   renderFriends();
+  renderMessagesAdmin();
 }
 
 function logoutAdmin() {
   adminPanel.classList.remove('active');
   hintEl.style.display = 'block';
+  document.getElementById('editForm').classList.remove('active');
 }
 
+// 渲染留言管理列表
+function renderMessagesAdmin() {
+  const list = document.getElementById('msgList');
+  document.getElementById('msgCount').textContent = `(${messages.length}条)`;
+  
+  if (messages.length === 0) {
+    list.innerHTML = '<p style="font-size:0.75rem;color:#999;text-align:center;padding:10px">暂无留言</p>';
+    return;
+  }
+  
+  list.innerHTML = messages.map((m, i) => `
+    <div class="msg-item">
+      <div class="msg-content">
+        <div class="msg-name">${escapeHtml(m.name)}</div>
+        <div class="msg-text">${escapeHtml(m.text)}</div>
+      </div>
+      <button class="delete-btn" onclick="deleteMessage(${i})">删除</button>
+    </div>
+  `).join('');
+}
+
+// HTML 转义
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// 删除单条留言
+async function deleteMessage(index) {
+  if (!confirm('确定删除这条留言？')) return;
+  messages.splice(index, 1);
+  await saveAllData();
+  renderMessagesAdmin();
+  renderMessages();
+}
+
+// 清空所有留言
+async function clearAllMessages() {
+  if (!confirm('确定清空所有留言？此操作不可恢复！')) return;
+  messages = [];
+  await saveAllData();
+  renderMessagesAdmin();
+  renderMessages();
+  alert('已清空所有留言！');
+}
+
+// 保存纪念日
+async function saveAnniversary() {
+  const date = document.getElementById('adminAnniversary').value;
+  if (!date) {
+    alert('请选择日期！');
+    return;
+  }
+  settings.anniversaryDate = date;
+  await saveAllData();
+  updateAnniversary();
+  alert('纪念日已更新！🎉');
+}
+
+// 更新纪念日显示
+function updateAnniversary() {
+  const countdownEl = document.getElementById('countdown');
+  const titleEl = document.getElementById('anniversaryTitle');
+  if (!countdownEl) return;
+  
+  const target = new Date(settings.anniversaryDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  target.setHours(0, 0, 0, 0);
+  
+  const diff = target - today;
+  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+  
+  countdownEl.textContent = days;
+  
+  if (days > 0) {
+    titleEl.textContent = `🎄 距离纪念日还有`;
+  } else if (days === 0) {
+    titleEl.textContent = '🎉 今天就是纪念日！';
+    countdownEl.textContent = '🎊';
+  } else {
+    titleEl.textContent = `🎄 纪念日已过`;
+    countdownEl.textContent = Math.abs(days);
+  }
+}
+
+// 渲染朋友列表
 function renderFriends() {
   document.getElementById('friendList').innerHTML = friends.map((f, i) => `
     <div class="friend-item" onclick="editFriend(${i})">
       <span class="f-avatar">${f.avatar}</span>
       <span class="f-name">${f.name}</span>
+      <span style="font-size:0.65rem;color:#999">${f.tag}</span>
     </div>
   `).join('');
 }
 
+// 添加新朋友
+function addNewFriend() {
+  document.getElementById('editTitle').textContent = '添加朋友';
+  document.getElementById('editIndex').value = -1;
+  document.getElementById('editAvatar').value = '👤';
+  document.getElementById('editName').value = '';
+  document.getElementById('editTag').value = '';
+  document.getElementById('editMeetDate').value = '';
+  document.getElementById('editSecretCode').value = '';
+  document.getElementById('editMessage').value = '';
+  document.getElementById('editSecretMessage').value = '';
+  document.getElementById('editForm').classList.add('active');
+  document.getElementById('deleteFriendBtn').style.display = 'none';
+}
+
+// 编辑朋友
 function editFriend(i) {
   const f = friends[i];
+  document.getElementById('editTitle').textContent = '编辑朋友';
   document.getElementById('editIndex').value = i;
   document.getElementById('editAvatar').value = f.avatar;
   document.getElementById('editName').value = f.name;
@@ -1101,11 +1317,13 @@ function editFriend(i) {
   document.getElementById('editMessage').value = f.message || '';
   document.getElementById('editSecretMessage').value = f.secretMessage || '';
   document.getElementById('editForm').classList.add('active');
+  document.getElementById('deleteFriendBtn').style.display = 'block';
 }
 
-function saveFriend() {
+// 保存朋友
+async function saveFriend() {
   const i = parseInt(document.getElementById('editIndex').value);
-  friends[i] = {
+  const newFriend = {
     avatar: document.getElementById('editAvatar').value || '👤',
     name: document.getElementById('editName').value || '未命名',
     tag: document.getElementById('editTag').value || '',
@@ -1114,21 +1332,63 @@ function saveFriend() {
     message: document.getElementById('editMessage').value || '',
     secretMessage: document.getElementById('editSecretMessage').value || ''
   };
+  
+  if (i === -1) {
+    friends.push(newFriend);
+  } else {
+    friends[i] = newFriend;
+  }
+  
   cancelEdit();
   renderFriends();
-  saveFriends();
+  await saveFriends();
   alert('保存成功！✅');
+}
+
+// 删除朋友
+async function deleteFriend() {
+  const i = parseInt(document.getElementById('editIndex').value);
+  if (i === -1) return;
+  if (!confirm('确定删除这个朋友？')) return;
+  
+  friends.splice(i, 1);
+  cancelEdit();
+  renderFriends();
+  await saveFriends();
+  alert('已删除！');
 }
 
 function cancelEdit() {
   document.getElementById('editForm').classList.remove('active');
 }
 
-function copyData() {
-  const data = `const friends = ${JSON.stringify(friends, null, 2)};`;
-  navigator.clipboard.writeText(data).then(() => {
-    alert('✅ 已复制！发给我帮你更新～');
+// 导出所有数据
+function copyAllData() {
+  const data = {
+    friends,
+    messages,
+    settings
+  };
+  navigator.clipboard.writeText(JSON.stringify(data, null, 2)).then(() => {
+    alert('✅ 数据已复制到剪贴板！');
   });
+}
+
+// 重置所有数据
+async function resetAllData() {
+  if (!confirm('⚠️ 确定重置所有数据？\n这将清空所有朋友、留言和设置！\n此操作不可恢复！')) return;
+  if (!confirm('最后一次确认！所有数据将丢失！')) return;
+  
+  friends = DEFAULT_FRIENDS;
+  messages = [];
+  settings = { anniversaryDate: '2025-12-25' };
+  await saveAllData();
+  updateAnniversary();
+  renderMessages();
+  renderFriends();
+  renderMessagesAdmin();
+  document.getElementById('adminAnniversary').value = settings.anniversaryDate;
+  alert('已重置所有数据！');
 }
 </script>
 </body>
