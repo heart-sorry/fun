@@ -1,0 +1,26 @@
+{
+  "friends": [
+    {
+      "avatar": "🌟",
+      "name": "朋友A",
+      "tag": "最好的朋友",
+      "message": "（搜索显示的话）",
+      "meetDate": "2024-01-01",
+      "secretCode": "暗号A",
+      "secretMessage": "（暗号专属的悄悄话）"
+    },
+    {
+      "avatar": "🌈",
+      "name": "朋友B",
+      "tag": "老朋友",
+      "message": "（搜索显示的话）",
+      "meetDate": "2023-06-15",
+      "secretCode": "暗号B",
+      "secretMessage": "（暗号专属的悄悄话）"
+    }
+  ],
+  "messages": [],
+  "settings": {
+    "anniversaryDate": "2025-12-25"
+  }
+}
