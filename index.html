@@ -658,6 +658,15 @@
       <button class="admin-btn" onclick="copyAllData()">📋 导出所有数据</button>
       <button class="admin-btn danger" onclick="resetAllData()">⚠️ 重置所有数据</button>
     </div>
+    
+    <!-- 同步设置 -->
+    <div class="admin-section">
+      <h3>🔄 跨设备同步</h3>
+      <p style="font-size:0.7rem;color:#666;margin-bottom:8px">设置 Token 后可跨设备同步数据</p>
+      <input type="text" id="gistTokenInput" placeholder="输入 GitHub Token..." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.75rem;margin-bottom:6px">
+      <button class="admin-btn" onclick="saveGistToken()">💾 保存 Token</button>
+      <p id="syncStatus" style="font-size:0.65rem;color:#999;margin-top:6px"></p>
+    </div>
   </div>
 
   <div class="admin-link" id="adminLink" onclick="showAdmin()">.</div>
@@ -703,8 +712,9 @@ let settings = {
 };
 
 // GitHub Gist 配置
-const GIST_ID = '838d91ca55ba46a1071a84fc274c699b';
+const GIST_ID = '0f44ac59cd83c853995098c4b7efcb2e';  // 公开 Gist（用于读取）
 const GIST_URL = `https://api.github.com/gists/${GIST_ID}`;
+const GIST_RAW_URL = 'https://gist.githubusercontent.com/heart-sorry/0f44ac59cd83c853995098c4b7efcb2e/raw/data.json';
 
 // 默认朋友数据
 const DEFAULT_FRIENDS = [
@@ -712,26 +722,35 @@ const DEFAULT_FRIENDS = [
   { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（搜索显示的话）", meetDate: "2023-06-15", secretCode: "暗号B", secretMessage: "（暗号专属的悄悄话）" }
 ];
 
-// 从 Gist 加载数据
+// 从 Gist 加载数据（使用公开的 raw URL）
 async function loadFromGist() {
   try {
-    const response = await fetch(GIST_URL);
-    const data = await response.json();
-    const content = JSON.parse(data.files['data.json'].content);
+    const response = await fetch(GIST_RAW_URL);
+    const content = await response.json();
     return content;
   } catch (e) {
-    console.log('Gist 加载失败');
+    console.log('Gist 加载失败:', e);
     return null;
   }
 }
 
-// 保存数据到 Gist
+// 保存数据到 Gist（使用公开 Gist）
 async function saveToGist(data) {
   try {
-    const response = await fetch(GIST_URL, {
+    // Token 从 localStorage 获取
+    const token = localStorage.getItem('gist_token') || '';
+    if (!token) {
+      console.log('未设置 Gist Token，数据仅保存在本地');
+      return false;
+    }
+    
+    // 使用公开 Gist 的 ID 进行保存
+    const publicGistUrl = 'https://api.github.com/gists/0f44ac59cd83c853995098c4b7efcb2e';
+    const response = await fetch(publicGistUrl, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
       },
       body: JSON.stringify({
         files: {
@@ -741,11 +760,23 @@ async function saveToGist(data) {
         }
       })
     });
-    return response.ok;
+    const ok = response.ok;
+    if (!ok) {
+      console.log('Gist 保存失败: HTTP', response.status);
+    }
+    return ok;
   } catch (e) {
-    console.log('Gist 保存失败');
+    console.log('Gist 保存失败:', e);
     return false;
   }
+}
+
+// 设置 Gist Token（首次使用时调用）
+function setGistToken(token) {
+  localStorage.setItem('gist_token', token);
+  alert('Token 已保存！现在可以跨设备同步了。');
+  // 重新加载数据
+  loadData();
 }
 
 // 加载数据（优先从 Gist 同步，失败则用本地存储）
@@ -1207,6 +1238,9 @@ function showAdmin() {
   // 加载设置
   document.getElementById('adminAnniversary').value = settings.anniversaryDate;
   
+  // 检查同步状态
+  checkSyncStatus();
+  
   renderFriends();
   renderMessagesAdmin();
 }
@@ -1415,6 +1449,33 @@ async function resetAllData() {
   renderMessagesAdmin();
   document.getElementById('adminAnniversary').value = settings.anniversaryDate;
   alert('已重置所有数据！');
+}
+
+// 保存 Gist Token
+function saveGistToken() {
+  const token = document.getElementById('gistTokenInput').value.trim();
+  if (!token) {
+    alert('请输入 Token！');
+    return;
+  }
+  localStorage.setItem('gist_token', token);
+  document.getElementById('syncStatus').textContent = '✅ Token 已保存！';
+  document.getElementById('syncStatus').style.color = '#4CAF50';
+  // 立即尝试同步
+  saveAllData();
+}
+
+// 检查同步状态
+function checkSyncStatus() {
+  const token = localStorage.getItem('gist_token');
+  const statusEl = document.getElementById('syncStatus');
+  if (token) {
+    statusEl.textContent = '✅ 已设置 Token，可跨设备同步';
+    statusEl.style.color = '#4CAF50';
+  } else {
+    statusEl.textContent = '⚠️ 未设置 Token，仅本地存储';
+    statusEl.style.color = '#ff9800';
+  }
 }
 </script>
 </body>
