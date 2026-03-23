@@ -577,59 +577,49 @@
 </div>
 
 <script>
-// 数据（从API加载）
+// 数据（本地存储）
 let friends = [];
 let messages = [];
 
-// API 配置（Cloudflare Worker）
-const API_URL = "https://fun-ruddy-six.vercel.app/api/data";
+// 默认朋友数据
+const DEFAULT_FRIENDS = [
+  { avatar: "🌟", name: "朋友A", tag: "最好的朋友", message: "（搜索显示的话）", meetDate: "2024-01-01", secretCode: "暗号A", secretMessage: "（暗号专属的悄悄话）" },
+  { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（搜索显示的话）", meetDate: "2023-06-15", secretCode: "暗号B", secretMessage: "（暗号专属的悄悄话）" }
+];
 
-// 加载数据
-async function loadData() {
+// 加载数据（从本地存储）
+function loadData() {
   try {
-    // 加载朋友数据
-    const friendsRes = await fetch(`${API_URL}?action=friends`);
-    friends = await friendsRes.json();
+    const savedFriends = localStorage.getItem('fun_friends');
+    const savedMessages = localStorage.getItem('fun_messages');
     
-    // 加载留言
-    const msgsRes = await fetch(`${API_URL}?action=messages`);
-    messages = await msgsRes.json();
+    friends = savedFriends ? JSON.parse(savedFriends) : DEFAULT_FRIENDS;
+    messages = savedMessages ? JSON.parse(savedMessages) : [];
     
-    // 渲染留言板
     renderMessages();
   } catch (e) {
     console.log('加载数据失败，使用默认数据');
-    friends = [
-      { avatar: "🌟", name: "朋友A", tag: "最好的朋友", message: "（搜索显示的话）", meetDate: "2024-01-01", secretCode: "暗号A", secretMessage: "（暗号专属的悄悄话）" },
-      { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（搜索显示的话）", meetDate: "2023-06-15", secretCode: "暗号B", secretMessage: "（暗号专属的悄悄话）" }
-    ];
+    friends = DEFAULT_FRIENDS;
+    messages = [];
   }
 }
 
-// 保存朋友数据
-async function saveFriends() {
+// 保存朋友数据（到本地存储）
+function saveFriends() {
   try {
-    await fetch(`${API_URL}?action=friends`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(friends)
-    });
+    localStorage.setItem('fun_friends', JSON.stringify(friends));
   } catch (e) {
     console.log('保存失败');
   }
 }
 
-// 添加留言
-async function addMessage(name, text, time) {
+// 添加留言（到本地存储）
+function addMessage(name, text, time) {
   const msg = { name, text, time };
   messages.push(msg);
   if (messages.length > 100) messages = messages.slice(-100);
   try {
-    await fetch(`${API_URL}?action=messages`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(msg)
-    });
+    localStorage.setItem('fun_messages', JSON.stringify(messages));
   } catch (e) {
     console.log('留言保存失败');
   }
