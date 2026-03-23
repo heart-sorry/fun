@@ -702,9 +702,8 @@ let settings = {
   anniversaryDate: '2025-12-25'  // 默认纪念日
 };
 
-// GitHub 数据文件配置（公开文件，无需 Token 读取）
-const DATA_URL = 'https://raw.githubusercontent.com/heart-sorry/fun/main/data.json';
-const API_URL = 'https://api.github.com/repos/heart-sorry/fun/contents/data.json';
+// Cloudflare Worker API（真正的后端服务）
+const WORKER_URL = 'https://fun.3575766578.workers.dev';
 
 // 默认朋友数据
 const DEFAULT_FRIENDS = [
@@ -712,32 +711,32 @@ const DEFAULT_FRIENDS = [
   { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（搜索显示的话）", meetDate: "2023-06-15", secretCode: "暗号B", secretMessage: "（暗号专属的悄悄话）" }
 ];
 
-// 从 GitHub 加载数据（公开文件，无需认证）
+// 从 Worker 加载数据
 async function loadFromGist() {
   try {
-    const response = await fetch(DATA_URL);
+    const response = await fetch(`${WORKER_URL}/api/data`);
+    if (!response.ok) return null;
     const content = await response.json();
     return content;
   } catch (e) {
-    console.log('数据加载失败:', e);
+    console.log('Worker 加载失败:', e);
     return null;
   }
 }
 
-// 保存数据到 GitHub（通过 GitHub Actions 自动提交）
+// 保存数据到 Worker
 async function saveToGist(data) {
   try {
-    // 将数据保存到 localStorage，然后触发 GitHub Actions 同步
-    // 由于浏览器安全限制，无法直接从客户端写入 GitHub
-    // 所以这里只保存到本地，数据会在页面加载时从 GitHub 读取
-    // 如果需要实时同步，需要使用 GitHub Actions 或其他后端服务
-    
-    // 尝试通过 GitHub API 写入（需要 Token，但 Token 不能暴露在前端代码中）
-    // 所以这里只保存到本地存储
-    console.log('数据已保存到本地，刷新页面后会从云端同步');
-    return true;
+    const response = await fetch(`${WORKER_URL}/api/data`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    return response.ok;
   } catch (e) {
-    console.log('数据保存失败:', e);
+    console.log('Worker 保存失败:', e);
     return false;
   }
 }
