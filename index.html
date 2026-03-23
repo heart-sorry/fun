@@ -582,17 +582,17 @@ let friends = [];
 let messages = [];
 
 // API 配置（Cloudflare Worker）
-const API_URL = "https://fun.3575766578.workers.dev";
+const API_URL = "https://fun-ruddy-six.vercel.app/api/data";
 
 // 加载数据
 async function loadData() {
   try {
     // 加载朋友数据
-    const friendsRes = await fetch(`${API_URL}/api/friends`);
+    const friendsRes = await fetch(`${API_URL}?action=friends`);
     friends = await friendsRes.json();
     
     // 加载留言
-    const msgsRes = await fetch(`${API_URL}/api/messages`);
+    const msgsRes = await fetch(`${API_URL}?action=messages`);
     messages = await msgsRes.json();
     
     // 渲染留言板
@@ -609,7 +609,7 @@ async function loadData() {
 // 保存朋友数据
 async function saveFriends() {
   try {
-    await fetch(`${API_URL}/api/friends`, {
+    await fetch(`${API_URL}?action=friends`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(friends)
@@ -625,7 +625,7 @@ async function addMessage(name, text, time) {
   messages.push(msg);
   if (messages.length > 100) messages = messages.slice(-100);
   try {
-    await fetch(`${API_URL}/api/messages`, {
+    await fetch(`${API_URL}?action=messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(msg)
