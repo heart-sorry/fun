@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>游戏数据管理</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #f5f7fa 0%, #e4e8ec 100%);
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .container.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 开场帘子 */
+    .curtain {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .curtain.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(1.1);
+    }
+    .curtain-title {
+      font-size: 2rem;
+      color: #fff;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .curtain-hint {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+      animation: pulse 2s infinite;
+    }
+    .curtain-note {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+      margin-top: 30px;
+      text-align: center;
+      max-width: 280px;
+      line-height: 1.5;
+    }
+    .curtain-music {
+      position: absolute;
+      bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.9);
+      font-size: 0.8rem;
+    }
+    .curtain-music .dot {
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      border-radius: 50%;
+      animation: bounce 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    header h1 {
+      font-size: 1.5rem;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    header p {
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    /* 音乐播放器 */
+    .music-player {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .music-player:active { transform: scale(0.98); }
+    .music-player .play-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    .music-player .music-info {
+      flex: 1;
+      color: #fff;
+    }
+    .music-player .music-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .music-player .music-artist {
+      font-size: 0.7rem;
+      opacity: 0.85;
+    }
+    .music-player .music-time {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.7);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* 纪念日 */
+    .anniversary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+    .anniversary .a-title { font-size: 0.8rem; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .anniversary .a-countdown { font-size: 1.6rem; font-weight: 700; }
+    .anniversary .a-label { font-size: 0.6rem; opacity: 0.85; }
+
+    /* 默契问答 */
+    .quiz-section {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .quiz-section:active { transform: scale(0.98); }
+    .quiz-section .q-title { font-size: 0.9rem; margin-bottom: 4px; }
+    .quiz-section .q-desc { font-size: 0.65rem; opacity: 0.85; }
+
+    .search-box {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 12px 50px 12px 16px;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      outline: none;
+    }
+    .search-box input::placeholder { color: #aaa; }
+    .search-box .search-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .results { display: none; }
+    .results.active { display: block; }
+
+    .result-item {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      cursor: pointer;
+    }
+    .result-item .r-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .result-item .r-avatar { font-size: 1.4rem; }
+    .result-item .r-name { font-size: 0.9rem; font-weight: 600; color: #333; }
+    .result-item .r-tag { font-size: 0.6rem; color: #888; }
+    .result-item .r-preview { color: #666; font-size: 0.75rem; }
+
+    .not-found { display: none; text-align: center; padding: 20px; color: #888; }
+    .not-found.active { display: block; }
+
+    .hint {
+      text-align: center;
+      color: #999;
+      font-size: 0.7rem;
+      margin-top: 12px;
+    }
+
+    /* 留言板 */
+    .message-board {
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    .message-board .mb-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .message-board .mb-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      resize: none;
+      min-height: 60px;
+      font-family: inherit;
+      margin-bottom: 8px;
+    }
+    .message-board .mb-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .message-board .mb-name {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+    .message-board .mb-btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .message-board .mb-msgs {
+      margin-top: 16px;
+      border-top: 1px solid #eee;
+      padding-top: 12px;
+    }
+    .message-board .mb-msg {
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .message-board .mb-msg .msg-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #667eea;
+    }
+    .message-board .mb-msg .msg-text {
+      font-size: 0.8rem;
+      color: #555;
+      margin-top: 4px;
+    }
+    .message-board .mb-msg .msg-time {
+      font-size: 0.6rem;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    /* 秘密暗号 */
+    .secret-hint {
+      text-align: center;
+      margin-top: 20px;
+      padding: 12px;
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      border-radius: 12px;
+      color: #555;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    .secret-input { display: none; margin-top: 8px; }
+    .secret-input.active { display: block; }
+    .secret-input input {
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+
+    /* 弹窗 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px 20px;
+      max-width: 320px;
+      width: 100%;
+      text-align: center;
+    }
+    .modal .m-avatar { font-size: 2.4rem; margin-bottom: 4px; }
+    .modal .m-name { font-size: 1.1rem; font-weight: 600; color: #333; }
+    .modal .m-tag { font-size: 0.65rem; color: #888; margin-bottom: 14px; }
+    .modal .m-text { font-size: 0.85rem; color: #444; line-height: 1.7; text-align: left; }
+    .modal .close-btn {
+      margin-top: 18px;
+      padding: 10px 28px;
+      border: none;
+      border-radius: 25px;
+      background: #333;
+      color: #fff;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    /* 管理入口 */
+    .admin-link {
+      text-align: center;
+      margin-top: 32px;
+      opacity: 0.5;
+      font-size: 1rem;
+      color: #999;
+      cursor: pointer;
+      transition: opacity 0.3s;
+    }
+    .admin-link:hover {
+      opacity: 1;
+    }
+
+    /* 管理后台 */
+    .admin-panel {
+      display: none;
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .admin-panel.active { display: block; }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .admin-header h2 { font-size: 0.9rem; color: #333; }
+    .admin-header button {
+      padding: 4px 10px;
+      border: none;
+      border-radius: 8px;
+      background: #f5f5f5;
+      color: #666;
+      font-size: 0.65rem;
+    }
+
+    .friend-list { display: flex; flex-direction: column; gap: 6px; }
+    .friend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .friend-item .f-avatar { font-size: 1rem; }
+    .friend-item .f-name { flex: 1; font-size: 0.8rem; color: #333; }
+
+    .edit-form {
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 10px;
+    }
+    .edit-form.active { display: block; }
+    .edit-form input,
+    .edit-form textarea {
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: inherit;
+    }
+    .edit-form textarea { min-height: 40px; }
+    .edit-form .btns { display: flex; gap: 6px; }
+    .edit-form button {
+      flex: 1;
+      padding: 6px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+    .edit-form .save { background: #333; color: #fff; }
+    .edit-form .cancel { background: #ddd; color: #666; }
+
+    .export-btn {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #f0f0f0;
+      color: #666;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    /* 管理后台增强样式 */
+    .admin-section {
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    .admin-section h3 {
+      font-size: 0.85rem;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .admin-btn {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 6px;
+      background: #667eea;
+      color: #fff;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .admin-btn:hover { background: #5568d3; }
+    .admin-btn.danger {
+      background: #ff6b6b;
+    }
+    .admin-btn.danger:hover { background: #ff5252; }
+    
+    .msg-list {
+      max-height: 150px;
+      overflow-y: auto;
+      margin-bottom: 8px;
+    }
+    .msg-item {
+      padding: 6px;
+      background: #f9f9f9;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      font-size: 0.7rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .msg-item .msg-content {
+      flex: 1;
+    }
+    .msg-item .msg-name {
+      font-weight: 600;
+      color: #333;
+    }
+    .msg-item .msg-text {
+      color: #666;
+      margin-top: 2px;
+    }
+    .msg-item .delete-btn {
+      padding: 2px 6px;
+      background: #ff6b6b;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.65rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 开场帘子 -->
+<div class="curtain" id="curtain" onclick="openCurtain()">
+  <div class="curtain-title">💌 致我们</div>
+  <div class="curtain-hint">点击进入</div>
+  <div class="curtain-note">🎵 点击即入场，音乐将自动播放<br>如加载缓慢请耐心等待片刻<br>让我们一起开启这段回忆之旅...</div>
+  <div class="curtain-music">
+    <div class="dot"></div>
+    <span>音乐加载中...</span>
+  </div>
+</div>
+
+<div class="container" id="mainContainer">
+  <header>
+    <h1>游戏数据管理</h1>
+    <p>朋友管理和数据同步</p>
+  </header>
+
+  <!-- 音乐播放器 -->
+  <div class="music-player" onclick="toggleMusic()">
+    <div class="play-btn" id="playBtn">▶</div>
+    <div class="music-info">
+      <div class="music-title" id="musicTitle">点击播放音乐</div>
+      <div class="music-artist">背景音乐 · 如加载缓慢请耐心等待 🎵</div>
+    </div>
+    <div class="music-time" id="musicTime">0:00</div>
+  </div>
+
+  <!-- 纪念日 -->
+  <div class="anniversary">
+    <div class="a-title" id="anniversaryTitle">🎄 距离纪念日还有</div>
+    <div class="a-countdown" id="countdown">--</div>
+    <div class="a-label">天</div>
+  </div>
+
+  <!-- MBTI 测试 -->
+  <div class="quiz-section" onclick="startQuiz()">
+    <div class="q-title">🧠 MBTI 测试</div>
+    <div class="q-desc">20道题测出你的MBTI，和朋友对比默契度</div>
+  </div>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="搜索名字..." autocomplete="off">
+    <button class="search-btn" onclick="doSearch()">🔍</button>
+  </div>
+
+  <div class="results" id="results"></div>
+  <div class="not-found" id="notFound">
+    <p>没有找到这个人哦</p>
+  </div>
+
+  <div class="hint" id="hint"></div>
+
+  <!-- 留言板已移除 -->
+
+  <!-- 秘密暗号 -->
+  <div class="secret-hint" onclick="toggleSecret()">
+    💫 输入秘密暗号解锁惊喜
+    <div class="secret-input" id="secretInput">
+      <input type="text" id="secretCode" placeholder="输入暗号..." onkeypress="checkSecret(event)">
+    </div>
+  </div>
+
+  <!-- 管理后台 -->
+  <div class="admin-panel" id="adminPanel">
+    <div class="admin-header">
+      <h2>🛠️ 管理后台</h2>
+      <button onclick="logoutAdmin()">退出</button>
+    </div>
+    
+    <!-- 纪念日设置 -->
+    <div class="admin-section">
+      <h3>📅 纪念日设置</h3>
+      <input type="date" id="adminAnniversary" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.8rem">
+      <button class="admin-btn" onclick="saveAnniversary()">保存纪念日</button>
+    </div>
+    
+    <!-- 留言管理 -->
+    <div class="admin-section">
+      <h3>💬 留言管理 <span id="msgCount"></span></h3>
+      <div class="msg-list" id="msgList"></div>
+      <button class="admin-btn danger" onclick="clearAllMessages()">🗑️ 清空所有留言</button>
+    </div>
+    
+    <!-- 朋友管理 -->
+    <div class="admin-section">
+      <h3>👥 朋友管理</h3>
+      <div class="friend-list" id="friendList"></div>
+      <button class="admin-btn" onclick="addNewFriend()">➕ 添加朋友</button>
+    </div>
+    
+    <!-- 编辑表单 -->
+    <div class="edit-form" id="editForm">
+      <h3 id="editTitle">编辑朋友</h3>
+      <input type="hidden" id="editIndex">
+      <input type="text" id="editAvatar" placeholder="头像（ emoji）">
+      <input type="text" id="editName" placeholder="名字">
+      <input type="text" id="editTag" placeholder="标签">
+      <input type="date" id="editMeetDate">
+      <input type="text" id="editSecretCode" placeholder="暗号">
+      <textarea id="editMessage" placeholder="公开消息"></textarea>
+      <textarea id="editSecretMessage" placeholder="暗号消息"></textarea>
+      <div class="btns">
+        <button class="save" onclick="saveFriend()">保存</button>
+        <button class="cancel" onclick="cancelEdit()">取消</button>
+      </div>
+      <button class="admin-btn danger" id="deleteFriendBtn" onclick="deleteFriend()">🗑️ 删除此朋友</button>
+    </div>
+    
+    <!-- 数据操作 -->
+    <div class="admin-section">
+      <h3>⚙️ 数据操作</h3>
+      <button class="admin-btn" onclick="copyAllData()">📋 导出所有数据</button>
+      <button class="admin-btn danger" onclick="resetAllData()">⚠️ 重置所有数据</button>
+    </div>
+  </div>
+
+  <div class="admin-link" id="adminLink" onclick="showAdmin()">.</div>
+</div>
+
+<!-- 弹窗 -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="m-avatar" id="m-avatar"></div>
+    <div class="m-name" id="m-name"></div>
+    <div class="m-tag" id="m-tag"></div>
+    <div class="m-text" id="m-text"></div>
+    <button class="close-btn" onclick="document.getElementById('modal').classList.remove('active')">收到</button>
+  </div>
+</div>
+
+<!-- 秘密弹窗 -->
+<div class="modal-overlay" id="secretModal" onclick="closeSecret(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="m-avatar" id="s-emoji">🎁</div>
+    <div class="m-name" id="s-title">惊喜时刻！</div>
+    <div class="m-text" id="s-text"></div>
+    <button class="close-btn" onclick="document.getElementById('secretModal').classList.remove('active')">太棒了</button>
+  </div>
+</div>
+
+<!-- 默契问答弹窗 -->
+<div class="modal-overlay" id="quizModal">
+  <div class="modal">
+    <div class="q-number" id="qNumber" style="font-size:0.7rem;color:#888;margin-bottom:8px">第 1/5 题</div>
+    <div class="q-text" id="qText" style="font-size:1rem;color:#333;margin-bottom:16px;font-weight:600">问题内容</div>
+    <div class="options" id="qOptions"></div>
+    <button class="close-q" onclick="closeQuiz()" style="margin-top:14px;width:100%;padding:8px;border:none;border-radius:8px;background:#f0f0f0;color:#666;cursor:pointer">关闭</button>
+  </div>
+</div>
+
+<script>
+// 数据（本地存储 + GitHub Gist 跨设备同步）
+let friends = [];
+let messages = [];
+let settings = {
+  anniversaryDate: '2025-12-25'  // 默认纪念日
+};
+
+// Cloudflare Worker API（真正的后端服务）
+const WORKER_URL = 'https://fun.3575766578.workers.dev';
+
+// 默认朋友数据
+const DEFAULT_FRIENDS = [
+  { avatar: "🌟", name: "朋友A", tag: "最好的朋友", message: "（搜索显示的话）", meetDate: "2024-01-01", secretCode: "暗号A", secretMessage: "（暗号专属的悄悄话）" },
+  { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（搜索显示的话）", meetDate: "2023-06-15", secretCode: "暗号B", secretMessage: "（暗号专属的悄悄话）" }
+];
+
+// 从 Worker 加载数据
+async function loadFromGist() {
+  try {
+    const response = await fetch(`${WORKER_URL}/api/data`);
+    if (!response.ok) return null;
+    const content = await response.json();
+    return content;
+  } catch (e) {
+    console.log('Worker 加载失败:', e);
+    return null;
+  }
+}
+
+// 保存数据到 Worker
+async function saveToGist(data) {
+  try {
+    const response = await fetch(`${WORKER_URL}/api/data`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    return response.ok;
+  } catch (e) {
+    console.log('Worker 保存失败:', e);
+    return false;
+  }
+}
+
+// 加载数据（优先从 Gist 同步，失败则用本地存储）
+async function loadData() {
+  try {
+    // 先尝试从 Gist 加载
+    const gistData = await loadFromGist();
+    
+    if (gistData) {
+      friends = gistData.friends || DEFAULT_FRIENDS;
+      messages = gistData.messages || [];
+      settings = gistData.settings || settings;
+      
+      // 保存到本地作为备份
+      localStorage.setItem('fun_friends', JSON.stringify(friends));
+      localStorage.setItem('fun_messages', JSON.stringify(messages));
+      localStorage.setItem('fun_settings', JSON.stringify(settings));
+    } else {
+      // Gist 失败，用本地存储
+      const savedFriends = localStorage.getItem('fun_friends');
+      const savedMessages = localStorage.getItem('fun_messages');
+      const savedSettings = localStorage.getItem('fun_settings');
+      friends = savedFriends ? JSON.parse(savedFriends) : DEFAULT_FRIENDS;
+      messages = savedMessages ? JSON.parse(savedMessages) : [];
+      settings = savedSettings ? JSON.parse(savedSettings) : settings;
+    }
+    
+    updateAnniversary();
+    renderMessages();
+  } catch (e) {
+    console.log('加载数据失败，使用默认数据');
+    friends = DEFAULT_FRIENDS;
+    messages = [];
+    updateAnniversary();
+    renderMessages();
+  }
+}
+
+// 保存所有数据（到本地 + Gist）
+async function saveAllData() {
+  const data = { friends, messages, settings };
+  localStorage.setItem('fun_friends', JSON.stringify(friends));
+  localStorage.setItem('fun_messages', JSON.stringify(messages));
+  localStorage.setItem('fun_settings', JSON.stringify(settings));
+  await saveToGist(data);
+}
+
+// 保存朋友数据（到本地 + Gist）
+async function saveFriends() {
+  await saveAllData();
+}
+
+// 添加留言（到本地 + Gist）
+async function addMessage(name, text, time) {
+  const msg = { name, text, time };
+  messages.push(msg);
+  if (messages.length > 100) messages = messages.slice(-100);
+  await saveAllData();
+}
+
+// 渲染留言板
+function renderMessages() {
+  const msgs = document.getElementById('mbMsgs');
+  msgs.innerHTML = messages.map(m => `
+    <div class="mb-msg">
+      <div class="msg-name">${m.name}</div>
+      <div class="msg-text">${m.text}</div>
+      <div class="msg-time">${m.time}</div>
+    </div>
+  `).join('');
+}
+
+// 页面加载时获取数据
+loadData();
+
+// 纪念日
+const ANNIVERSARY_DATE = "2025-12-25";
+
+// 默契问答
+const quizQuestions = [
+  // E/I 维度（外向-内向）
+  { q: "周末你更喜欢？", options: ["和朋友一起出去玩", "一个人安静待着"] },
+  { q: "在聚会上你通常会？", options: ["主动和陌生人聊天", "只和认识的人交流"] },
+  { q: "独处一天后，你感觉？", options: ["有点无聊，想找人说话", "精力充沛，充电完成"] },
+  { q: "你更喜欢什么样的工作环境？", options: ["热闹的团队协作", "安静的独立思考"] },
+  { q: "和朋友聊天时，你更多是？", options: ["说很多，分享想法", "倾听为主，默默陪伴"] },
+  
+  // S/N 维度（实际-直觉）
+  { q: "你看重的是？", options: ["具体的事实和数据", "未来的可能性"] },
+  { q: "读小说时你更在意？", options: ["情节怎么发展的", "背后有什么含义"] },
+  { q: "面对新项目，你更关注？", options: ["具体的执行步骤", "整体的创意和愿景"] },
+  { q: "你更擅长记住？", options: ["具体的细节和事实", "抽象的概念和联系"] },
+  { q: "解决问题时你习惯？", options: ["用已有经验方法", "尝试全新的方式"] },
+  
+  // T/F 维度（理性-感性）
+  { q: "做重要决定时，你更看重？", options: ["客观的逻辑和分析", "内心的感受和价值观"] },
+  { q: "朋友向你抱怨烦恼时，你更想说？", options: ["我来帮你分析问题", "我能理解你的感受"] },
+  { q: "你觉得什么更重要？", options: ["公平和原则", "和谐和关系"] },
+  { q: "当你不同意别人的观点时？", options: ["直接说出来", "委婉地表达"] },
+  { q: "你更容易被什么打动？", options: ["有道理的分析", "真诚的情感表达"] },
+  
+  // J/P 维度（判断-灵活）
+  { q: "你更喜欢提前计划还是随机应变？", options: ["提前计划好一切", "随性而为，看情况"] },
+  { q: "你的房间/桌面一般？", options: ["整洁有序，井井有条", "有点乱，但自己知道在哪"] },
+  { q: "出门旅行你通常？", options: ["提前订好所有行程", "走一步看一步"] },
+  { q: "面对最后期限的态度？", options: ["必须按时完成", "晚一点也没关系"] },
+  { q: "你更喜欢的生活是？", options: ["按部就班，有确定性", "灵活自由，充满新鲜感"] }
+];
+
+// 背景音乐 - 鸟之诗八音盒版
+const musicUrl = "./music.mp3";
+
+const ADMIN_PASSWORD = "5201314";
+
+const searchInput = document.getElementById('searchInput');
+const resultsEl = document.getElementById('results');
+const notFoundEl = document.getElementById('notFound');
+const adminPanel = document.getElementById('adminPanel');
+const hintEl = document.getElementById('hint');
+
+// 音频
+let audio = new Audio();
+audio.src = musicUrl;
+audio.loop = true;
+audio.preload = 'auto';
+audio.load(); // 立即开始加载
+let isPlaying = false;
+let curtainOpened = false;
+
+audio.onerror = () => {
+  document.getElementById('musicTitle').textContent = '音乐加载失败';
+};
+
+audio.oncanplay = () => {
+  document.getElementById('musicTitle').textContent = '点击播放音乐 🎵';
+  // 更新帘子上的文字
+  const musicNote = document.querySelector('.curtain-music span');
+  if (musicNote) musicNote.textContent = '🎵 音乐已就绪';
+};
+
+// 每秒更新一次时间
+let lastTime = 0;
+audio.ontimeupdate = () => {
+  if (!isPlaying) return;
+  const now = Date.now();
+  if (now - lastTime < 1000) return;
+  lastTime = now;
+  const m = Math.floor(audio.currentTime / 60);
+  const s = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
+  document.getElementById('musicTime').textContent = `${m}:${s}`;
+};
+
+// 拉开帘子
+function openCurtain() {
+  if (curtainOpened) return;
+  curtainOpened = true;
+  
+  // 播放音乐
+  audio.play().then(() => {
+    isPlaying = true;
+    document.getElementById('playBtn').textContent = '⏸';
+    document.getElementById('musicTitle').textContent = '🎵 鸟之诗';
+  }).catch(() => {
+    // 播放失败，静默处理
+  });
+  
+  // 隐藏帘子
+  document.getElementById('curtain').classList.add('hidden');
+  
+  // 显示内容
+  setTimeout(() => {
+    document.getElementById('mainContainer').classList.add('visible');
+  }, 300);
+}
+
+function toggleMusic() {
+  if (isPlaying) {
+    audio.pause();
+    document.getElementById('playBtn').textContent = '▶';
+    document.getElementById('musicTitle').textContent = '点击播放音乐 🎵';
+    isPlaying = false;
+  } else {
+    audio.play().then(() => {
+      document.getElementById('playBtn').textContent = '⏸';
+      document.getElementById('musicTitle').textContent = '🎵 鸟之诗';
+      isPlaying = true;
+    }).catch(() => {
+      document.getElementById('musicTitle').textContent = '点击重试播放';
+    });
+  }
+}
+
+// 搜索防抖
+function debounce(fn, delay = 200) {
+  let timer = null;
+  return function(...args) {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+// 计算相识天数（缓存）
+const daysCache = new Map();
+function getDays(dateStr) {
+  if (!dateStr) return 0;
+  if (daysCache.has(dateStr)) return daysCache.get(dateStr);
+  const meet = new Date(dateStr);
+  const today = new Date();
+  const diff = Math.floor((today - meet) / 86400000);
+  const result = diff > 0 ? diff : 0;
+  daysCache.set(dateStr, result);
+  return result;
+}
+
+// 纪念日倒计时
+function initAnniversary() {
+  const target = new Date(ANNIVERSARY_DATE);
+  const today = new Date();
+  const diff = Math.floor((target - today) / 86400000);
+  document.getElementById('countdown').textContent = diff > 0 ? diff : 0;
+}
+initAnniversary();
+
+// 搜索函数（供按钮和回车调用）
+function doSearch() {
+  const query = searchInput.value.trim();
+  
+  if (!query) {
+    hintEl.style.display = 'block';
+    return;
+  }
+  
+  // 管理员密码
+  if (query === ADMIN_PASSWORD) {
+    showAdmin();
+    searchInput.value = '';
+    return;
+  }
+  
+  // 搜索朋友
+  const match = friends.find(f => f.name.toLowerCase().includes(query.toLowerCase()));
+  if (match) {
+    openModal(friends.indexOf(match));
+    searchInput.value = '';
+  } else {
+    notFoundEl.classList.add('active');
+    hintEl.style.display = 'none';
+    // 3秒后自动隐藏
+    setTimeout(() => {
+      notFoundEl.classList.remove('active');
+      if (friends.length > 0) {
+        hintEl.style.display = 'block';
+      }
+    }, 3000);
+  }
+}
+
+// 搜索框输入时隐藏列表
+searchInput.addEventListener('input', (e) => {
+  const query = e.target.value.trim();
+  
+  if (!query) {
+    resultsEl.classList.remove('active');
+    notFoundEl.classList.remove('active');
+    hintEl.style.display = 'block';
+    return;
+  }
+  
+  // 输入时隐藏列表，只有点击搜索按钮或按回车时才搜索
+  resultsEl.classList.remove('active');
+  notFoundEl.classList.remove('active');
+});
+
+// 按回车搜索
+searchInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    doSearch();
+  }
+});
+
+// 弹窗
+function openModal(i) {
+  const f = friends[i];
+  document.getElementById('m-avatar').textContent = f.avatar;
+  document.getElementById('m-name').textContent = f.name;
+  document.getElementById('m-tag').textContent = f.tag + (f.meetDate ? ' · 认识' + getDays(f.meetDate) + '天' : '');
+  document.getElementById('m-text').textContent = f.message;
+  document.getElementById('modal').classList.add('active');
+}
+
+function closeModal(e) {
+  if (e.target.id === 'modal') document.getElementById('modal').classList.remove('active');
+}
+
+// 秘密暗号
+function toggleSecret() {
+  document.getElementById('secretInput').classList.toggle('active');
+}
+
+function checkSecret(e) {
+  if (e.key === 'Enter') {
+    const code = document.getElementById('secretCode').value.trim();
+    const matchedFriend = friends.find(f => f.secretCode && f.secretCode === code);
+    if (matchedFriend) {
+      document.getElementById('s-emoji').textContent = matchedFriend.avatar;
+      document.getElementById('s-title').textContent = matchedFriend.name + '的专属惊喜！';
+      document.getElementById('s-text').textContent = matchedFriend.secretMessage || matchedFriend.message || "你找到了我们的秘密暗号！";
+      document.getElementById('secretModal').classList.add('active');
+      document.getElementById('secretInput').classList.remove('active');
+      document.getElementById('secretCode').value = '';
+    } else if (code === ADMIN_PASSWORD) {
+      showAdmin();
+      document.getElementById('secretInput').classList.remove('active');
+      document.getElementById('secretCode').value = '';
+    } else {
+      alert('暗号不对哦～再想想？');
+    }
+  }
+}
+
+function closeSecret(e) {
+  if (e.target.id === 'secretModal') document.getElementById('secretModal').classList.remove('active');
+}
+
+// 默契问答
+let currentQ = 0;
+let answers = [];
+
+function startQuiz() {
+  currentQ = 0;
+  answers = [];
+  showQuestion();
+  document.getElementById('quizModal').classList.add('active');
+}
+
+function showQuestion() {
+  const q = quizQuestions[currentQ];
+  const dimNames = ['E/I 外向-内向', 'S/N 实际-直觉', 'T/F 理性-感性', 'J/P 判断-灵活'];
+  const dim = Math.floor(currentQ / 5);
+  document.getElementById('qNumber').textContent = `第 ${currentQ + 1}/${quizQuestions.length} 题 · ${dimNames[dim]}`;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('qOptions').innerHTML = q.options.map((opt, i) => 
+    `<div class="option" onclick="selectOption(${i})" style="padding:12px;border:2px solid #eee;border-radius:10px;text-align:center;cursor:pointer;margin-bottom:8px;transition:all 0.2s">${opt}</div>`
+  ).join('');
+}
+
+function selectOption(i) {
+  answers.push(i);
+  if (currentQ < quizQuestions.length - 1) {
+    currentQ++;
+    showQuestion();
+  } else {
+    // 计算 MBTI
+    const mbti = calculateMBTI(answers);
+    const match = compareMBTI(mbti, userMBTI);
+    
+    const mbtiDesc = {
+      'INTJ': '建筑师', 'INTP': '逻辑学家', 'ENTJ': '指挥官', 'ENTP': '辩论家',
+      'INFJ': '提倡者', 'INFP': '调停者', 'ENFJ': '主人公', 'ENFP': '竞选者',
+      'ISTJ': '物流师', 'ISFJ': '守卫者', 'ESTJ': '总经理', 'ESFJ': '执政官',
+      'ISTP': '鉴赏家', 'ISFP': '探险家', 'ESTP': '企业家', 'ESFP': '表演者'
+    };
+    
+    const yourType = mbtiDesc[mbti] || '';
+    const friendType = mbtiDesc[userMBTI] || '';
+    const matchDesc = getMatchDescription(match, mbti, userMBTI, yourType, friendType);
+    
+    document.getElementById('qText').textContent = `你的MBTI: ${mbti} ${yourType}`;
+    document.getElementById('qOptions').innerHTML = `
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2rem;margin-bottom:12px">${match}%</div>
+        <div style="font-size:0.85rem;color:#666;margin-bottom:16px">${matchDesc}</div>
+        <div style="font-size:0.75rem;color:#888;padding:12px;background:#f5f5f5;border-radius:8px">
+          <div>你的类型: <b>${mbti}</b> (${yourType})</div>
+          <div style="margin-top:6px">对方的类型: <b>${userMBTI}</b> (${friendType})</div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function calculateMBTI(answers) {
+  // 每个维度取多数票: 前5题E/I, 中5题S/N, 后5题T/F, 最后5题J/P
+  // 选第一个选项多 -> E/S/T/J, 选第二个多 -> I/N/F/P
+  const e = answers.slice(0, 5).filter(a => a === 0).length;
+  const s = answers.slice(5, 10).filter(a => a === 0).length;
+  const t = answers.slice(10, 15).filter(a => a === 0).length;
+  const j = answers.slice(15, 20).filter(a => a === 0).length;
+  
+  return (e >= 3 ? 'E' : 'I') + (s >= 3 ? 'S' : 'N') + (t >= 3 ? 'T' : 'F') + (j >= 3 ? 'J' : 'P');
+}
+
+function compareMBTI(yourMBTI, friendMBTI) {
+  // 计算四个维度匹配的百分比
+  let match = 0;
+  for (let i = 0; i < 4; i++) {
+    if (yourMBTI[i] === friendMBTI[i]) match += 25;
+  }
+  return match;
+}
+
+function getMatchDescription(match, yourMBTI, friendMBTI, yourType, friendType) {
+  if (match === 100) return `完全相同！🎉 你们是完美搭档，性格高度一致！`;
+  if (match >= 75) return `高度契合！😊 你们在${match/4}个维度相同，非常默契～`;
+  if (match >= 50) return `部分契合 🤔 你们有${match/4}个维度相同，各有千秋～`;
+  if (match >= 25) return `互补型 💫 你们在${match/4}个维度不同，恰好互补～`;
+  return `完全互补！🌟 你们性格完全相反，却是最佳拍档！`;
+}
+
+// 你的MBTI类型（可从管理后台修改）
+const userMBTI = "ISTP";
+
+function closeQuiz() {
+  document.getElementById('quizModal').classList.remove('active');
+}
+
+// 留言板
+function submitMessage() {
+  const name = document.getElementById('msgName').value.trim();
+  const text = document.getElementById('msgText').value.trim();
+  
+  if (!name || !text) {
+    alert('请填写名字和留言～');
+    return;
+  }
+  
+  const now = new Date();
+  const time = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
+  
+  // 添加留言
+  addMessage(name, text, time);
+  
+  // 重新渲染留言板
+  renderMessages();
+  
+  // 清空输入
+  document.getElementById('msgName').value = '';
+  document.getElementById('msgText').value = '';
+  
+  alert('留言成功！💕');
+}
+
+// 管理后台 - 需要密码
+function showAdmin() {
+  const password = prompt('请输入管理员密码：');
+  if (password !== '5201314') {
+    if (password !== null) {
+      alert('密码错误！');
+    }
+    return;
+  }
+  
+  searchInput.value = '';
+  resultsEl.classList.remove('active');
+  notFoundEl.classList.remove('active');
+  hintEl.style.display = 'none';
+  adminPanel.classList.add('active');
+  
+  // 加载设置
+  document.getElementById('adminAnniversary').value = settings.anniversaryDate;
+  
+  renderFriends();
+  renderMessagesAdmin();
+}
+
+function logoutAdmin() {
+  adminPanel.classList.remove('active');
+  hintEl.style.display = 'block';
+  document.getElementById('editForm').classList.remove('active');
+}
+
+// 渲染留言管理列表
+function renderMessagesAdmin() {
+  const list = document.getElementById('msgList');
+  document.getElementById('msgCount').textContent = `(${messages.length}条)`;
+  
+  if (messages.length === 0) {
+    list.innerHTML = '<p style="font-size:0.75rem;color:#999;text-align:center;padding:10px">暂无留言</p>';
+    return;
+  }
+  
+  list.innerHTML = messages.map((m, i) => `
+    <div class="msg-item">
+      <div class="msg-content">
+        <div class="msg-name">${escapeHtml(m.name)}</div>
+        <div class="msg-text">${escapeHtml(m.text)}</div>
+      </div>
+      <button class="delete-btn" onclick="deleteMessage(${i})">删除</button>
+    </div>
+  `).join('');
+}
+
+// HTML 转义
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// 删除单条留言
+async function deleteMessage(index) {
+  if (!confirm('确定删除这条留言？')) return;
+  messages.splice(index, 1);
+  await saveAllData();
+  renderMessagesAdmin();
+  renderMessages();
+}
+
+// 清空所有留言
+async function clearAllMessages() {
+  if (!confirm('确定清空所有留言？此操作不可恢复！')) return;
+  messages = [];
+  await saveAllData();
+  renderMessagesAdmin();
+  renderMessages();
+  alert('已清空所有留言！');
+}
+
+// 保存纪念日
+async function saveAnniversary() {
+  const date = document.getElementById('adminAnniversary').value;
+  if (!date) {
+    alert('请选择日期！');
+    return;
+  }
+  settings.anniversaryDate = date;
+  await saveAllData();
+  updateAnniversary();
+  alert('纪念日已更新！🎉');
+}
+
+// 更新纪念日显示
+function updateAnniversary() {
+  const countdownEl = document.getElementById('countdown');
+  const titleEl = document.getElementById('anniversaryTitle');
+  if (!countdownEl) return;
+  
+  const target = new Date(settings.anniversaryDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  target.setHours(0, 0, 0, 0);
+  
+  const diff = target - today;
+  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+  
+  countdownEl.textContent = days;
+  
+  if (days > 0) {
+    titleEl.textContent = `🎄 距离纪念日还有`;
+  } else if (days === 0) {
+    titleEl.textContent = '🎉 今天就是纪念日！';
+    countdownEl.textContent = '🎊';
+  } else {
+    titleEl.textContent = `🎄 纪念日已过`;
+    countdownEl.textContent = Math.abs(days);
+  }
+}
+
+// 渲染朋友列表
+function renderFriends() {
+  document.getElementById('friendList').innerHTML = friends.map((f, i) => `
+    <div class="friend-item" onclick="editFriend(${i})">
+      <span class="f-avatar">${f.avatar}</span>
+      <span class="f-name">${f.name}</span>
+      <span style="font-size:0.65rem;color:#999">${f.tag}</span>
+    </div>
+  `).join('');
+}
+
+// 添加新朋友
+function addNewFriend() {
+  document.getElementById('editTitle').textContent = '添加朋友';
+  document.getElementById('editIndex').value = -1;
+  document.getElementById('editAvatar').value = '👤';
+  document.getElementById('editName').value = '';
+  document.getElementById('editTag').value = '';
+  document.getElementById('editMeetDate').value = '';
+  document.getElementById('editSecretCode').value = '';
+  document.getElementById('editMessage').value = '';
+  document.getElementById('editSecretMessage').value = '';
+  document.getElementById('editForm').classList.add('active');
+  document.getElementById('deleteFriendBtn').style.display = 'none';
+}
+
+// 编辑朋友
+function editFriend(i) {
+  const f = friends[i];
+  document.getElementById('editTitle').textContent = '编辑朋友';
+  document.getElementById('editIndex').value = i;
+  document.getElementById('editAvatar').value = f.avatar;
+  document.getElementById('editName').value = f.name;
+  document.getElementById('editTag').value = f.tag;
+  document.getElementById('editMeetDate').value = f.meetDate || '';
+  document.getElementById('editSecretCode').value = f.secretCode || '';
+  document.getElementById('editMessage').value = f.message || '';
+  document.getElementById('editSecretMessage').value = f.secretMessage || '';
+  document.getElementById('editForm').classList.add('active');
+  document.getElementById('deleteFriendBtn').style.display = 'block';
+}
+
+// 保存朋友
+async function saveFriend() {
+  const i = parseInt(document.getElementById('editIndex').value);
+  const newFriend = {
+    avatar: document.getElementById('editAvatar').value || '👤',
+    name: document.getElementById('editName').value || '未命名',
+    tag: document.getElementById('editTag').value || '',
+    meetDate: document.getElementById('editMeetDate').value || '',
+    secretCode: document.getElementById('editSecretCode').value || '',
+    message: document.getElementById('editMessage').value || '',
+    secretMessage: document.getElementById('editSecretMessage').value || ''
+  };
+  
+  if (i === -1) {
+    friends.push(newFriend);
+  } else {
+    friends[i] = newFriend;
+  }
+  
+  cancelEdit();
+  renderFriends();
+  await saveFriends();
+  alert('保存成功！✅');
+}
+
+// 删除朋友
+async function deleteFriend() {
+  const i = parseInt(document.getElementById('editIndex').value);
+  if (i === -1) return;
+  if (!confirm('确定删除这个朋友？')) return;
+  
+  friends.splice(i, 1);
+  cancelEdit();
+  renderFriends();
+  await saveFriends();
+  alert('已删除！');
+}
+
+function cancelEdit() {
+  document.getElementById('editForm').classList.remove('active');
+}
+
+// 导出所有数据
+function copyAllData() {
+  const data = {
+    friends,
+    messages,
+    settings
+  };
+  navigator.clipboard.writeText(JSON.stringify(data, null, 2)).then(() => {
+    alert('✅ 数据已复制到剪贴板！');
+  });
+}
+
+// 重置所有数据
+async function resetAllData() {
+  if (!confirm('⚠️ 确定重置所有数据？\n这将清空所有朋友、留言和设置！\n此操作不可恢复！')) return;
+  if (!confirm('最后一次确认！所有数据将丢失！')) return;
+  
+  friends = DEFAULT_FRIENDS;
+  messages = [];
+  settings = { anniversaryDate: '2025-12-25' };
+  await saveAllData();
+  updateAnniversary();
+  renderMessages();
+  renderFriends();
+  renderMessagesAdmin();
+  document.getElementById('adminAnniversary').value = settings.anniversaryDate;
+  alert('已重置所有数据！');
+}
+</script>
+</body>
+</html>
