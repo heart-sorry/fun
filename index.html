@@ -147,6 +147,80 @@
       text-align: right;
     }
 
+    /* 时段问候语 */
+    .greeting-bar {
+      background: linear-gradient(90deg, #ffecd2 0%, #fcb69f 100%);
+      border-radius: 14px;
+      padding: 12px 18px;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+      color: #7a4a2a;
+      font-weight: 500;
+      text-align: center;
+      min-height: 24px;
+    }
+
+    /* 心情记录 */
+    .mood-section {
+      background: linear-gradient(135deg, #f8f9ff 0%, #e8f4fd 100%);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      border: 1px solid #e0e8ff;
+    }
+    .mood-label {
+      font-size: 0.78rem;
+      color: #888;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mood-choices {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .mood-btn {
+      font-size: 1.5rem;
+      background: #fff;
+      border: 2px solid #e0e0e0;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mood-btn:hover { transform: scale(1.15); border-color: #f8a5c2; }
+    .mood-btn.selected { border-color: #f8a5c2; background: #fff0f5; transform: scale(1.1); }
+    .mood-today {
+      font-size: 0.8rem;
+      color: #f093fb;
+      font-weight: 600;
+      margin-bottom: 8px;
+      min-height: 18px;
+    }
+    .mood-history {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .mood-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid #e0e0e0;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     /* 纪念日 */
     .anniversary {
       background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -516,6 +590,17 @@
     <p>致我们共同的回忆</p>
   </header>
 
+  <!-- 时段问候语 -->
+  <div class="greeting-bar" id="greetingBar"></div>
+
+  <!-- 心情记录 -->
+  <div class="mood-section" id="moodSection">
+    <div class="mood-label">✨ 今天的心情</div>
+    <div class="mood-choices" id="moodChoices"></div>
+    <div class="mood-today" id="moodToday"></div>
+    <div class="mood-history" id="moodHistory"></div>
+  </div>
+
   <!-- 音乐播放器 -->
   <div class="music-player" onclick="toggleMusic()">
     <div class="play-btn" id="playBtn">▶</div>
@@ -650,6 +735,104 @@ const GIST_RAW = `https://gist.githubusercontent.com/heart-sorry/${GIST_ID}/raw/
 function getPending() {
   try { return JSON.parse(localStorage.getItem('msgs_pending') || '[]'); }
   catch { return []; }
+}
+
+// ==================== 时段问候语 ====================
+const GREETINGS = [
+  { after: 23, text: '夜深了，早点休息哦 🌙' },
+  { after: 21, text: '晚安💤' },
+  { after: 18, text: '傍晚好，吃了吗？🍽️' },
+  { after: 14, text: '下午好，辛苦了 ☕' },
+  { after: 11, text: '中午好，吃饱了吗 🍜' },
+  { after: 8,  text: '上午好 ☀️' },
+  { after: 6,  text: '早安，又是新的一天 🌅' },
+  { after: 0,  text: '你好呀 👋' }
+];
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  for (const g of GREETINGS) {
+    if (hour >= g.after) return g.text;
+  }
+  return '你好呀 👋';
+}
+
+function showGreeting() {
+  const bar = document.getElementById('greetingBar');
+  if (!bar) return;
+  const day = new Date().getDate();
+  bar.textContent = getGreeting() + ' · ' + ['日','一','二','三','四','五','六'][new Date().getDay()] + '曜日';
+}
+
+// ==================== 心情记录 ====================
+const MOODS = [
+  { emoji: '😊', label: '开心' },
+  { emoji: '🥰', label: '心动' },
+  { emoji: '😢', label: '难过' },
+  { emoji: '😡', label: '生气' },
+  { emoji: '😴', label: '疲惫' },
+  { emoji: '🤔', label: '思考' },
+  { emoji: '😎', label: '得意' },
+  { emoji: '🥳', label: '兴奋' }
+];
+
+function getMoodData() {
+  try { return JSON.parse(localStorage.getItem('mood_data') || '{}'); }
+  catch { return {}; }
+}
+
+function saveMoodData(data) {
+  localStorage.setItem('mood_data', JSON.stringify(data));
+}
+
+function getTodayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
+function showMood() {
+  const section = document.getElementById('moodSection');
+  const choices = document.getElementById('moodChoices');
+  const today = document.getElementById('moodToday');
+  const history = document.getElementById('moodHistory');
+  if (!section || !choices) return;
+
+  const data = getMoodData();
+  const todayKey = getTodayKey();
+
+  // 渲染心情选项
+  choices.innerHTML = MOODS.map((m, i) =>
+    `<button class="mood-btn${data[todayKey] === i ? ' selected' : ''}" onclick="recordMood(${i})" title="${m.label}">${m.emoji}</button>`
+  ).join('');
+
+  // 今天已记录
+  if (data[todayKey] !== undefined) {
+    today.textContent = `今天：${MOODS[data[todayKey]].emoji} ${MOODS[data[todayKey]].label}`;
+  } else {
+    today.textContent = '';
+  }
+
+  // 最近7天历史
+  const days = [];
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+    const mood = MOODS[data[key]] || null;
+    days.push({ key, mood, day: ['日','一','二','三','四','五','六'][d.getDay()] });
+  }
+  history.innerHTML = days.map(d =>
+    d.mood
+      ? `<div class="mood-dot" title="${d.key}">${d.mood.emoji}<br><span style="font-size:0.55rem">${d.day}</span></div>`
+      : `<div class="mood-dot" style="opacity:0.3" title="${d.key}"><span style="font-size:0.6rem">${d.day}</span></div>`
+  ).join('');
+}
+
+function recordMood(index) {
+  const data = getMoodData();
+  data[getTodayKey()] = index;
+  saveMoodData(data);
+  showMood();
 }
 function setPending(list) {
   localStorage.setItem('msgs_pending', JSON.stringify(list));
@@ -877,6 +1060,8 @@ function openCurtain() {
   // 显示内容
   setTimeout(() => {
     document.getElementById('mainContainer').classList.add('visible');
+    showGreeting();
+    showMood();
   }, 300);
 }
 
