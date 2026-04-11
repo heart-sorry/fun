@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>留言板 API</title>
+</head>
+<body>
+<script>
+// 致我们 - 留言板 Gist API 代理
+// Gist ID: 70e5eee6b9ac06d27956f639a6efb9e3
+const GIST_ID = '70e5eee6b9ac06d27956f639a6efb9e3';
+const GIST_FILE = 'messages.json';
+const RAW_URL = 'https://gist.githubusercontent.com/heart-sorry/' + GIST_ID + '/raw/' + GIST_FILE;
+const API_URL = 'https://api.github.com/gists/' + GIST_ID;
+
+const headers = {
+  'Accept': 'application/vnd.github.v3+json'
+};
+
+function output(data, status = 200) {
+  document.open();
+  document.write('<pre>' + JSON.stringify(data) + '</pre>');
+  document.close();
+  document.title = status + ' ' + JSON.stringify(data).substring(0, 50);
+}
+
+function parseQuery(q) {
+  const params = {};
+  q.replace(/\?/g, '').split('&').forEach(pair => {
+    const [k, v] = pair.split('=');
+    if (k) params[decodeURIComponent(k)] = decodeURIComponent(v || '');
+  });
+  return params;
+}
+
+(async () => {
+  const q = parseQuery(location.search);
+  const action = q.action || 'get';
+
+  // GET: 获取留言列表（公开，无需 token）
+  if (action === 'get') {
+    try {
+      const res = await fetch(RAW_URL + '?t=' + Date.now());
+      if (res.ok) {
+        const msgs = await res.json();
+        output(msgs, 200);
+        return;
+      }
+      // 备用 GitHub API
+      const apiRes = await fetch(API_URL, { headers });
+      const data = await apiRes.json();
+      const content = (data.files && data.files[GIST_FILE]
+        ? data.files[GIST_FILE].content : '[]');
+      output(JSON.parse(content), 200);
+      return;
+    } catch (e) {
+      output({ error: e.message }, 500);
+      return;
+    }
+  }
+
+  // POST: 添加留言（需要 token）
+  if (action === 'post') {
+    const token = q.token;
+    const name = (q.name || '').substring(0, 30);
+    const text = (q.text || '').substring(0, 500);
+
+    if (!token || !name || !text) {
+      output({ error: 'token, name and text required' }, 400);
+      return;
+    }
+
+    const writeHeaders = {
+      ...headers,
+      'Authorization': 'token ' + token,
+      'Content-Type': 'application/json'
+    };
+
+    try {
+      // 获取现有留言
+      let messages = [];
+      try {
+        const rawRes = await fetch(RAW_URL + '?t=' + Date.now());
+        if (rawRes.ok) messages = await rawRes.json();
+      } catch (e) {}
+
+      // 添加新留言
+      const newMsg = {
+        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+        name,
+        text,
+        createdAt: new Date().toISOString()
+      };
+      messages.unshift(newMsg);
+      if (messages.length > 200) messages = messages.slice(0, 200);
+
+      // 写入 Gist
+      const patchRes = await fetch(API_URL, {
+        method: 'PATCH',
+        headers: writeHeaders,
+        body: JSON.stringify({
+          description: '致我们-留言板数据',
+          files: { [GIST_FILE]: { content: JSON.stringify(messages) } }
+        })
+      });
+
+      if (patchRes.ok) {
+        output({ success: true, message: newMsg, count: messages.length }, 200);
+      } else {
+        const err = await patchRes.json();
+        output({ error: err.message || 'save failed' }, patchRes.status);
+      }
+    } catch (e) {
+      output({ error: e.message }, 500);
+    }
+    return;
+  }
+
+  output({ error: 'unknown action: ' + action }, 400);
+})();
+</script>
+</body>
+</html>
