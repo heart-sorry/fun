@@ -637,34 +637,93 @@
 </div>
 
 <script>
-// 数据（从API加载）
+// 数据
 let friends = [];
 let messages = [];
 
-// 留言板 Gist ID（公开）
+// Gist 配置
 const GIST_ID = 'cf38eea9cb4db23811ff60fdd6d6cec3';
+const GIST_API = 'https://api.github.com/gists/' + GIST_ID;
 const GIST_RAW = `https://gist.githubusercontent.com/heart-sorry/${GIST_ID}/raw/messages.json`;
+
+// 读取本地待同步队列
+function getPending() {
+  try { return JSON.parse(localStorage.getItem('msgs_pending') || '[]'); }
+  catch { return []; }
+}
+function setPending(list) {
+  localStorage.setItem('msgs_pending', JSON.stringify(list));
+}
+function addPending(msg) {
+  const p = getPending();
+  // 去重
+  if (!p.find(m => m.id === msg.id)) p.push(msg);
+  setPending(p);
+}
+
+// 同步到 Gist（静默后台运行）
+async function pushToGist(msgs) {
+  const token = localStorage.getItem('gist_token');
+  if (!token) return false;
+  try {
+    const res = await fetch(GIST_API, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: 'fun-messages', files: { 'messages.json': { content: JSON.stringify(msgs) } } })
+    });
+    return res.ok;
+  } catch (e) { return false; }
+}
+
+// 自动同步：页面加载时静默执行
+async function autoSync() {
+  const token = localStorage.getItem('gist_token');
+  if (!token) return;
+
+  // 先尝试把待同步消息推上去
+  const pending = getPending();
+  if (pending.length > 0) {
+    // 获取云端最新
+    try {
+      const res = await fetch(GIST_RAW + '?t=' + Date.now());
+      if (res.ok) {
+        const cloud = await res.json();
+        // 合并（去重）
+        const cloudIds = new Set(cloud.map(m => m.id));
+        const newOnes = pending.filter(m => !cloudIds.has(m.id));
+        if (newOnes.length > 0) {
+          const merged = [...newOnes, ...cloud];
+          if (await pushToGist(merged)) {
+            setPending([]);
+            messages = merged;
+            renderMessages();
+          }
+        }
+      }
+    } catch (e) {}
+  }
+}
 
 // 加载数据
 async function loadData() {
-  // 加载留言（从公开 Gist 读取）
+  // 先静默同步（后台，不阻塞）
+  autoSync();
+
+  // 再加载云端留言
   try {
     const msgsRes = await fetch(GIST_RAW + '?t=' + Date.now());
     if (msgsRes.ok) {
       const cloud = await msgsRes.json();
-      if (Array.isArray(cloud) && cloud.length > 0) {
-        messages = cloud;
-        renderMessages();
-      } else if (Array.isArray(cloud)) {
+      if (Array.isArray(cloud)) {
         messages = cloud;
         renderMessages();
       }
     }
   } catch (e) {
-    console.log('留言加载失败');
+    // 网络失败，使用本地
   }
 
-  // 朋友数据使用默认（可本地修改）
+  // 朋友数据默认
   friends = [
     { avatar: "🌟", name: "朋友A", tag: "最好的朋友", message: "（搜索显示的话）", meetDate: "2024-01-01", secretCode: "暗号A", secretMessage: "（暗号专属的悄悄话）" },
     { avatar: "🌈", name: "朋友B", tag: "老朋友", message: "（搜索显示的话）", meetDate: "2023-06-15", secretCode: "暗号B", secretMessage: "（暗号专属的悄悄话）" }
@@ -684,7 +743,7 @@ async function saveFriends() {
   }
 }
 
-// 添加留言（写入本地 + 同步 Gist）
+// 添加留言（本地显示 + 静默同步）
 async function addMessage(name, text, time) {
   const msg = {
     id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
@@ -695,24 +754,14 @@ async function addMessage(name, text, time) {
   if (messages.length > 200) messages = messages.slice(0, 200);
   renderMessages();
 
-  // 异步同步到 Gist
+  // 静默同步到 Gist
   const token = localStorage.getItem('gist_token');
   if (!token) return;
 
-  try {
-    const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': 'token ' + token,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        description: 'fun-messages-board',
-        files: { 'messages.json': { content: JSON.stringify(messages) } }
-      })
-    });
-  } catch (e) {
-    console.log('留言同步失败');
+  const synced = await pushToGist(messages);
+  if (!synced) {
+    // 推送失败，加入待同步队列
+    addPending(msg);
   }
 }
 
