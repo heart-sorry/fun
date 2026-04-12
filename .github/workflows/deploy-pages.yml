@@ -13,6 +13,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Inject Gist Token
+        run: |
+          sed -i "s/const GIST_TOKEN = '';/const GIST_TOKEN = '${{ secrets.GIST_TOKEN }}';/" index.html
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:

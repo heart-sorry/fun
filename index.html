@@ -747,6 +747,7 @@ let messages = [];
 const GIST_ID = 'cf38eea9cb4db23811ff60fdd6d6cec3';
 const GIST_API = 'https://api.github.com/gists/' + GIST_ID;
 const GIST_RAW = `https://gist.githubusercontent.com/heart-sorry/${GIST_ID}/raw/data.json`;
+const GIST_TOKEN = ''; // Token 从 GitHub Secrets 注入
 
 // 读取本地待同步队列
 function getPending() {
@@ -887,7 +888,7 @@ function addPending(msg) {
 // 同步到 Gist（静默后台运行）
 // 推送完整数据（留言+朋友）到 Gist
 async function pushToGist() {
-  const token = localStorage.getItem('gist_token');
+  const token = localStorage.getItem('gist_token') || GIST_TOKEN;
   if (!token) return false;
   try {
     const data = { messages, friends, updatedAt: new Date().toISOString() };
@@ -902,7 +903,7 @@ async function pushToGist() {
 
 // 自动同步：页面加载时静默执行，把待同步消息推上去
 async function autoSync() {
-  const token = localStorage.getItem('gist_token');
+  const token = localStorage.getItem('gist_token') || GIST_TOKEN;
   if (!token) return;
 
   const pending = getPending();
@@ -996,8 +997,8 @@ async function addMessage(name, text, time) {
   if (messages.length > 200) messages = messages.slice(0, 200);
   renderMessages();
 
-  // 静默同步到 Gist
-  const token = localStorage.getItem('gist_token');
+  // 静默同步到 Gist（优先用内置 Token）
+  const token = localStorage.getItem('gist_token') || GIST_TOKEN;
   if (!token) return;
 
   const synced = await pushToGist();
