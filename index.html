@@ -371,6 +371,23 @@
       color: #aaa;
       margin-top: 4px;
     }
+    .message-board .mb-msg {
+      position: relative;
+    }
+    .delete-msg-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: none;
+      border: none;
+      font-size: 0.7rem;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+    .delete-msg-btn:hover {
+      opacity: 1;
+    }
 
     /* 秘密暗号 */
     .secret-hint {
@@ -1008,13 +1025,30 @@ async function addMessage(name, text, time) {
 // 渲染留言板
 function renderMessages() {
   const msgs = document.getElementById('mbMsgs');
+  const isAdmin = adminPanel.classList.contains('active');
   msgs.innerHTML = messages.map(m => `
     <div class="mb-msg">
       <div class="msg-name">${m.name}</div>
       <div class="msg-text">${m.text}</div>
       <div class="msg-time">${m.time}</div>
+      ${isAdmin ? `<button class="delete-msg-btn" onclick="deleteMessage('${m.id}')" title="删除">🗑️</button>` : ''}
     </div>
   `).join('');
+}
+
+// 删除留言（管理员）
+async function deleteMessage(id) {
+  if (!confirm('确定删除这条留言吗？')) return;
+  
+  messages = messages.filter(m => m.id !== id);
+  setMessages(messages);
+  renderMessages();
+  
+  // 同步到 Gist
+  const synced = await pushToGist();
+  if (!synced) {
+    alert('删除成功，但同步失败。数据已保存本地，稍后会自动重试。');
+  }
 }
 
 // 页面加载时获取数据
