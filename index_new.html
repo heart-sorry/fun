@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>致我们 💌</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #8b5cf6;
+      --accent: #ec4899;
+      --accent2: #fb7185;
+      --bg-1: #1a1225;
+      --bg-2: #231b33;
+      --surface: #2d2040;
+      --text: #f0e6ff;
+      --text-secondary: #c4b0e0;
+      --text-muted: #8a6fa0;
+      --border: #3d2d5a;
+      --shadow: rgba(139,92,246,0.1);
+      --shadow-md: rgba(139,92,246,0.2);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --radius-xs: 6px;
+    }
+    [data-theme="warm"] {
+      --primary: #f59e0b;
+      --accent: #ef4444;
+      --accent2: #f97316;
+      --bg-1: #fffbeb;
+      --bg-2: #fef3c7;
+      --surface: #fff7ed;
+      --text: #78350f;
+      --text-secondary: #92400e;
+      --text-muted: #b45309;
+      --border: #fde68a;
+      --shadow: rgba(245,158,11,0.08);
+      --shadow-md: rgba(245,158,11,0.15);
+    }
+    [data-theme="dark"] {
+      --bg-1: #0a0a0f;
+      --bg-2: #111118;
+      --surface: #1a1a25;
+      --text: #e8e0ff;
+      --text-secondary: #b8a8d8;
+      --text-muted: #6b5a8e;
+      --border: #2a2040;
+      --shadow: rgba(139,92,246,0.05);
+      --shadow-md: rgba(139,92,246,0.1);
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+      color: var(--text);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 20px;
+      transition: background 0.5s, color 0.5s;
+      overflow-x: hidden;
+    }
+
+    /* ---- 浮游粒子 ---- */
+    .particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .particle {
+      position: absolute; border-radius: 50%; animation: floatUp linear infinite;
+      opacity: 0.35; pointer-events: none;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.35; }
+      90% { opacity: 0.35; }
+      100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* ---- Toast ---- */
+    .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .toast {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 10px 18px; font-size: 0.8rem; color: var(--text);
+      box-shadow: 0 4px 20px var(--shadow-md); animation: toastIn 0.3s ease, toastOut 0.3s ease forwards;
+      animation-delay: 0s, 2.7s; pointer-events: auto;
+      display: flex; align-items: center; gap: 8px; max-width: 320px;
+    }
+    .toast.success { border-left: 3px solid #22c55e; }
+    .toast.error { border-left: 3px solid var(--accent2); }
+    .toast.info { border-left: 3px solid var(--primary); }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-10px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-8px); } }
+
+    .container {
+      width: 100%; max-width: 440px; position: relative; z-index: 1;
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease; padding-bottom: 50px;
+    }
+    .container.visible { opacity: 1; transform: translateY(0); }
+
+    /* ---- 帘子 ---- */
+    .curtain {
+      position: fixed; inset: 0; z-index: 1000;
+      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #f43f5e 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+    .curtain.hidden { opacity: 0; pointer-events: none; transform: scale(1.08); }
+    .curtain-title { font-size: 2.4rem; color: #fff; margin-bottom: 16px; text-shadow: 0 4px 20px rgba(0,0,0,0.15); letter-spacing: 4px; }
+    .curtain-sub { font-size: 0.95rem; color: rgba(255,255,255,0.9); margin-bottom: 16px; }
+    .curtain-hint { font-size: 0.85rem; color: rgba(255,255,255,0.7); animation: curtainPulse 2s ease-in-out infinite; }
+    .curtain-note { font-size: 0.72rem; color: rgba(255,255,255,0.5); margin-top: 24px; text-align: center; max-width: 280px; line-height: 1.6; }
+    .curtain-music { position: absolute; bottom: 40px; display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.9); font-size: 0.8rem; }
+    .curtain-music .dot { width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: dotBounce 1s ease-in-out infinite; }
+    @keyframes curtainPulse { 0%, 100% { opacity: 0.7; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+    @keyframes dotBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+    /* ---- 头部 ---- */
+    header { text-align: center; margin-bottom: 14px; }
+    header h1 { font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    header p { font-size: 0.78rem; color: var(--text-muted); }
+
+    /* ---- 通用卡片 ---- */
+    .card { background: var(--surface); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: 0 2px 12px var(--shadow); transition: box-shadow 0.3s, transform 0.2s; }
+    .card:hover { box-shadow: 0 4px 20px var(--shadow-md); }
+    .card-label { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 5px; font-weight: 600; letter-spacing: 0.5px; }
+
+    /* ---- 时段问候 ---- */
+    .greeting-bar {
+      background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: var(--radius); padding: 12px 16px;
+      margin-bottom: 12px; font-size: 0.88rem; color: #92400e; font-weight: 500; text-align: center; border: 1px solid #fde68a; transition: all 0.5s;
+    }
+    [data-theme="dark"] .greeting-bar { background: linear-gradient(135deg, #2d1f0a, #3d2a0f); color: #fcd34d; border-color: #78350f; }
+    [data-theme="warm"] .greeting-bar { background: linear-gradient(135deg, #fff7ed, #ffedd5); color: #9a3412; border-color: #fed7aa; }
+
+    /* ---- 每日一言 ---- */
+    .quote-card {
+      background: linear-gradient(135deg, #faf5ff, #ede9fe); border-radius: var(--radius); padding: 14px 18px;
+      margin-bottom: 12px; border: 1px solid #e9d5ff; position: relative; overflow: hidden; transition: all 0.3s;
+    }
+    [data-theme="dark"] .quote-card { background: linear-gradient(135deg, #2d1f45, #1e1430); border-color: #4c1d95; }
+    .quote-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--shadow-md); }
+    .quote-text { font-size: 0.88rem; color: var(--text); line-height: 1.7; font-style: italic; }
+    .quote-source { font-size: 0.68rem; color: var(--text-muted); margin-top: 6px; text-align: right; }
+    .quote-refresh { position: absolute; top: 10px; right: 12px; background: none; border: none; font-size: 0.7rem; cursor: pointer; color: var(--text-muted); opacity: 0.5; transition: opacity 0.2s, transform 0.3s; }
+    .quote-refresh:hover { opacity: 1; transform: rotate(180deg); }
+
+    /* ---- 心情记录 ---- */
+    .mood-choices { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    .mood-btn {
+      font-size: 1.5rem; background: var(--surface); border: 2px solid var(--border); border-radius: 50%;
+      width: 42px; height: 42px; cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mood-btn:hover { transform: scale(1.2); border-color: var(--accent); box-shadow: 0 4px 12px rgba(236,72,153,0.2); }
+    .mood-btn.selected { border-color: var(--accent); background: #fdf2f8; transform: scale(1.15); box-shadow: 0 4px 12px rgba(236,72,153,0.25); }
+    [data-theme="dark"] .mood-btn.selected { background: #2d1f3d; }
+    .mood-today { font-size: 0.75rem; color: var(--accent); font-weight: 600; margin-bottom: 8px; min-height: 18px; transition: opacity 0.3s; }
+    .mood-history { display: flex; gap: 5px; flex-wrap: wrap; }
+    .mood-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--surface); border: 2px solid var(--border); font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
+    .mood-dot .day { font-size: 0.5rem; color: var(--text-muted); }
+
+    /* ---- 音乐播放器 ---- */
+    .music-player {
+      background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: var(--radius);
+      padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;
+      cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+      box-shadow: 0 4px 15px rgba(139,92,246,0.3);
+    }
+    .music-player:hover { transform: scale(1.02); box-shadow: 0 6px 24px rgba(139,92,246,0.4); }
+    .music-player:active { transform: scale(0.98); }
+    .music-player .play-btn { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; font-size: 1rem; color: #fff; flex-shrink: 0; }
+    .music-player .play-btn.playing { animation: musicPulse 1.5s ease-in-out infinite; }
+    @keyframes musicPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.3); } 50% { box-shadow: 0 0 0 8px rgba(255,255,255,0); } }
+    .music-player .music-info { flex: 1; color: #fff; }
+    .music-player .music-title { font-size: 0.88rem; font-weight: 600; }
+    .music-player .music-artist { font-size: 0.65rem; opacity: 0.8; margin-top: 2px; }
+    .music-player .music-time { font-size: 0.7rem; color: rgba(255,255,255,0.75); min-width: 36px; text-align: right; }
+
+    /* ---- 纪念日 ---- */
+    .anniversary-card {
+      background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: var(--radius);
+      padding: 16px; margin-bottom: 12px; color: #fff; position: relative; overflow: hidden;
+      box-shadow: 0 4px 15px rgba(236,72,153,0.3);
+    }
+    .anniversary-card::before { content: ''; position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.08); }
+    .anniversary-card .a-title { font-size: 0.72rem; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; opacity: 0.9; }
+    .anniversary-card .a-countdown { font-size: 2.2rem; font-weight: 800; line-height: 1; margin-bottom: 2px; }
+    .anniversary-card .a-label { font-size: 0.6rem; opacity: 0.8; }
+    .anniversary-card .a-next { font-size: 0.65rem; opacity: 0.8; margin-top: 6px; }
+    .anniversary-edit-btn { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.15); border: none; border-radius: 6px; color: rgba(255,255,255,0.8); font-size: 0.65rem; padding: 3px 8px; cursor: pointer; transition: background 0.2s; }
+    .anniversary-edit-btn:hover { background: rgba(255,255,255,0.25); }
+
+    /* ---- 每日打卡 ---- */
+    .checkin-section {
+      background: linear-gradient(135deg, #dcfce7, #bbf7d0); border-radius: var(--radius);
+      padding: 14px 16px; margin-bottom: 12px; border: 1px solid #86efac; transition: all 0.3s;
+    }
+    [data-theme="dark"] .checkin-section { background: linear-gradient(135deg, #14532d, #1a1a25); border-color: #166534; }
+    .checkin-section:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34,197,94,0.15); }
+    .checkin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .checkin-title { font-size: 0.8rem; font-weight: 600; color: #166534; }
+    [data-theme="dark"] .checkin-title { color: #86efac; }
+    .checkin-streak { font-size: 0.72rem; color: #166534; font-weight: 600; }
+    [data-theme="dark"] .checkin-streak { color: #86efac; }
+    .checkin-btn {
+      padding: 8px 20px; background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff; border: none; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 12px rgba(34,197,94,0.3);
+    }
+    .checkin-btn:hover { transform: scale(1.05); box-shadow: 0 6px 18px rgba(34,197,94,0.4); }
+    .checkin-btn.checked { background: var(--bg-2); color: #166534; box-shadow: none; cursor: default; }
+    [data-theme="dark"] .checkin-btn.checked { color: #86efac; }
+    .checkin-btn.checked:hover { transform: none; }
+    .checkin-calendar { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 8px; }
+    .checkin-dot { width: 22px; height: 22px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); font-size: 0.55rem; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); }
+    .checkin-dot.active { background: #22c55e; border-color: #22c55e; color: #fff; }
+    .checkin-dot.today { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(236,72,153,0.3); }
+    .checkin-custom { display: flex; gap: 6px; margin-top: 8px; align-items: center; }
+    .checkin-custom input { flex: 1; padding: 5px 10px; border: 1px solid var(--border); border-radius: var(--radius-xs); font-size: 0.72rem; background: var(--surface); color: var(--text); }
+    .checkin-custom input:focus { outline: none; border-color: #22c55e; }
+    .checkin-custom button { padding: 5px 10px; background: #22c55e; color: #fff; border: none; border-radius: var(--radius-xs); font-size: 0.68rem; cursor: pointer; }
+
+    /* ---- 回忆闪回 ---- */
+    .memory-card {
+      background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: var(--radius);
+      padding: 14px 18px; margin-bottom: 12px; border: 1px solid #fde68a;
+      cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
+    }
+    [data-theme="dark"] .memory-card { background: linear-gradient(135deg, #78350f, #1e1430); border-color: #78350f; }
+    .memory-card:hover { transform: translateY(-3px) scale(1.01); box-shadow: 0 8px 24px rgba(245,158,11,0.2); }
+    [data-theme="dark"] .memory-card:hover { box-shadow: 0 8px 24px rgba(245,158,11,0.1); }
+    .memory-card .mem-icon { font-size: 1.6rem; margin-bottom: 6px; }
+    .memory-card .mem-label { font-size: 0.68rem; color: #92400e; font-weight: 600; margin-bottom: 4px; }
+    [data-theme="dark"] .memory-card .mem-label { color: #fcd34d; }
+    .memory-card .mem-text { font-size: 0.82rem; color: var(--text); line-height: 1.6; max-height: 3em; overflow: hidden; }
+    .memory-card .mem-meta { font-size: 0.62rem; color: #b45309; margin-top: 6px; }
+    [data-theme="dark"] .memory-card .mem-meta { color: #fbbf24; }
+    .memory-shimmer { position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); animation: shimmer 3s ease-in-out infinite; pointer-events: none; }
+    @keyframes shimmer { 0% { left: -100%; } 50%, 100% { left: 100%; } }
+    .memory-nav { display: flex; justify-content: space-between; margin-top: 8px; }
+    .memory-nav button { background: none; border: none; color: #92400e; font-size: 0.7rem; cursor: pointer; opacity: 0.7; }
+    [data-theme="dark"] .memory-nav button { color: #fcd34d; }
+    .memory-nav button:hover { opacity: 1; }
+
+    /* ---- 悄悄话/私密信 ---- */
+    .letter-section {
+      background: linear-gradient(135deg, #faf5ff, #ede9fe); border-radius: var(--radius);
+      padding: 14px 16px; margin-bottom: 12px; border: 1px solid #e9d5ff; transition: all 0.3s;
+    }
+    [data-theme="dark"] .letter-section { background: linear-gradient(135deg, #2d1f45, #1e1430); border-color: #4c1d95; }
+    .letter-section:hover { box-shadow: 0 6px 20px var(--shadow-md); }
+    .letter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .letter-title { font-size: 0.8rem; font-weight: 600; color: #7c3aed; }
+    [data-theme="dark"] .letter-title { color: #c4b5fd; }
+    .letter-list { display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto; }
+    .letter-item { padding: 8px 10px; background: var(--surface); border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+    .letter-item:hover { border-color: var(--primary); transform: translateX(4px); }
+    .letter-item .li-top { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+    .letter-item .li-avatar { font-size: 0.9rem; }
+    .letter-item .li-name { font-size: 0.72rem; font-weight: 700; color: var(--text); flex: 1; }
+    .letter-item .li-date { font-size: 0.6rem; color: var(--text-muted); }
+    .letter-item .li-preview { font-size: 0.7rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .letter-empty { text-align: center; padding: 16px; color: var(--text-muted); font-size: 0.75rem; }
+    .letter-add-btn { width: 100%; padding: 8px; border: 2px dashed var(--border); border-radius: var(--radius-sm); background: none; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; transition: all 0.2s; margin-top: 6px; }
+    .letter-add-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* ---- MBTI 测试 ---- */
+    .quiz-card {
+      background: linear-gradient(135deg, #0d9488, #14b8a6); border-radius: var(--radius);
+      padding: 14px 18px; margin-bottom: 12px; color: #fff; cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+      box-shadow: 0 4px 15px rgba(13,148,136,0.3); position: relative; overflow: hidden;
+    }
+    .quiz-card:hover { transform: scale(1.02); box-shadow: 0 6px 24px rgba(13,148,136,0.4); }
+    .quiz-card:active { transform: scale(0.98); }
+    .quiz-card .q-title { font-size: 0.88rem; font-weight: 600; margin-bottom: 3px; }
+    .quiz-card .q-desc { font-size: 0.62rem; opacity: 0.85; }
+    .quiz-card .q-badge { position: absolute; top: 10px; right: 12px; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 2px 8px; font-size: 0.6rem; }
+
+    /* ---- 愿望清单 ---- */
+    .wish-section {
+      background: linear-gradient(135deg, #fef3c7, #fff7ed); border-radius: var(--radius);
+      padding: 14px 16px; margin-bottom: 12px; border: 1px solid #fde68a;
+    }
+    [data-theme="dark"] .wish-section { background: linear-gradient(135deg, #2d1f0a, #1e1430); border-color: #78350f; }
+    .wish-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .wish-title { font-size: 0.8rem; font-weight: 600; color: #92400e; }
+    [data-theme="dark"] .wish-title { color: #fcd34d; }
+    .wish-add { background: none; border: none; font-size: 1rem; cursor: pointer; color: #92400e; transition: transform 0.2s; }
+    [data-theme="dark"] .wish-add { color: #fcd34d; }
+    .wish-add:hover { transform: scale(1.2); }
+    .wish-list { display: flex; flex-direction: column; gap: 6px; }
+    .wish-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px dashed var(--border); }
+    .wish-item:last-child { border-bottom: none; }
+    .wish-check { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #d97706; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #d97706; flex-shrink: 0; transition: all 0.2s; }
+    .wish-check.done { background: #d97706; color: #fff; }
+    .wish-text { flex: 1; font-size: 0.78rem; color: var(--text); }
+    .wish-text.done { text-decoration: line-through; opacity: 0.5; }
+    .wish-delete { background: none; border: none; font-size: 0.6rem; cursor: pointer; opacity: 0.3; color: #92400e; }
+    .wish-delete:hover { opacity: 1; }
+    [data-theme="dark"] .wish-delete { color: #fcd34d; }
+    .wish-input-row { display: flex; gap: 6px; margin-bottom: 8px; }
+    .wish-input-row input { flex: 1; padding: 6px 10px; border: 1px solid #fde68a; border-radius: var(--radius-xs); font-size: 0.75rem; background: #fffef0; }
+    [data-theme="dark"] .wish-input-row input { background: #2d1f0a; border-color: #78350f; color: var(--text); }
+    .wish-input-row input:focus { outline: none; border-color: #d97706; }
+    .wish-input-row button { padding: 6px 12px; background: #d97706; color: #fff; border: none; border-radius: var(--radius-xs); font-size: 0.7rem; cursor: pointer; }
+
+    /* ---- 搜索 ---- */
+    .search-box { position: relative; margin-bottom: 12px; }
+    .search-box input { width: 100%; padding: 12px 40px 12px 16px; font-size: 0.88rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-shadow: 0 2px 8px var(--shadow); }
+    .search-box input::placeholder { color: var(--text-muted); }
+    .search-box input:focus { border-color: var(--primary); box-shadow: 0 4px 16px var(--shadow-md); }
+    .search-box .search-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 0.85rem; color: var(--text-muted); pointer-events: none; }
+
+    .results { display: none; }
+    .results.active { display: block; }
+
+    .result-item { background: var(--surface); border-radius: var(--radius); padding: 14px; margin-bottom: 8px; box-shadow: 0 2px 8px var(--shadow); cursor: pointer; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); border: 1px solid var(--border); }
+    .result-item:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--shadow-md); border-color: var(--primary); }
+    .result-item .r-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .result-item .r-avatar { font-size: 1.6rem; }
+    .result-item .r-name { font-size: 0.9rem; font-weight: 700; color: var(--text); flex: 1; }
+    .result-item .r-tag { font-size: 0.6rem; color: var(--surface); background: var(--primary); padding: 2px 7px; border-radius: 20px; }
+    .result-item .r-days { font-size: 0.65rem; color: var(--accent); font-weight: 600; }
+    .result-item .r-preview { color: var(--text-secondary); font-size: 0.75rem; }
+
+    .not-found { display: none; text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.82rem; }
+    .not-found.active { display: block; }
+
+    /* ---- 秘密暗号 ---- */
+    .secret-hint { text-align: center; margin-top: 16px; padding: 12px 16px; background: linear-gradient(135deg, #faf5ff, #ede9fe); border-radius: var(--radius); color: var(--text-secondary); font-size: 0.75rem; border: 1px solid #e9d5ff; cursor: pointer; transition: all 0.3s; }
+    [data-theme="dark"] .secret-hint { background: linear-gradient(135deg, #2d1f45, #1e1430); border-color: #4c1d95; }
+    .secret-hint:hover { background: linear-gradient(135deg, #f3e8ff, #ddd6fe); }
+    [data-theme="dark"] .secret-hint:hover { background: linear-gradient(135deg, #3d2a60, #2d1f45); }
+    .secret-input { display: none; margin-top: 10px; }
+    .secret-input.active { display: block; }
+    .secret-input input { width: 100%; padding: 8px 12px; border: 1px solid #e9d5ff; border-radius: var(--radius-xs); font-size: 0.8rem; background: var(--surface); color: var(--text); }
+    .secret-input input:focus { outline: none; border-color: var(--primary); }
+
+    /* ---- 留言板 ---- */
+    .message-board { background: var(--surface); border-radius: var(--radius); padding: 16px; margin-top: 16px; box-shadow: 0 2px 12px var(--shadow); border: 1px solid var(--border); }
+    .message-board .mb-title { font-size: 0.85rem; font-weight: 700; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .message-board .mb-name { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.8rem; margin-bottom: 6px; background: var(--surface); color: var(--text); box-sizing: border-box; }
+    .message-board .mb-name:focus { outline: none; border-color: var(--primary); }
+    .message-board .mb-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.8rem; resize: none; min-height: 64px; font-family: inherit; margin-bottom: 8px; background: var(--surface); color: var(--text); box-sizing: border-box; }
+    .message-board .mb-input:focus { outline: none; border-color: var(--primary); }
+    .message-board .mb-row { display: flex; gap: 6px; margin-bottom: 8px; }
+    .message-board .mb-btn { flex: 1; padding: 10px; border: none; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; font-size: 0.82rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 12px var(--shadow-md); }
+    .message-board .mb-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px var(--shadow-md); }
+    .message-board .mb-btn:active { transform: scale(0.98); }
+    .message-board .mb-sync-btn { padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-secondary); font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
+    .message-board .mb-sync-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .message-board .mb-msgs { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
+    .message-board .mb-msg { padding: 10px; background: var(--bg-1); border-radius: var(--radius-sm); margin-bottom: 8px; position: relative; transition: background 0.2s; }
+    .message-board .mb-msg:hover { background: var(--bg-2); }
+    .message-board .mb-msg .msg-name { font-size: 0.72rem; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+    .message-board .mb-msg .msg-text { font-size: 0.8rem; color: var(--text); line-height: 1.5; }
+    .message-board .mb-msg .msg-time { font-size: 0.6rem; color: var(--text-muted); margin-top: 4px; }
+    .message-board .mb-msg .msg-actions { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; }
+    .delete-msg-btn { background: none; border: none; font-size: 0.65rem; cursor: pointer; opacity: 0.3; transition: opacity 0.2s; padding: 2px 4px; color: var(--accent2); }
+    .delete-msg-btn:hover { opacity: 1; }
+    .heart-btn { background: none; border: none; font-size: 0.75rem; cursor: pointer; opacity: 0.3; transition: all 0.2s; padding: 2px 4px; }
+    .heart-btn:hover { opacity: 1; transform: scale(1.3); }
+    .heart-btn.liked { opacity: 1; color: var(--accent); }
+
+    /* ---- 设置入口 ---- */
+    .settings-link { text-align: center; margin-top: 16px; }
+    .settings-link button { background: none; border: none; color: var(--text-muted); font-size: 0.7rem; cursor: pointer; padding: 6px 12px; border-radius: 20px; transition: all 0.2s; opacity: 0.5; }
+    .settings-link button:hover { opacity: 0.85; background: var(--bg-2); }
+
+    /* ---- 管理入口 ---- */
+    .admin-link { text-align: center; margin-top: 8px; margin-bottom: 30px; opacity: 0.15; font-size: 0.6rem; color: var(--text-muted); cursor: pointer; transition: opacity 0.2s; }
+    .admin-link:hover { opacity: 0.5; }
+
+    /* ---- 管理后台 ---- */
+    .admin-section { background: var(--bg-1); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px; border: 1px solid var(--border); }
+    .section-title { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+    .sync-status { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 6px; }
+    .sync-status.active { color: #22c55e; font-weight: 600; }
+    .token-input { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-xs); font-size: 0.72rem; margin-bottom: 6px; box-sizing: border-box; background: var(--surface); color: var(--text); }
+    .token-input:focus { outline: none; border-color: var(--primary); }
+    .sync-btn { width: 100%; padding: 7px; background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; border: none; border-radius: var(--radius-xs); font-size: 0.75rem; cursor: pointer; }
+
+    .admin-panel { display: none; background: var(--surface); border-radius: var(--radius); padding: 16px; box-shadow: 0 4px 16px var(--shadow); border: 1px solid var(--border); margin-top: 16px; }
+    .admin-panel.active { display: block; }
+    .admin-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+    .admin-header h2 { font-size: 0.88rem; color: var(--text); }
+    .admin-header button { padding: 4px 10px; border: none; border-radius: var(--radius-xs); background: var(--bg-2); color: var(--text-secondary); font-size: 0.65rem; cursor: pointer; }
+
+    .friend-list { display: flex; flex-direction: column; gap: 6px; }
+    .friend-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--bg-1); border-radius: var(--radius-sm); cursor: pointer; transition: background 0.2s; }
+    .friend-item:hover { background: var(--bg-2); }
+    .friend-item .f-avatar { font-size: 1rem; }
+    .friend-item .f-name { flex: 1; font-size: 0.8rem; color: var(--text); }
+    .friend-item .f-arrow { font-size: 0.6rem; color: var(--text-muted); }
+
+    .edit-form { display: none; margin-top: 10px; padding: 12px; background: var(--bg-1); border-radius: var(--radius-sm); border: 1px solid var(--border); }
+    .edit-form.active { display: block; }
+    .edit-form input, .edit-form textarea { width: 100%; padding: 7px 10px; margin-bottom: 6px; border: 1px solid var(--border); border-radius: var(--radius-xs); font-size: 0.72rem; font-family: inherit; background: var(--surface); color: var(--text); box-sizing: border-box; }
+    .edit-form input:focus, .edit-form textarea:focus { outline: none; border-color: var(--primary); }
+    .edit-form textarea { min-height: 36px; }
+    .edit-form .btns { display: flex; gap: 6px; }
+    .edit-form button { flex: 1; padding: 6px; border: none; border-radius: var(--radius-xs); font-size: 0.68rem; cursor: pointer; }
+    .edit-form .save { background: var(--primary); color: #fff; }
+    .edit-form .cancel { background: var(--bg-2); color: var(--text-secondary); }
+    .edit-form .del-btn { background: #fff0f0; color: var(--accent2); border: 1px solid var(--accent2); }
+
+    .add-friend-btn { display: block; width: 100%; padding: 8px; margin-bottom: 8px; border: 2px dashed var(--border); border-radius: var(--radius-sm); background: transparent; color: var(--text-muted); font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
+    .add-friend-btn:hover { border-color: var(--accent); color: var(--accent); background: #fdf2f8; }
+
+    .export-btn { display: block; width: 100%; padding: 8px; margin-top: 10px; border: none; border-radius: var(--radius-sm); background: var(--bg-2); color: var(--text-secondary); font-size: 0.72rem; cursor: pointer; transition: all 0.2s; }
+    .export-btn:hover { background: var(--border); }
+
+    /* ---- 弹窗 ---- */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+    .modal-overlay.active { display: flex; }
+    .modal { background: var(--surface); border-radius: 20px; padding: 28px 24px; max-width: 340px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15); animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal .m-avatar { font-size: 2.8rem; margin-bottom: 6px; }
+    .modal .m-name { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+    .modal .m-tag { font-size: 0.65rem; color: var(--text-muted); margin-bottom: 12px; }
+    .modal .m-days { font-size: 0.7rem; color: var(--accent); font-weight: 600; margin-bottom: 12px; }
+    .modal .m-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.8; text-align: left; }
+    .modal .close-btn { margin-top: 20px; padding: 10px 32px; border: none; border-radius: 25px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; font-size: 0.82rem; cursor: pointer; box-shadow: 0 4px 12px var(--shadow-md); transition: transform 0.2s; }
+    .modal .close-btn:hover { transform: scale(1.05); }
+
+    /* ---- 纪念日编辑 ---- */
+    .anniv-edit-form { display: none; margin-top: 10px; padding: 10px; background: var(--bg-1); border-radius: var(--radius-sm); border: 1px solid var(--border); }
+    .anniv-edit-form.active { display: block; }
+    .anniv-edit-form input, .anniv-edit-form textarea { width: 100%; padding: 7px 10px; margin-bottom: 6px; border: 1px solid var(--border); border-radius: var(--radius-xs); font-size: 0.72rem; background: var(--surface); color: var(--text); box-sizing: border-box; }
+    .anniv-edit-form input:focus, .anniv-edit-form textarea:focus { outline: none; border-color: var(--primary); }
+    .anniv-edit-form .btns { display: flex; gap: 6px; margin-top: 6px; }
+    .anniv-edit-form button { flex: 1; padding: 6px; border: none; border-radius: var(--radius-xs); font-size: 0.68rem; cursor: pointer; }
+    .anniv-edit-form .save { background: var(--accent); color: #fff; }
+    .anniv-edit-form .cancel { background: var(--bg-2); color: var(--text-secondary); }
+    .anniv-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    .anniv-item { display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: var(--surface); border-radius: var(--radius-xs); border: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+    .anniv-item:hover { background: var(--bg-2); }
+    .anniv-item .emoji { font-size: 0.9rem; }
+    .anniv-item .name { flex: 1; font-size: 0.72rem; color: var(--text); }
+    .anniv-item .days { font-size: 0.65rem; color: var(--accent); font-weight: 600; }
+    .anniv-item .del { font-size: 0.6rem; color: var(--accent2); opacity: 0.5; cursor: pointer; }
+    .anniv-item .del:hover { opacity: 1; }
+    .add-anniv-btn { display: block; width: 100%; padding: 6px; border: 1px dashed var(--border); border-radius: var(--radius-xs); background: none; color: var(--text-muted); font-size: 0.7rem; cursor: pointer; transition: all 0.2s; }
+    .add-anniv-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ---- 设置面板 ---- */
+    .settings-panel { display: none; background: var(--surface); border-radius: var(--radius); padding: 16px; box-shadow: 0 4px 16px var(--shadow); border: 1px solid var(--border); margin-top: 16px; }
+    .settings-panel.active { display: block; }
+    .settings-panel h3 { font-size: 0.85rem; color: var(--text); margin-bottom: 12px; }
+    .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .setting-item:last-child { border-bottom: none; }
+    .setting-item .label { font-size: 0.78rem; color: var(--text-secondary); }
+    .setting-item .value { font-size: 0.78rem; color: var(--text); }
+    .theme-switcher { display: flex; gap: 6px; }
+    .theme-btn { padding: 4px 10px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); color: var(--text-secondary); font-size: 0.65rem; cursor: pointer; transition: all 0.2s; }
+    .theme-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .setting-close { display: block; width: 100%; padding: 8px; margin-top: 10px; border: none; border-radius: var(--radius-sm); background: var(--bg-2); color: var(--text-secondary); font-size: 0.75rem; cursor: pointer; }
+
+    /* ---- 私密信弹窗 ---- */
+    .letter-modal-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.78rem; background: var(--surface); color: var(--text); box-sizing: border-box; margin-bottom: 6px; font-family: inherit; }
+    .letter-modal-input:focus { outline: none; border-color: var(--primary); }
+    .letter-modal-select { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.78rem; background: var(--surface); color: var(--text); box-sizing: border-box; margin-bottom: 8px; }
+    .letter-modal-select:focus { outline: none; border-color: var(--primary); }
+    .letter-modal-textarea { width: 100%; min-height: 100px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.78rem; background: var(--surface); color: var(--text); box-sizing: border-box; margin-bottom: 10px; font-family: inherit; resize: vertical; }
+    .letter-modal-textarea:focus { outline: none; border-color: var(--primary); }
+    .letter-modal-save { width: 100%; padding: 10px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 0.82rem; cursor: pointer; }
+
+    /* 键盘快捷键提示 */
+    .kbd { display: inline-block; padding: 1px 5px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 3px; font-size: 0.6rem; color: var(--text-muted); }
+
+    /* ---- 滚动条美化 ---- */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- 帘子开场 -->
+<div class="curtain" id="curtain" onclick="openCurtain()">
+  <div class="curtain-title">💌 致我们</div>
+  <div class="curtain-sub">我们共同的回忆</div>
+  <div class="curtain-hint">✦ 点击进入 ✦</div>
+  <div class="curtain-note">🎵 点击即入场<br>愿这段回忆永远温热</div>
+  <div class="curtain-music">
+    <div class="dot"></div>
+    <span>音乐加载中...</span>
+  </div>
+</div>
+
+<div class="container" id="mainContainer">
+  <header>
+    <h1>致我们 💌</h1>
+    <p id="headerSubtitle">我们共同的回忆</p>
+  </header>
+
+  <!-- 时段问候 -->
+  <div class="greeting-bar" id="greetingBar"></div>
+
+  <!-- 每日一言 -->
+  <div class="quote-card" id="quoteCard">
+    <button class="quote-refresh" onclick="nextQuote()" title="换一句">🔄</button>
+    <div class="quote-text" id="quoteText">"生活不是等待风暴过去，而是学会在雨中起舞。"</div>
+    <div class="quote-source" id="quoteSource">—— 维维安·格林</div>
+  </div>
+
+  <!-- 心情记录 -->
+  <div class="card">
+    <div class="card-label">✨ 今天的心情</div>
+    <div class="mood-choices" id="moodChoices"></div>
+    <div class="mood-today" id="moodToday"></div>
+    <div class="mood-history" id="moodHistory"></div>
+  </div>
+
+  <!-- 音乐播放器 -->
+  <div class="music-player" onclick="toggleMusic()" role="button" tabindex="0"
+       onkeypress="if(event.key==='Enter')toggleMusic()">
+    <div class="play-btn" id="playBtn">▶</div>
+    <div class="music-info">
+      <div class="music-title" id="musicTitle">🎵 点击播放</div>
+      <div class="music-artist">鸟之诗 · 八音盒版</div>
+    </div>
+    <div class="music-time" id="musicTime">0:00</div>
+  </div>
+
+  <!-- 纪念日 -->
+  <div class="anniversary-card" id="anniversaryCard">
+    <div class="anniversary-edit-btn" onclick="toggleAnnivEdit(event)">⚙️</div>
+    <div class="a-title" id="annivTitle">🎄 圣诞节</div>
+    <div class="a-countdown" id="countdown">--</div>
+    <div class="a-label">天</div>
+    <div class="a-next" id="annivNext"></div>
+    <div class="anniv-edit-form" id="annivEditForm">
+      <div class="anniv-list" id="annivList"></div>
+      <input type="text" id="newAnnivName" placeholder="名称，如：相识纪念日">
+      <input type="date" id="newAnnivDate">
+      <div class="btns">
+        <button class="save" onclick="saveAnniv()">添加</button>
+        <button class="cancel" onclick="document.getElementById('annivEditForm').classList.remove('active')">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 每日打卡 -->
+  <div class="checkin-section" id="checkinSection">
+    <div class="checkin-header">
+      <div>
+        <div class="checkin-title">📋 每日打卡</div>
+        <div class="checkin-streak" id="checkinStreak"></div>
+      </div>
+      <button class="checkin-btn" id="checkinBtn" onclick="doCheckin()">✅ 打卡</button>
+    </div>
+    <div class="checkin-calendar" id="checkinCalendar"></div>
+    <div class="checkin-custom">
+      <input type="text" id="checkinCustom" placeholder="自定义习惯名称...">
+      <button onclick="addCheckinHabit()">添加</button>
+    </div>
+  </div>
+
+  <!-- 回忆闪回 -->
+  <div class="memory-card" id="memoryCard" onclick="openMemory()">
+    <div class="memory-shimmer"></div>
+    <div class="mem-icon" id="memIcon">💭</div>
+    <div class="mem-label" id="memLabel">回忆闪回</div>
+    <div class="mem-text" id="memText">点击查看一段随机回忆...</div>
+    <div class="mem-meta" id="memMeta"></div>
+    <div class="memory-nav">
+      <button onclick="event.stopPropagation(); prevMemory()">◀ 上一条</button>
+      <button onclick="event.stopPropagation(); nextMemory()">下一条 ▶</button>
+    </div>
+  </div>
+
+  <!-- 私密信 -->
+  <div class="letter-section" id="letterSection">
+    <div class="letter-header">
+      <div class="letter-title">💌 私密信</div>
+    </div>
+    <div class="letter-list" id="letterList"></div>
+    <button class="letter-add-btn" onclick="openLetterModal()">✚ 写一封私密信</button>
+  </div>
+
+  <!-- MBTI 测试 -->
+  <div class="quiz-card" onclick="startQuiz()" role="button" tabindex="0"
+       onkeypress="if(event.key==='Enter')startQuiz()">
+    <div class="q-title">🧠 MBTI 人格测试</div>
+    <div class="q-desc">20道题，测出你的性格类型</div>
+    <div class="q-badge" id="mbtiBadge" style="display:none"></div>
+  </div>
+
+  <!-- 愿望清单 -->
+  <div class="wish-section">
+    <div class="wish-header">
+      <div class="wish-title">🌟 愿望清单</div>
+      <button class="wish-add" onclick="toggleWishInput()" title="添加愿望">✚</button>
+    </div>
+    <div class="wish-input-row" id="wishInputRow" style="display:none">
+      <input type="text" id="wishInput" placeholder="写下一个愿望..." onkeypress="if(event.key==='Enter')addWish()">
+      <button onclick="addWish()">添加</button>
+    </div>
+    <div class="wish-list" id="wishList"></div>
+  </div>
+
+  <!-- 搜索 -->
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="🔍 搜索朋友..." autocomplete="off"
+           oninput="handleSearch(this.value)">
+    <span class="search-icon">🔍</span>
+  </div>
+
+  <div class="results" id="results"></div>
+  <div class="not-found" id="notFound">
+    <p>没有找到这个人哦 💭</p>
+  </div>
+
+  <!-- 秘密暗号 -->
+  <div class="secret-hint" onclick="toggleSecret()">
+    💫 输入秘密暗号解锁惊喜
+    <div class="secret-input" id="secretInput">
+      <input type="text" id="secretCode" placeholder="输入暗号..." onkeypress="checkSecret(event)">
+    </div>
+  </div>
+
+  <!-- 设置 -->
+  <div class="settings-link">
+    <button onclick="toggleSettings()">⚙️ 设置</button>
+  </div>
+
+  <!-- 设置面板 -->
+  <div class="settings-panel" id="settingsPanel">
+    <h3>⚙️ 个性设置</h3>
+    <div class="setting-item">
+      <span class="label">外观主题</span>
+      <div class="theme-switcher">
+        <button class="theme-btn active" onclick="setTheme('')" id="themeDefault">🌸 默认</button>
+        <button class="theme-btn" onclick="setTheme('warm')" id="themeWarm">🍊 暖色</button>
+        <button class="theme-btn" onclick="setTheme('dark')" id="themeDark">🌙 深夜</button>
+      </div>
+    </div>
+    <div class="setting-item">
+      <span class="label">你的昵称</span>
+      <input type="text" id="settingNickname" placeholder="设置昵称..." value=""
+             style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.75rem;width:120px;background:var(--surface);color:var(--text)"
+             onchange="saveSetting('nickname', this.value)">
+    </div>
+    <div class="setting-item">
+      <span class="label">你的 MBTI</span>
+      <input type="text" id="settingMbti" placeholder="如：INTJ" maxlength="4"
+             style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.75rem;width:80px;background:var(--surface);color:var(--text);text-transform:uppercase"
+             onchange="saveSetting('mbti', this.value.toUpperCase())">
+    </div>
+    <div class="setting-item">
+      <span class="label">浮游粒子</span>
+      <label style="position:relative;display:inline-block;width:36px;height:20px">
+        <input type="checkbox" id="toggleParticles" checked
+               onchange="saveSetting('particles', this.checked); toggleParticlesEffect()"
+               style="opacity:0;width:0;height:0">
+        <span style="position:absolute;cursor:pointer;inset:0;background:var(--border);border-radius:20px;transition:0.3s"></span>
+        <span style="position:absolute;left:2px;top:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:0.3s;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></span>
+      </label>
+    </div>
+    <button class="setting-close" onclick="document.getElementById('settingsPanel').classList.remove('active')">关闭</button>
+  </div>
+
+  <!-- 留言板 -->
+  <div class="message-board">
+    <div class="mb-title">💬 留言板 <span id="msgCount" style="font-size:0.65rem;color:var(--text-muted);font-weight:400"></span></div>
+    <input type="text" class="mb-name" id="msgName" placeholder="你的名字">
+    <textarea class="mb-input" id="msgText" placeholder="写下你想说的话..."></textarea>
+    <div class="mb-row">
+      <button class="mb-btn" onclick="submitMessage()">✨ 提交留言</button>
+      <button class="mb-sync-btn" onclick="manualSync()" title="手动同步到云端" id="syncNowBtn">☁️</button>
+    </div>
+    <div class="mb-msgs" id="mbMsgs"></div>
+  </div>
+
+  <!-- 管理后台入口 -->
+  <div class="admin-link">
+    <button onclick="promptAdminPassword()">⚙️ 管理</button>
+  </div>
+
+  <!-- 管理后台 -->
+  <div class="admin-panel" id="adminPanel">
+    <div class="admin-header">
+      <h2>🛠️ 管理后台</h2>
+      <button onclick="logoutAdmin()">退出</button>
+    </div>
+    <div class="admin-section">
+      <div class="section-title">☁️ 云端同步</div>
+      <div class="sync-status" id="syncStatus">未配置 Token</div>
+      <input type="password" class="token-input" id="gistToken" placeholder="GitHub Token (gho_...)">
+      <button class="sync-btn" onclick="saveSyncToken()">开启同步</button>
+    </div>
+    <div class="admin-section">
+      <div class="section-title">🎄 纪念日管理</div>
+      <div class="anniv-list" id="adminAnnivList"></div>
+      <button class="add-anniv-btn" onclick="showAnnivForm()">✚ 添加纪念日</button>
+      <div class="anniv-edit-form" id="adminAnnivForm" style="margin-top:8px">
+        <input type="text" id="adminNewAnnivName" placeholder="名称">
+        <input type="date" id="adminNewAnnivDate">
+        <div class="btns">
+          <button class="save" onclick="adminSaveAnniv()">保存</button>
+          <button class="cancel" onclick="document.getElementById('adminAnnivForm').classList.remove('active')">取消</button>
+        </div>
+      </div>
+    </div>
+    <button class="add-friend-btn" onclick="addFriend()">➕ 新增朋友</button>
+    <div class="friend-list" id="friendList"></div>
+    <div class="edit-form" id="editForm">
+      <input type="hidden" id="editIndex">
+      <input type="text" id="editAvatar" placeholder="头像 (emoji)">
+      <input type="text" id="editName" placeholder="名字">
+      <input type="text" id="editTag" placeholder="标签">
+      <input type="date" id="editMeetDate">
+      <input type="text" id="editSecretCode" placeholder="暗号">
+      <textarea id="editMessage" placeholder="公开消息"></textarea>
+      <textarea id="editSecretMessage" placeholder="暗号消息"></textarea>
+      <div class="btns">
+        <button class="save" onclick="saveFriend()">保存</button>
+        <button class="cancel" onclick="cancelEdit()">取消</button>
+        <button class="del-btn" onclick="deleteFriendFromForm()">🗑️</button>
+      </div>
+    </div>
+    <button class="export-btn" onclick="copyData()">📋 复制全部数据</button>
+  </div>
+</div>
+
+<!-- 弹窗 -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="m-avatar" id="m-avatar"></div>
+    <div class="m-name" id="m-name"></div>
+    <div class="m-tag" id="m-tag"></div>
+    <div class="m-days" id="m-days"></div>
+    <div class="m-text" id="m-text"></div>
+    <button class="close-btn" onclick="document.getElementById('modal').classList.remove('active')">收到 💕</button>
+  </div>
+</div>
+
+<!-- 秘密弹窗 -->
+<div class="modal-overlay" id="secretModal" onclick="closeSecret(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="m-avatar">🎁</div>
+    <div class="m-name" id="s-title">惊喜时刻！</div>
+    <div class="m-text" id="s-text"></div>
+    <button class="close-btn" onclick="document.getElementById('secretModal').classList.remove('active')">太棒了 ✨</button>
+  </div>
+</div>
+
+<!-- 私密信弹窗 -->
+<div class="modal-overlay" id="letterModal" onclick="closeLetterModal(event)">
+  <div class="modal" onclick="event.stopPropagation()" style="padding:20px;max-width:360px">
+    <div style="font-size:1.4rem;margin-bottom:4px">💌</div>
+    <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:12px">写一封私密信</div>
+    <select class="letter-modal-select" id="letterFriendSelect"></select>
+    <input type="text" class="letter-modal-input" id="letterSubjectInput" placeholder="信件标题...">
+    <textarea class="letter-modal-textarea" id="letterContentInput" placeholder="写下想说的话..."></textarea>
+    <button class="letter-modal-save" onclick="saveLetter()">💾 发送</button>
+  </div>
+</div>
+
+<!-- MBTI 问答弹窗 -->
+<div class="modal-overlay" id="quizModal">
+  <div class="modal">
+    <div class="q-number" id="qNumber" style="font-size:0.7rem;color:var(--text-muted);margin-bottom:8px">第 1/20 题</div>
+    <div class="q-text" id="qText" style="font-size:1rem;color:var(--text);margin-bottom:16px;font-weight:600;line-height:1.6">问题内容</div>
+    <div class="options" id="qOptions"></div>
+    <button class="close-q" onclick="closeQuiz()" style="margin-top:14px;width:100%;padding:8px;border:none;border-radius:8px;background:var(--bg-2);color:var(--text-secondary);cursor:pointer;font-size:0.75rem">关闭</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// 全局数据
+// ============================================================
+let friends = [];
+let messages = [];
+let wishes = [];
+
+// Gist 配置
+const GIST_ID = 'cf38eea9cb4db23811ff60fdd6d6cec3';
+const GIST_API = 'https://api.github.com/gists/' + GIST_ID;
+const GIST_RAW = `https://gist.githubusercontent.com/heart-sorry/${GIST_ID}/raw/data.json`;
+const GIST_TOKEN = '';
+
+const ADMIN_PASSWORD = '5201314';
+
+// ============================================================
+// Toast 通知系统
+// ============================================================
+function showToast(msg, type = 'info', icon = '') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  const icons = { success: '✅', error: '❌', info: '💡' };
+  toast.innerHTML = `<span>${icon || icons[type] || '•'}</span><span>${msg}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3200);
+}
+
+// ============================================================
+// 浮游粒子
+// ============================================================
+function initParticles() {
+  const container = document.getElementById('particles');
+  const colors = ['#f9a8d4','#c4b5fd','#86efac','#fde68a','#93c5fd','#fca5a5'];
+  const particleCount = Math.min(20, Math.floor(window.innerWidth / 80));
+  for (let i = 0; i < particleCount; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 8 + 4;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    p.style.cssText = `width:${size}px;height:${size}px;background:${color};left:${Math.random() * 100}%;animation-duration:${Math.random() * 15 + 10}s;animation-delay:${Math.random() * 15}s`;
+    container.appendChild(p);
+  }
+}
+function toggleParticlesEffect() {
+  const checked = document.getElementById('toggleParticles').checked;
+  document.getElementById('particles').style.display = checked ? 'block' : 'none';
+}
+
+// ============================================================
+// 每日一言
+// ============================================================
+const QUOTES = [
+  { text: '"生活不是等待风暴过去，而是学会在雨中起舞。"', source: '维维安·格林' },
+  { text: '"爱不是彼此凝视，而是一起望向同一个方向。"', source: '安托万·德·圣埃克苏佩里' },
+  { text: '"世界上最好的事情，就是和你一起虚度光阴。"', source: '李健' },
+  { text: '"相遇是春风十里，原来是你。"', source: '佚名' },
+  { text: '"山有木兮木有枝，心悦君兮君不知。"', source: '越人歌' },
+  { text: '"愿我如星君如月，夜夜流光相皎洁。"', source: '范成大' },
+  { text: '"从前的日色变得慢，车马邮件都慢，一生只够爱一个人。"', source: '木心' },
+  { text: '"我们终此一生，就是要摆脱他人的期待，找到真正的自己。"', source: '无声告白' },
+  { text: '"人生若只如初见，何事秋风悲画扇。"', source: '纳兰性德' },
+  { text: '"我会化作人间的风雨，永远陪在你身边。"', source: '大鱼海棠' },
+  { text: '"遇见你之前，我没想过结婚。遇见你之后，结婚我没想过别人。"', source: '钱钟书' },
+  { text: '"你那么憎恨那些人，和他们斗了那么久，最终却变得和他们一样。"', source: '麦田里的守望者' },
+  { text: '"温柔半两，从容一生。"', source: '三毛' },
+  { text: '"所有的大人都曾经是小孩，虽然，只有少数的人记得。"', source: '小王子' },
+  { text: '"我们听过无数的道理，却仍旧过不好这一生。"', source: '韩寒' },
+  { text: '"人间烟火气，最抚凡人心。"', source: '佚名' },
+  { text: '"总有一天，你会对着过去微笑。"', source: '追风筝的人' },
+  { text: '"有些事不是看到了希望才去坚持，而是因为坚持才会看到希望。"', source: '人民日报' },
+  { text: '"你那么温柔，走路的时候都觉得是在发光。"', source: '佚名' },
+  { text: '"世界很大，幸福很小，有你在刚刚好。"', source: '佚名' },
+];
+let quoteIndex = 0;
+function showQuote() {
+  const saved = localStorage.getItem('quote_index');
+  if (saved !== null) quoteIndex = parseInt(saved);
+  renderQuote();
+}
+function nextQuote() {
+  quoteIndex = (quoteIndex + 1) % QUOTES.length;
+  localStorage.setItem('quote_index', quoteIndex);
+  renderQuote();
+}
+function renderQuote() {
+  const q = QUOTES[quoteIndex];
+  document.getElementById('quoteText').textContent = q.text;
+  document.getElementById('quoteSource').textContent = '—— ' + q.source;
+}
+
+// ============================================================
+// 存储工具
+// ============================================================
+function getLocal(key, fallback) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch { return fallback; }
+}
+function setLocal(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+function getPending() { return getLocal('msgs_pending', []); }
+function setPending(list) { setLocal('msgs_pending', list); }
+function addPending(item) {
+  const p = getPending();
+  if (!p.find(x => x.id === item.id)) p.push(item);
+  setPending(p);
+}
+
+function getMessages() { return getLocal('msgs', []); }
+function setMessages(list) { setLocal('msgs', list); }
+function getFriends() { return getLocal('friends', []); }
+function setFriends(list) { setLocal('friends', list); }
+function getWishes() { return getLocal('wishes', []); }
+function setWishes(list) { setLocal('wishes', list); }
+function getAnniversaries() { return getLocal('anniversaries', []); }
+function setAnniversaries(list) { setLocal('anniversaries', list); }
+function getSettings() { return getLocal('settings', {}); }
+function getLetters() { return getLocal('letters', []); }
+function setLetters(list) { setLocal('letters', list); }
+function getCheckinData() { return getLocal('checkin_data', {}); }
+function saveCheckinData(data) { setLocal('checkin_data', data); }
+
+// ============================================================
+// 设置
+// ============================================================
+function saveSetting(key, val) {
+  const s = getSettings();
+  s[key] = val;
+  setLocal('settings', s);
+}
+
+function applySettings() {
+  const s = getSettings();
+  if (s.theme) {
+    document.documentElement.setAttribute('data-theme', s.theme);
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById('theme' + s.theme.charAt(0).toUpperCase() + s.theme.slice(1));
+    if (btn) btn.classList.add('active');
+  }
+  const nickInput = document.getElementById('settingNickname');
+  if (nickInput && s.nickname) {
+    nickInput.value = s.nickname;
+    const nameInput = document.getElementById('msgName');
+    if (nameInput && !nameInput.value) nameInput.value = s.nickname;
+  }
+  const mbtiInput = document.getElementById('settingMbti');
+  if (mbtiInput && s.mbti) mbtiInput.value = s.mbti;
+  if (s.particles === false) {
+    document.getElementById('particles').style.display = 'none';
+    const cb = document.getElementById('toggleParticles');
+    if (cb) cb.checked = false;
+  }
+  if (s.mbti) {
+    const badge = document.getElementById('mbtiBadge');
+    if (badge) { badge.textContent = s.mbti; badge.style.display = 'block'; }
+  }
+}
+
+function setTheme(theme) {
+  if (theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    saveSetting('theme', theme);
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    saveSetting('theme', '');
+  }
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  showToast('主题已切换', 'success');
+}
+
+function toggleSettings() {
+  document.getElementById('settingsPanel').classList.toggle('active');
+}
+
+// ============================================================
+// 帘子开场
+// ============================================================
+function openCurtain() {
+  document.getElementById('curtain').classList.add('hidden');
+  document.getElementById('mainContainer').classList.add('visible');
+  autoPlayMusic();
+  localStorage.setItem('curtain_shown', new Date().toDateString());
+}
+(function checkCurtain() {
+  const shown = localStorage.getItem('curtain_shown');
+  if (shown === new Date().toDateString()) {
+    document.getElementById('curtain').classList.add('hidden');
+    document.getElementById('mainContainer').classList.add('visible');
+  }
+})();
+
+// ============================================================
+// 时段问候语
+// ============================================================
+const GREETINGS = [
+  { after: 23, text: '夜深了，早点休息哦 🌙' },
+  { after: 21, text: '晚安，今晚做个好梦 💤' },
+  { after: 18, text: '傍晚好，吃了吗？🍽️' },
+  { after: 14, text: '下午好，辛苦了 ☕' },
+  { after: 11, text: '中午好，吃饱了吗 🍜' },
+  { after: 8,  text: '上午好 ☀️' },
+  { after: 6,  text: '早安，又是新的一天 🌅' },
+  { after: 0,  text: '你好呀 👋' }
+];
+function getGreeting() {
+  const hour = new Date().getHours();
+  for (const g of GREETINGS) { if (hour >= g.after) return g.text; }
+  return '你好呀 👋';
+}
+function showGreeting() {
+  const bar = document.getElementById('greetingBar');
+  if (!bar) return;
+  const days = ['日','一','二','三','四','五','六'];
+  const now = new Date();
+  bar.textContent = getGreeting() + ' · 星期' + days[now.getDay()] + ' · ' +
+    (now.getMonth()+1) + '月' + now.getDate() + '日';
+}
+
+// ============================================================
+// 心情记录
+// ============================================================
+const MOODS = [
+  { emoji: '😊', label: '开心' }, { emoji: '🥰', label: '心动' },
+  { emoji: '😢', label: '难过' }, { emoji: '😡', label: '生气' },
+  { emoji: '😴', label: '疲惫' }, { emoji: '🤔', label: '思考' },
+  { emoji: '😎', label: '得意' }, { emoji: '🥳', label: '兴奋' }
+];
+function getMoodData() { return getLocal('mood_data', {}); }
+function saveMoodData(data) { setLocal('mood_data', data); }
+function getTodayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+function showMood() {
+  const choices = document.getElementById('moodChoices');
+  const today = document.getElementById('moodToday');
+  const history = document.getElementById('moodHistory');
+  if (!choices) return;
+
+  // 渲染按钮
+  const todayMood = getMoodData()[getTodayKey()];
+  choices.innerHTML = MOODS.map(m => {
+    const sel = todayMood && todayMood.emoji === m.emoji ? 'selected' : '';
+    return `<button class="mood-btn ${sel}" onclick="saveMood('${m.emoji}')" title="${m.label}">${m.emoji}</button>`;
+  }).join('');
+
+  if (todayMood) {
+    const mood = MOODS.find(m => m.emoji === todayMood.emoji);
+    today.textContent = `今天：${mood ? mood.emoji + ' ' + mood.label : todayMood.emoji}`;
+  } else {
+    today.textContent = '';
+  }
+
+  // 历史（最近7天）
+  const data = getMoodData();
+  const now = new Date();
+  history.innerHTML = '';
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+    const entry = data[key];
+    const day = d.getDate();
+    const el = document.createElement('div');
+    el.className = 'mood-dot';
+    el.innerHTML = `<span>${entry ? entry.emoji : '·'}</span><span class="day">${day}</span>`;
+    history.appendChild(el);
+  }
+}
+function saveMood(emoji) {
+  const data = getMoodData();
+  const mood = MOODS.find(m => m.emoji === emoji);
+  data[getTodayKey()] = { emoji, label: mood ? mood.label : emoji };
+  saveMoodData(data);
+  showMood();
+  showToast(`今天的心情：${emoji} ${mood ? mood.label : ''}`, 'success');
+}
+
+// ============================================================
+// 音乐播放器
+// ============================================================
+let audio = null;
+function toggleMusic() {
+  if (!audio) {
+    audio = new Audio('./music.mp3');
+    audio.addEventListener('timeupdate', () => {
+      const t = document.getElementById('musicTime');
+      if (t) {
+        const m = Math.floor(audio.currentTime / 60);
+        const s = Math.floor(audio.currentTime % 60);
+        t.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+      }
+    });
+    audio.addEventListener('ended', () => {
+      const btn = document.getElementById('playBtn');
+      const title = document.getElementById('musicTitle');
+      if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
+      if (title) title.textContent = '🎵 点击播放';
+    });
+  }
+  if (audio.paused) {
+    audio.play().catch(() => {
+      const title = document.getElementById('musicTitle');
+      if (title) title.textContent = '🎵 音乐加载中...';
+    });
+    const btn = document.getElementById('playBtn');
+    const title = document.getElementById('musicTitle');
+    if (btn) { btn.textContent = '⏸'; btn.classList.add('playing'); }
+    if (title) title.textContent = '🎵 鸟之诗';
+  } else {
+    audio.pause();
+    const btn = document.getElementById('playBtn');
+    const title = document.getElementById('musicTitle');
+    if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
+    if (title) title.textContent = '🎵 已暂停';
+  }
+}
+function autoPlayMusic() {
+  setTimeout(() => toggleMusic(), 500);
+}
+
+// ============================================================
+// 纪念日
+// ============================================================
+function getAnniversaries() { return getLocal('anniversaries', []); }
+function setAnniversaries(list) { setLocal('anniversaries', list); }
+function showAnniversary() {
+  const annivs = getAnniversaries();
+  const now = new Date();
+  let next = null, minDays = Infinity;
+
+  for (const a of annivs) {
+    let target = new Date(a.date);
+    if (target <= now) {
+      target.setFullYear(now.getFullYear() + 1);
+    }
+    const days = Math.ceil((target - now) / 86400000);
+    if (days < minDays) { minDays = days; next = a; next._days = days; next._next = target; }
+  }
+
+  const title = document.getElementById('annivTitle');
+  const countdown = document.getElementById('countdown');
+  const nextEl = document.getElementById('annivNext');
+
+  if (next) {
+    if (title) title.textContent = (next.emoji || '🎄') + ' ' + next.name;
+    if (countdown) countdown.textContent = next._days;
+    if (nextEl) {
+      const month = next._next.getMonth() + 1;
+      const day = next._next.getDate();
+      nextEl.textContent = `${month}月${day}日 还有 ${next._days} 天`;
+    }
+  } else {
+    if (title) title.textContent = '🎄 圣诞节';
+    if (countdown) countdown.textContent = '--';
+    if (nextEl) nextEl.textContent = '';
+  }
+
+  // 编辑列表
+  const list = document.getElementById('annivList');
+  if (list) {
+    list.innerHTML = annivs.map((a, i) => {
+      const d = new Date(a.date);
+      const days = Math.ceil((d - now) / 86400000);
+      return `<div class="anniv-item" onclick="selectAnniv(${i})">
+        <span class="emoji">${a.emoji || '🎄'}</span>
+        <span class="name">${a.name}</span>
+        <span class="days">${Math.abs(days)}天</span>
+        <span class="del" onclick="event.stopPropagation(); deleteAnniv(${i})">✕</span>
+      </div>`;
+    }).join('');
+  }
+}
+function selectAnniv(i) {
+  const annivs = getAnniversaries();
+  const a = annivs[i];
+  const now = new Date();
+  let target = new Date(a.date);
+  if (target <= now) target.setFullYear(now.getFullYear() + 1);
+  annivs.unshift(annivs.splice(i, 1)[0]);
+  setAnniversaries(annivs);
+  showAnniversary();
+}
+function deleteAnniv(i) {
+  const annivs = getAnniversaries();
+  annivs.splice(i, 1);
+  setAnniversaries(annivs);
+  showAnniversary();
+  showToast('已删除', 'info');
+}
+function saveAnniv() {
+  const name = document.getElementById('newAnnivName').value.trim();
+  const date = document.getElementById('newAnnivDate').value;
+  if (!name || !date) { showToast('请填写名称和日期', 'error'); return; }
+  const annivs = getAnniversaries();
+  const emojis = ['🎄', '🎉', '💕', '🌸', '⭐', '🎂', '✈️', '📚'];
+  annivs.push({ name, date, emoji: emojis[annivs.length % emojis.length] });
+  setAnniversaries(annivs);
+  document.getElementById('newAnnivName').value = '';
+  document.getElementById('newAnnivDate').value = '';
+  showAnniversary();
+  showToast('纪念日已添加', 'success');
+}
+function toggleAnnivEdit(e) {
+  if (e) e.stopPropagation();
+  document.getElementById('annivEditForm').classList.toggle('active');
+}
+function showAnnivForm() {
+  document.getElementById('adminAnnivForm').classList.toggle('active');
+}
+function adminSaveAnniv() {
+  const name = document.getElementById('adminNewAnnivName').value.trim();
+  const date = document.getElementById('adminNewAnnivDate').value;
+  if (!name || !date) { showToast('请填写名称和日期', 'error'); return; }
+  const annivs = getAnn

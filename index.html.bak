@@ -767,18 +767,33 @@ const GIST_RAW = `https://gist.githubusercontent.com/heart-sorry/${GIST_ID}/raw/
 const GIST_TOKEN = ''; // Token 从 GitHub Secrets 注入
 
 // 读取本地待同步队列
+function getPending() {
+  try { return JSON.parse(localStorage.getItem('msgs_pending') || '[]'); }
+  catch { return []; }
+}
 
-
-
-
+function setPending(list) { localStorage.setItem('msgs_pending', JSON.stringify(list)); }
+function addPending(item) {
+  const p = getPending();
+  if (!p.find(x => x.id === item.id)) {
+    p.push(item);
+    setPending(p);
+  }
+}
 
 // 留言存取
-
-
+function getMessages() {
+  try { return JSON.parse(localStorage.getItem('msgs') || '[]'); }
+  catch { return []; }
+}
+function setMessages(list) { localStorage.setItem('msgs', JSON.stringify(list)); }
 
 // 朋友存取
-
-
+function getFriends() {
+  try { return JSON.parse(localStorage.getItem('friends') || '[]'); }
+  catch { return []; }
+}
+function setFriends(list) { localStorage.setItem('friends', JSON.stringify(list)); }
 
 // ==================== 时段问候语 ====================
 const GREETINGS = [
@@ -877,18 +892,103 @@ function recordMood(index) {
   saveMoodData(data);
   showMood();
 }
-
-
+function setPending(list) {
+  localStorage.setItem('msgs_pending', JSON.stringify(list));
+}
+function addPending(msg) {
+  const p = getPending();
+  // 去重
+  if (!p.find(m => m.id === msg.id)) p.push(msg);
+  setPending(p);
+}
 
 // 同步到 Gist（静默后台运行）
 // 推送完整数据（留言+朋友）到 Gist
-async 
+async function pushToGist() {
+  const token = localStorage.getItem('gist_token') || GIST_TOKEN;
+  if (!token) return false;
+  try {
+    const data = { messages, friends, updatedAt: new Date().toISOString() };
+    const res = await fetch(GIST_API, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: 'fun-data', files: { 'data.json': { content: JSON.stringify(data) } } })
+    });
+    return res.ok;
+  } catch (e) { return false; }
+}
 
 // 自动同步：页面加载时静默执行，把待同步消息推上去
-async 
+async function autoSync() {
+  const token = localStorage.getItem('gist_token') || GIST_TOKEN;
+  if (!token) return;
+
+  const pending = getPending();
+  if (pending.length === 0) return;
+
+  try {
+    const res = await fetch(GIST_RAW + '?t=' + Date.now());
+    if (res.ok) {
+      const cloud = await res.json();
+      const cloudMessages = Array.isArray(cloud) ? cloud : (cloud.messages || []);
+      const cloudFriends = cloud.friends || friends;
+      const cloudIds = new Set(cloudMessages.map(m => m.id));
+      const newOnes = pending.filter(m => !cloudIds.has(m.id));
+      if (newOnes.length > 0) {
+        messages = [...newOnes, ...cloudMessages].slice(0, 200);
+        friends = cloudFriends;
+        if (await pushToGist()) {
+          setPending([]);
+          renderMessages();
+          renderFriends();
+        }
+      }
+    }
+  } catch (e) {}
+}
 
 // 加载数据：留言 + 朋友（优先云端，本地作为备份）
-async 
+async function loadData() {
+  // 1. 先尝试从本地读取（离线时可用）
+  const localMsgs = getMessages();
+  const localFriends = getFriends();
+  if (localMsgs.length > 0) messages = localMsgs;
+  if (localFriends.length > 0) friends = localFriends;
+
+  // 2. 尝试从云端加载（会覆盖本地 + 合并待同步）
+  try {
+    const res = await fetch(GIST_RAW + '?t=' + Date.now());
+    if (res.ok) {
+      const cloud = await res.json();
+
+      // 新格式：{ messages: [...], friends: [...] }
+      if (cloud.messages) {
+        // 云端有数据则优先用云端
+        messages = cloud.messages;
+        friends = cloud.friends || friends;
+        // 保存到本地缓存
+        setMessages(messages);
+        setFriends(friends);
+        renderMessages();
+        renderFriends();
+        // 后台静默同步（合并本地待同步消息）
+        autoSync();
+        return;
+      }
+
+      // 兼容旧格式（纯数组 = 纯留言）
+      if (Array.isArray(cloud)) {
+        messages = cloud;
+        setMessages(messages);
+        renderMessages();
+      }
+    }
+  } catch (e) {}
+
+  // 3. 纯离线：渲染本地数据
+  renderMessages();
+  renderFriends();
+}
 
 // 保存朋友数据（本地 + 自动同步 Gist）
 async function saveFriends() {
@@ -1051,7 +1151,7 @@ function openCurtain() {
   // 显示内容
   setTimeout(() => {
     document.getElementById('mainContainer').classList.add('visible');
-    showGreeting(); loadData();
+    showGreeting();
     showMood();
   }, 300);
 }
@@ -1312,27 +1412,19 @@ function submitMessage() {
   }
   
   const now = new Date();
-  const id = Date.now().toString(36) + Math.random().toString(36).substr(2);
   const time = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
   
-  const msg = { id, name, text, time };
+  // 添加留言
+  addMessage(name, text, time);
   
-  // 1. 先存本地
-  messages.unshift(msg);
-  setMessages(messages);
+  // 重新渲染留言板
   renderMessages();
-  
-  // 2. 加入待同步队列
-  addPending(msg);
-  
-  // 3. 尝试自动同步
-  setTimeout(() => autoSync(), 500);
   
   // 清空输入
   document.getElementById('msgName').value = '';
   document.getElementById('msgText').value = '';
   
-  showToast('留言成功！💕 已加入同步队列', 'success');
+  alert('留言成功！💕');
 }
 
 // 同步设置
@@ -1456,110 +1548,6 @@ function copyData() {
     alert('✅ 已复制！发给我帮你更新～');
   });
 }
-
-
-// ============================================================
-// 数据同步 (Gist)
-// ============================================================
-function getPending() {
-  try { return JSON.parse(localStorage.getItem('msgs_pending') || '[]'); }
-  catch { return []; }
-}
-function setPending(list) { localStorage.setItem('msgs_pending', JSON.stringify(list)); }
-function addPending(item) {
-  const p = getPending();
-  if (!p.find(x => x.id === item.id)) {
-    p.push(item);
-    setPending(p);
-  }
-}
-
-function pushToGist() {
-  const token = localStorage.getItem('gist_token') || GIST_TOKEN;
-  if (!token) { console.log('No token'); return false; }
-  try {
-    const data = { messages, friends, updatedAt: new Date().toISOString() };
-    const res = await fetch(GIST_API, {
-      method: 'PATCH',
-      headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description: 'fun-data', files: { 'data.json': { content: JSON.stringify(data) } } })
-    });
-    console.log('pushToGist result:', res.ok);
-    return res.ok;
-  } catch (e) { console.error('pushToGist error:', e); return false; }
-}
-
-function autoSync() {
-  const token = localStorage.getItem('gist_token') || GIST_TOKEN;
-  if (!token) return;
-  const pending = getPending();
-  if (pending.length === 0) return;
-  try {
-    const res = await fetch(GIST_RAW + '?t=' + Date.now());
-    if (res.ok) {
-      const cloud = await res.json();
-      const cloudMessages = Array.isArray(cloud) ? cloud : (cloud.messages || []);
-      const cloudFriends = cloud.friends || friends;
-      const cloudIds = new Set(cloudMessages.map(m => m.id));
-      const newOnes = pending.filter(m => !cloudIds.has(m.id));
-      if (newOnes.length > 0) {
-        messages = [...newOnes, ...cloudMessages].slice(0, 200);
-        friends = cloudFriends;
-        if (await pushToGist()) {
-          setPending([]);
-          renderMessages();
-          renderFriends();
-          showToast('已同步到云端', 'success');
-        }
-      }
-    }
-  } catch (e) { console.error('autoSync error:', e); }
-}
-
-function loadData() {
-  const localMsgs = getMessages();
-  const localFriends = getFriends();
-  if (localMsgs.length > 0) messages = localMsgs;
-  if (localFriends.length > 0) friends = localFriends;
-  try {
-    const res = await fetch(GIST_RAW + '?t=' + Date.now());
-    if (res.ok) {
-      const cloud = await res.json();
-      if (cloud.messages) {
-        messages = cloud.messages;
-        friends = cloud.friends || friends;
-        setMessages(messages);
-        setFriends(friends);
-        renderMessages();
-        renderFriends();
-        autoSync();
-        return;
-      }
-      if (Array.isArray(cloud)) {
-        messages = cloud;
-        setMessages(messages);
-        renderMessages();
-      }
-    }
-  } catch (e) { console.error('loadData error:', e); }
-  renderMessages();
-  renderFriends();
-}
-
-function getMessages() {
-  try { return JSON.parse(localStorage.getItem('msgs') || '[]'); }
-  catch { return []; }
-}
-function setMessages(list) { localStorage.setItem('msgs', JSON.stringify(list)); }
-function getFriends() {
-  try { return JSON.parse(localStorage.getItem('friends') || '[]'); }
-  catch { return []; }
-}
-function setFriends(list) { localStorage.setItem('friends', JSON.stringify(list)); }
-
 </script>
 </body>
-</html>
-
-<script>loadData();</script>
 </html>
