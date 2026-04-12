@@ -1461,6 +1461,7 @@ function showAdmin() {
   hintEl.style.display = 'none';
   adminPanel.classList.add('active');
   renderFriends();
+  renderMessages(); // 重新渲染留言，显示删除按钮
   
   // 显示同步状态
   const token = localStorage.getItem('gist_token');
