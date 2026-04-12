@@ -703,7 +703,7 @@
   </div>
 
   <div class="admin-link">
-    <button class="admin-link-btn" onclick="showAdmin()">⚙️ 管理</button>
+    <button class="admin-link-btn" onclick="promptAdminPassword()">⚙️ 管理</button>
   </div>
 </div>
 
@@ -1408,6 +1408,15 @@ function saveSyncToken() {
   document.getElementById('syncStatus').classList.add('active');
   document.getElementById('gistToken').value = '';
   alert('✅ 同步已开启！你的留言将自动保存到云端');
+}
+
+function promptAdminPassword() {
+  const input = prompt('请输入管理密码：');
+  if (input === ADMIN_PASSWORD) {
+    showAdmin();
+  } else if (input !== null) {
+    alert('密码错误');
+  }
 }
 
 function showAdmin() {
