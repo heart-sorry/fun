@@ -6,7 +6,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -21,7 +21,14 @@ jobs:
 
       - name: Inject Gist Token
         run: |
-          sed -i "s/const GIST_TOKEN = '';/const GIST_TOKEN = '${{ secrets.GIST_TOKEN }}';/" index.html
+          if [ -z "$GIST_TOKEN" ]; then
+            echo "Warning: GIST_TOKEN secret not set, leaving empty"
+          else
+            sed -i "s/const GIST_TOKEN = '';/const GIST_TOKEN = '$GIST_TOKEN';/" index.html
+            echo "Token injected: ${GIST_TOKEN:0:4}..."
+          fi
+        env:
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
