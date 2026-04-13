@@ -766,20 +766,37 @@ const GIST_API = 'https://api.github.com/gists/' + GIST_ID;
 const GIST_RAW = `https://gist.githubusercontent.com/heart-sorry/${GIST_ID}/raw/data.json`;
 const GIST_TOKEN = ''; // Token 从 GitHub Secrets 注入 v2
 
-// 读取本地待同步队列
+// Pending queue
+function getPending() {
+  try { return JSON.parse(localStorage.getItem('msgs_pending') || '[]'); }
+  catch { return []; }
+}
+function setPending(arr) {
+  localStorage.setItem('msgs_pending', JSON.stringify(arr));
+}
+function addPending(msg) {
+  const p = getPending();
+  if (!p.find(m => m.id === msg.id)) p.push(msg);
+  setPending(p);
+}
 
+// Messages
+function getMessages() {
+  try { return JSON.parse(localStorage.getItem('msgs') || '[]'); }
+  catch { return []; }
+}
+function setMessages(arr) {
+  localStorage.setItem('msgs', JSON.stringify(arr));
+}
 
-
-
-
-// 留言存取
-
-
-
-// 朋友存取
-
-
-
+// Friends
+function getFriends() {
+  try { return JSON.parse(localStorage.getItem('friends') || '[]'); }
+  catch { return []; }
+}
+function setFriends(arr) {
+  localStorage.setItem('friends', JSON.stringify(arr));
+}
 // ==================== 时段问候语 ====================
 const GREETINGS = [
   { after: 23, text: '夜深了，早点休息哦 🌙' },
@@ -882,14 +899,75 @@ function recordMood(index) {
 
 // 同步到 Gist（静默后台运行）
 // 推送完整数据（留言+朋友）到 Gist
-async 
+async function pushToGist() {
+  const token = localStorage.getItem('gist_token') || GIST_TOKEN;
+  if (!token) return false;
+  try {
+    const data = { messages, friends, updatedAt: new Date().toISOString() };
+    const res = await fetch(GIST_API, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: 'fun-data', files: { 'data.json': { content: JSON.stringify(data) } } })
+    });
+    return res.ok;
+  } catch (e) { return false; }
+}
 
-// 自动同步：页面加载时静默执行，把待同步消息推上去
-async 
+async function autoSync() {
+  const token = localStorage.getItem('gist_token') || GIST_TOKEN;
+  if (!token) return;
+  const pending = getPending();
+  if (pending.length === 0) return;
+  try {
+    const res = await fetch(GIST_RAW + '?t=' + Date.now());
+    if (res.ok) {
+      const cloud = await res.json();
+      const cloudMessages = Array.isArray(cloud) ? cloud : (cloud.messages || []);
+      const cloudFriends = cloud.friends || friends;
+      const cloudIds = new Set(cloudMessages.map(m => m.id));
+      const newOnes = pending.filter(m => !cloudIds.has(m.id));
+      if (newOnes.length > 0) {
+        messages = [...newOnes, ...cloudMessages].slice(0, 200);
+        friends = cloudFriends;
+        if (await pushToGist()) {
+          setPending([]);
+          renderMessages();
+          renderFriends();
+        }
+      }
+    }
+  } catch (e) {}
+}
 
-// 加载数据：留言 + 朋友（优先云端，本地作为备份）
-async 
-
+async function loadData() {
+  const localMsgs = getMessages();
+  const localFriends = getFriends();
+  if (localMsgs.length > 0) messages = localMsgs;
+  if (localFriends.length > 0) friends = localFriends;
+  try {
+    const res = await fetch(GIST_RAW + '?t=' + Date.now());
+    if (res.ok) {
+      const cloud = await res.json();
+      if (cloud.messages) {
+        messages = cloud.messages;
+        friends = cloud.friends || friends;
+        setMessages(messages);
+        setFriends(friends);
+        renderMessages();
+        renderFriends();
+        autoSync();
+        return;
+      }
+      if (Array.isArray(cloud)) {
+        messages = cloud;
+        setMessages(messages);
+        renderMessages();
+      }
+    }
+  } catch (e) {}
+  renderMessages();
+  renderFriends();
+}
 // 保存朋友数据（本地 + 自动同步 Gist）
 async function saveFriends() {
   localStorage.setItem('friends', JSON.stringify(friends));
@@ -1457,109 +1535,6 @@ function copyData() {
   });
 }
 
-
-// ============================================================
-// 数据同步 (Gist)
-// ============================================================
-function getPending() {
-  try { return JSON.parse(localStorage.getItem('msgs_pending') || '[]'); }
-  catch { return []; }
-}
-function setPending(list) { localStorage.setItem('msgs_pending', JSON.stringify(list)); }
-function addPending(item) {
-  const p = getPending();
-  if (!p.find(x => x.id === item.id)) {
-    p.push(item);
-    setPending(p);
-  }
-}
-
-function pushToGist() {
-  const token = localStorage.getItem('gist_token') || GIST_TOKEN;
-  if (!token) { console.log('No token'); return false; }
-  try {
-    const data = { messages, friends, updatedAt: new Date().toISOString() };
-    const res = await fetch(GIST_API, {
-      method: 'PATCH',
-      headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description: 'fun-data', files: { 'data.json': { content: JSON.stringify(data) } } })
-    });
-    console.log('pushToGist result:', res.ok);
-    return res.ok;
-  } catch (e) { console.error('pushToGist error:', e); return false; }
-}
-
-function autoSync() {
-  const token = localStorage.getItem('gist_token') || GIST_TOKEN;
-  if (!token) return;
-  const pending = getPending();
-  if (pending.length === 0) return;
-  try {
-    const res = await fetch(GIST_RAW + '?t=' + Date.now());
-    if (res.ok) {
-      const cloud = await res.json();
-      const cloudMessages = Array.isArray(cloud) ? cloud : (cloud.messages || []);
-      const cloudFriends = cloud.friends || friends;
-      const cloudIds = new Set(cloudMessages.map(m => m.id));
-      const newOnes = pending.filter(m => !cloudIds.has(m.id));
-      if (newOnes.length > 0) {
-        messages = [...newOnes, ...cloudMessages].slice(0, 200);
-        friends = cloudFriends;
-        if (await pushToGist()) {
-          setPending([]);
-          renderMessages();
-          renderFriends();
-          showToast('已同步到云端', 'success');
-        }
-      }
-    }
-  } catch (e) { console.error('autoSync error:', e); }
-}
-
-function loadData() {
-  const localMsgs = getMessages();
-  const localFriends = getFriends();
-  if (localMsgs.length > 0) messages = localMsgs;
-  if (localFriends.length > 0) friends = localFriends;
-  try {
-    const res = await fetch(GIST_RAW + '?t=' + Date.now());
-    if (res.ok) {
-      const cloud = await res.json();
-      if (cloud.messages) {
-        messages = cloud.messages;
-        friends = cloud.friends || friends;
-        setMessages(messages);
-        setFriends(friends);
-        renderMessages();
-        renderFriends();
-        autoSync();
-        return;
-      }
-      if (Array.isArray(cloud)) {
-        messages = cloud;
-        setMessages(messages);
-        renderMessages();
-      }
-    }
-  } catch (e) { console.error('loadData error:', e); }
-  renderMessages();
-  renderFriends();
-}
-
-function getMessages() {
-  try { return JSON.parse(localStorage.getItem('msgs') || '[]'); }
-  catch { return []; }
-}
-function setMessages(list) { localStorage.setItem('msgs', JSON.stringify(list)); }
-function getFriends() {
-  try { return JSON.parse(localStorage.getItem('friends') || '[]'); }
-  catch { return []; }
-}
-function setFriends(list) { localStorage.setItem('friends', JSON.stringify(list)); }
-
 </script>
 </body>
-</html>
-
-<script>loadData();</script>
 </html>
