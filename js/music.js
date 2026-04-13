@@ -1,9 +1,10 @@
 /*
 音乐信息
 
-感谢 @武恩赐 提供的 MetingAPI
-https://api.wuenci.com/meting/api/
+感谢 @imsyy 提供的 MetingAPI
+https://github.com/imsyy/home
 
+API: api.injahow.cn (替换已失效的 api.wuenci.com)
 作者: imsyy
 主页：https://www.imsyy.top/
 GitHub：https://github.com/imsyy/home
@@ -14,7 +15,7 @@ let type = "playlist"; //song: 单曲; playlist: 歌单; album: 唱片
 let id = "2751969066"; //封面 ID / 单曲 ID / 歌单 ID
 
 $.ajax({
-    url: "https://api.wuenci.com/meting/api/?server=" + server + "&type=" + type + "&id=" + id,
+    url: "https://api.injahow.cn/meting/?server=" + server + "&type=" + type + "&id=" + id,
     type: "GET",
     dataType: "JSON",
     success: function (data) {
