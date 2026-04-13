@@ -1,7 +1,0 @@
-name = "fun"
-main = "fun.js"
-compatibility_date = "2024-01-01"
-
-[[kv_namespaces]]
-binding = "FUN_KV"
-id = "b21fa835ff0942d4840c3a197c29baf6"
