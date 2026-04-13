@@ -12,7 +12,7 @@ GitHub：https://github.com/imsyy/home
 */
 let server = "tencent"; //netease: 网易云音乐; tencent: QQ音乐; kugou: 酷狗音乐; xiami: 虾米; kuwo: 酷我
 let type = "playlist"; //song: 单曲; playlist: 歌单; album: 唱片
-let id = "2751969066"; //封面 ID / 单曲 ID / 歌单 ID
+let id = "8650439880"; //封面 ID / 单曲 ID / 歌单 ID (替换失效歌单 2751969066)
 
 $.ajax({
     url: "https://api.injahow.cn/meting/?server=" + server + "&type=" + type + "&id=" + id,
