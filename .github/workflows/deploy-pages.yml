@@ -22,10 +22,14 @@ jobs:
       - name: Inject Gist Token
         run: |
           if [ -z "$GIST_TOKEN" ]; then
-            echo "Warning: GIST_TOKEN secret not set, leaving empty"
+            echo "::warning::GIST_TOKEN secret is empty or not set"
+            echo "Checking if const GIST_TOKEN line exists..."
+            grep -n "const GIST_TOKEN" index.html || echo "NOT FOUND"
           else
-            sed -i "s/const GIST_TOKEN = '';/const GIST_TOKEN = '$GIST_TOKEN';/" index.html
-            echo "Token injected: ${GIST_TOKEN:0:4}..."
+            echo "Token found, length: ${#GIST_TOKEN}"
+            sed -i "s/const GIST_TOKEN = ''/const GIST_TOKEN = '$GIST_TOKEN'/" index.html
+            echo "After injection:"
+            grep "const GIST_TOKEN" index.html | cut -c1-40
           fi
         env:
           GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
