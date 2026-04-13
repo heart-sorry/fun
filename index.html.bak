@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>致我们 💌</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #f5f7fa 0%, #e4e8ec 100%);
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .container.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 开场帘子 */
+    .curtain {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .curtain.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(1.1);
+    }
+    .curtain-title {
+      font-size: 2rem;
+      color: #fff;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .curtain-hint {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+      animation: pulse 2s infinite;
+    }
+    .curtain-note {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+      margin-top: 30px;
+      text-align: center;
+      max-width: 280px;
+      line-height: 1.5;
+    }
+    .curtain-music {
+      position: absolute;
+      bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.9);
+      font-size: 0.8rem;
+    }
+    .curtain-music .dot {
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      border-radius: 50%;
+      animation: bounce 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    header h1 {
+      font-size: 1.5rem;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    header p {
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    /* 音乐播放器 */
+    .music-player {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .music-player:active { transform: scale(0.98); }
+    .music-player .play-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    .music-player .music-info {
+      flex: 1;
+      color: #fff;
+    }
+    .music-player .music-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .music-player .music-artist {
+      font-size: 0.7rem;
+      opacity: 0.85;
+    }
+    .music-player .music-time {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.7);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* 时段问候语 */
+    .greeting-bar {
+      background: linear-gradient(90deg, #ffecd2 0%, #fcb69f 100%);
+      border-radius: 14px;
+      padding: 12px 18px;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+      color: #7a4a2a;
+      font-weight: 500;
+      text-align: center;
+      min-height: 24px;
+    }
+
+    /* 心情记录 */
+    .mood-section {
+      background: linear-gradient(135deg, #f8f9ff 0%, #e8f4fd 100%);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      border: 1px solid #e0e8ff;
+    }
+    .mood-label {
+      font-size: 0.78rem;
+      color: #888;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mood-choices {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .mood-btn {
+      font-size: 1.5rem;
+      background: #fff;
+      border: 2px solid #e0e0e0;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mood-btn:hover { transform: scale(1.15); border-color: #f8a5c2; }
+    .mood-btn.selected { border-color: #f8a5c2; background: #fff0f5; transform: scale(1.1); }
+    .mood-today {
+      font-size: 0.8rem;
+      color: #f093fb;
+      font-weight: 600;
+      margin-bottom: 8px;
+      min-height: 18px;
+    }
+    .mood-history {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .mood-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid #e0e0e0;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 纪念日 */
+    .anniversary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+    .anniversary .a-title { font-size: 0.8rem; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .anniversary .a-countdown { font-size: 1.6rem; font-weight: 700; }
+    .anniversary .a-label { font-size: 0.6rem; opacity: 0.85; }
+
+    /* 默契问答 */
+    .quiz-section {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .quiz-section:active { transform: scale(0.98); }
+    .quiz-section .q-title { font-size: 0.9rem; margin-bottom: 4px; }
+    .quiz-section .q-desc { font-size: 0.65rem; opacity: 0.85; }
+
+    .search-box {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      outline: none;
+    }
+    .search-box input::placeholder { color: #aaa; }
+
+    .results { display: none; }
+    .results.active { display: block; }
+
+    .result-item {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      cursor: pointer;
+    }
+    .result-item .r-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .result-item .r-avatar { font-size: 1.4rem; }
+    .result-item .r-name { font-size: 0.9rem; font-weight: 600; color: #333; }
+    .result-item .r-tag { font-size: 0.6rem; color: #888; }
+    .result-item .r-preview { color: #666; font-size: 0.75rem; }
+
+    .not-found { display: none; text-align: center; padding: 20px; color: #888; }
+    .not-found.active { display: block; }
+
+    .hint {
+      text-align: center;
+      color: #999;
+      font-size: 0.7rem;
+      margin-top: 12px;
+    }
+
+    /* 留言板 */
+    .message-board {
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    .message-board .mb-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .message-board .mb-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      resize: none;
+      min-height: 60px;
+      font-family: inherit;
+      margin-bottom: 8px;
+    }
+    .message-board .mb-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .message-board .mb-name {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+    .message-board .mb-btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .message-board .mb-msgs {
+      margin-top: 16px;
+      border-top: 1px solid #eee;
+      padding-top: 12px;
+    }
+    .message-board .mb-msg {
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .message-board .mb-msg .msg-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #667eea;
+    }
+    .message-board .mb-msg .msg-text {
+      font-size: 0.8rem;
+      color: #555;
+      margin-top: 4px;
+    }
+    .message-board .mb-msg .msg-time {
+      font-size: 0.6rem;
+      color: #aaa;
+      margin-top: 4px;
+    }
+    .message-board .mb-msg {
+      position: relative;
+    }
+    .delete-msg-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: none;
+      border: none;
+      font-size: 0.7rem;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+    .delete-msg-btn:hover {
+      opacity: 1;
+    }
+
+    /* 秘密暗号 */
+    .secret-hint {
+      text-align: center;
+      margin-top: 20px;
+      padding: 12px;
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      border-radius: 12px;
+      color: #555;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    .secret-input { display: none; margin-top: 8px; }
+    .secret-input.active { display: block; }
+    .secret-input input {
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+
+    /* 弹窗 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px 20px;
+      max-width: 320px;
+      width: 100%;
+      text-align: center;
+    }
+    .modal .m-avatar { font-size: 2.4rem; margin-bottom: 4px; }
+    .modal .m-name { font-size: 1.1rem; font-weight: 600; color: #333; }
+    .modal .m-tag { font-size: 0.65rem; color: #888; margin-bottom: 14px; }
+    .modal .m-text { font-size: 0.85rem; color: #444; line-height: 1.7; text-align: left; }
+    .modal .close-btn {
+      margin-top: 18px;
+      padding: 10px 28px;
+      border: none;
+      border-radius: 25px;
+      background: #333;
+      color: #fff;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    /* 管理入口 */
+    .admin-link {
+      text-align: center;
+      margin-top: 32px;
+      opacity: 0.12;
+      font-size: 0.6rem;
+      color: #ccc;
+      cursor: pointer;
+    }
+
+    /* 管理后台 */
+    /* 管理入口按钮 */
+    .admin-link { text-align: center; margin-top: 24px; margin-bottom: 30px; }
+    .admin-link-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 20px; border: none; border-radius: 20px;
+      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+      color: #6b5b6e; font-size: 0.75rem; cursor: pointer;
+      opacity: 0.5; transition: opacity 0.2s, transform 0.2s;
+    }
+    .admin-link-btn:hover { opacity: 0.85; transform: scale(1.03); }
+
+    /* 管理后台 */
+    /* 同步设置 */
+    .admin-section {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+    .sync-status {
+      font-size: 0.75rem;
+      color: #999;
+      margin-bottom: 8px;
+    }
+    .sync-status.active { color: #27ae60; }
+    .token-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      margin-bottom: 8px;
+      box-sizing: border-box;
+    }
+    .sync-btn {
+      width: 100%;
+      padding: 8px;
+      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .admin-panel {
+      display: none;
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .admin-panel.active { display: block; }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .admin-header h2 { font-size: 0.9rem; color: #333; }
+    .admin-header button {
+      padding: 4px 10px;
+      border: none;
+      border-radius: 8px;
+      background: #f5f5f5;
+      color: #666;
+      font-size: 0.65rem;
+    }
+
+    .friend-list { display: flex; flex-direction: column; gap: 6px; }
+    .friend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .friend-item .f-avatar { font-size: 1rem; }
+    .friend-item .f-name { flex: 1; font-size: 0.8rem; color: #333; }
+
+    .edit-form {
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 10px;
+    }
+    .edit-form.active { display: block; }
+    .edit-form input,
+    .edit-form textarea {
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: inherit;
+    }
+    .edit-form textarea { min-height: 40px; }
+    .edit-form .btns { display: flex; gap: 6px; }
+    .edit-form button {
+      flex: 1;
+      padding: 6px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+    .edit-form .save { background: #333; color: #fff; }
+    .edit-form .cancel { background: #ddd; color: #666; }
+    .edit-form .del-btn { background: #fff0f0; color: #e74c3c; border: 1px solid #e74c3c; }
+
+    .add-friend-btn {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 8px;
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      background: #fafafa;
+      color: #888;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .add-friend-btn:hover { border-color: #f8a5c2; color: #f8a5c2; background: #fff0f5; }
+
+    .export-btn {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #f0f0f0;
+      color: #666;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 开场帘子 -->
+<div class="curtain" id="curtain" onclick="openCurtain()">
+  <div class="curtain-title">💌 致我们</div>
+  <div class="curtain-hint">点击进入</div>
+  <div class="curtain-note">🎵 点击即入场，音乐将自动播放<br>让我们一起开启这段回忆之旅...</div>
+  <div class="curtain-music">
+    <div class="dot"></div>
+    <span>音乐加载中...</span>
+  </div>
+</div>
+
+<div class="container" id="mainContainer">
+  <header>
+    <h1>致我们 💌</h1>
+    <p>致我们共同的回忆</p>
+  </header>
+
+  <!-- 时段问候语 -->
+  <div class="greeting-bar" id="greetingBar"></div>
+
+  <!-- 心情记录 -->
+  <div class="mood-section" id="moodSection">
+    <div class="mood-label">✨ 今天的心情</div>
+    <div class="mood-choices" id="moodChoices"></div>
+    <div class="mood-today" id="moodToday"></div>
+    <div class="mood-history" id="moodHistory"></div>
+  </div>
+
+  <!-- 音乐播放器 -->
+  <div class="music-player" onclick="toggleMusic()">
+    <div class="play-btn" id="playBtn">▶</div>
+    <div class="music-info">
+      <div class="music-title" id="musicTitle">点击播放音乐</div>
+      <div class="music-artist">背景音乐</div>
+    </div>
+    <div class="music-time" id="musicTime">0:00</div>
+  </div>
+
+  <!-- 纪念日 -->
+  <div class="anniversary">
+    <div class="a-title">🎄 距离圣诞节还有</div>
+    <div class="a-countdown" id="countdown">--</div>
+    <div class="a-label">天</div>
+  </div>
+
+  <!-- MBTI 测试 -->
+  <div class="quiz-section" onclick="startQuiz()">
+    <div class="q-title">🧠 MBTI 测试</div>
+    <div class="q-desc">20道题测出你的MBTI，和朋友对比默契度</div>
+  </div>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="搜索名字..." autocomplete="off">
+  </div>
+
+  <div class="results" id="results"></div>
+  <div class="not-found" id="notFound">
+    <p>没有找到这个人哦</p>
+  </div>
+
+  <div class="hint" id="hint">在这里留下我们的回忆</div>
+
+  <!-- 留言板 -->
+  <div class="message-board">
+    <div class="mb-title">💬 留言板</div>
+    <input type="text" class="mb-name" id="msgName" placeholder="你的名字">
+    <textarea class="mb-input" id="msgText" placeholder="写下你想说的话..."></textarea>
+    <button class="mb-btn" onclick="submitMessage()">提交留言</button>
+    <div class="mb-msgs" id="mbMsgs">
+      <!-- 留言显示在这里 -->
+    </div>
+  </div>
+
+  <!-- 秘密暗号 -->
+  <div class="secret-hint" onclick="toggleSecret()">
+    💫 输入秘密暗号解锁惊喜
+    <div class="secret-input" id="secretInput">
+      <input type="text" id="secretCode" placeholder="输入暗号..." onkeypress="checkSecret(event)">
+    </div>
+  </div>
+
+  <!-- 管理后台 -->
+  <div class="admin-panel" id="adminPanel">
+    <div class="admin-header">
+      <h2>🛠️ 管理</h2>
+      <button onclick="logoutAdmin()">退出</button>
+    </div>
+    <!-- 同步设置 -->
+    <div class="admin-section">
+      <div class="section-title">☁️ 留言同步</div>
+      <div class="sync-status" id="syncStatus">未开启</div>
+      <input type="password" class="token-input" id="gistToken" placeholder="粘贴 GitHub Token">
+      <button class="sync-btn" onclick="saveSyncToken()">开启同步</button>
+    </div>
+    <button class="add-friend-btn" onclick="addFriend()">➕ 新增朋友</button>
+    <div class="friend-list" id="friendList"></div>
+    <div class="edit-form" id="editForm">
+      <input type="hidden" id="editIndex">
+      <input type="text" id="editAvatar" placeholder="头像">
+      <input type="text" id="editName" placeholder="名字">
+      <input type="text" id="editTag" placeholder="标签">
+      <input type="date" id="editMeetDate">
+      <input type="text" id="editSecretCode" placeholder="暗号">
+      <textarea id="editMessage" placeholder="公开消息"></textarea>
+      <textarea id="editSecretMessage" placeholder="暗号消息"></textarea>
+      <div class="btns">
+        <button class="save" onclick="saveFriend()">保存</button>
+        <button class="cancel" onclick="cancelEdit()">取消</button>
+        <button class="del-btn" onclick="deleteFriendFromForm()">🗑️ 删除</button>
+      </div>
+    </div>
+    <button class="export-btn" onclick="copyData()">📋 复制数据</button>
+  </div>
+
+  <div class="admin-link">
+    <button class="admin-link-btn" onclick="promptAdminPassword()">⚙️ 管理</button>
+  </div>
+</div>
+
+<!-- 弹窗 -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="m-avatar" id="m-avatar"></div>
+    <div class="m-name" id="m-name"></div>
+    <div class="m-tag" id="m-tag"></div>
+    <div class="m-text" id="m-text"></div>
+    <button class="close-btn" onclick="document.getElementById('modal').classList.remove('active')">收到</button>
+  </div>
+</div>
+
+<!-- 秘密弹窗 -->
+<div class="modal-overlay" id="secretModal" onclick="closeSecret(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="m-avatar" id="s-emoji">🎁</div>
+    <div class="m-name" id="s-title">惊喜时刻！</div>
+    <div class="m-text" id="s-text"></div>
+    <button class="close-btn" onclick="document.getElementById('secretModal').classList.remove('active')">太棒了</button>
+  </div>
+</div>
+
+<!-- 默契问答弹窗 -->
+<div class="modal-overlay" id="quizModal">
+  <div class="modal">
+    <div class="q-number" id="qNumber" style="font-size:0.7rem;color:#888;margin-bottom:8px">第 1/5 题</div>
+    <div class="q-text" id="qText" style="font-size:1rem;color:#333;margin-bottom:16px;font-weight:600">问题内容</div>
+    <div class="options" id="qOptions"></div>
+    <button class="close-q" onclick="closeQuiz()" style="margin-top:14px;width:100%;padding:8px;border:none;border-radius:8px;background:#f0f0f0;color:#666;cursor:pointer">关闭</button>
+  </div>
+</div>
+
+<script>
+// 数据
+let friends = [];
+let messages = [];
+
+// Gist 配置
+const GIST_ID = 'cf38eea9cb4db23811ff60fdd6d6cec3';
+const GIST_API = 'https://api.github.com/gists/' + GIST_ID;
+const GIST_RAW = `https://gist.githubusercontent.com/heart-sorry/${GIST_ID}/raw/data.json`;
+const GIST_TOKEN = ''; // Token 从 GitHub Secrets 注入
+
+// 读取本地待同步队列
+function getPending() {
+  try { return JSON.parse(localStorage.getItem('msgs_pending') || '[]'); }
+  catch { return []; }
+}
+
+function setPending(list) { localStorage.setItem('msgs_pending', JSON.stringify(list)); }
+function addPending(item) {
+  const p = getPending();
+  if (!p.find(x => x.id === item.id)) {
+    p.push(item);
+    setPending(p);
+  }
+}
+
+// 留言存取
+function getMessages() {
+  try { return JSON.parse(localStorage.getItem('msgs') || '[]'); }
+  catch { return []; }
+}
+function setMessages(list) { localStorage.setItem('msgs', JSON.stringify(list)); }
+
+// 朋友存取
+function getFriends() {
+  try { return JSON.parse(localStorage.getItem('friends') || '[]'); }
+  catch { return []; }
+}
+function setFriends(list) { localStorage.setItem('friends', JSON.stringify(list)); }
+
+// ==================== 时段问候语 ====================
+const GREETINGS = [
+  { after: 23, text: '夜深了，早点休息哦 🌙' },
+  { after: 21, text: '晚安💤' },
+  { after: 18, text: '傍晚好，吃了吗？🍽️' },
+  { after: 14, text: '下午好，辛苦了 ☕' },
+  { after: 11, text: '中午好，吃饱了吗 🍜' },
+  { after: 8,  text: '上午好 ☀️' },
+  { after: 6,  text: '早安，又是新的一天 🌅' },
+  { after: 0,  text: '你好呀 👋' }
+];
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  for (const g of GREETINGS) {
+    if (hour >= g.after) return g.text;
+  }
+  return '你好呀 👋';
+}
+
+function showGreeting() {
+  const bar = document.getElementById('greetingBar');
+  if (!bar) return;
+  const day = new Date().getDate();
+  bar.textContent = getGreeting() + ' · ' + ['日','一','二','三','四','五','六'][new Date().getDay()] + '曜日';
+}
+
+// ==================== 心情记录 ====================
+const MOODS = [
+  { emoji: '😊', label: '开心' },
+  { emoji: '🥰', label: '心动' },
+  { emoji: '😢', label: '难过' },
+  { emoji: '😡', label: '生气' },
+  { emoji: '😴', label: '疲惫' },
+  { emoji: '🤔', label: '思考' },
+  { emoji: '😎', label: '得意' },
+  { emoji: '🥳', label: '兴奋' }
+];
+
+function getMoodData() {
+  try { return JSON.parse(localStorage.getItem('mood_data') || '{}'); }
+  catch { return {}; }
+}
+
+function saveMoodData(data) {
+  localStorage.setItem('mood_data', JSON.stringify(data));
+}
+
+function getTodayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
+function showMood() {
+  const section = document.getElementById('moodSection');
+  const choices = document.getElementById('moodChoices');
+  const today = document.getElementById('moodToday');
+  const history = document.getElementById('moodHistory');
+  if (!section || !choices) return;
+
+  const data = getMoodData();
+  const todayKey = getTodayKey();
+
+  // 渲染心情选项
+  choices.innerHTML = MOODS.map((m, i) =>
+    `<button class="mood-btn${data[todayKey] === i ? ' selected' : ''}" onclick="recordMood(${i})" title="${m.label}">${m.emoji}</button>`
+  ).join('');
+
+  // 今天已记录
+  if (data[todayKey] !== undefined) {
+    today.textContent = `今天：${MOODS[data[todayKey]].emoji} ${MOODS[data[todayKey]].label}`;
+  } else {
+    today.textContent = '';
+  }
+
+  // 最近7天历史
+  const days = [];
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+    const mood = MOODS[data[key]] || null;
+    days.push({ key, mood, day: ['日','一','二','三','四','五','六'][d.getDay()] });
+  }
+  history.innerHTML = days.map(d =>
+    d.mood
+      ? `<div class="mood-dot" title="${d.key}">${d.mood.emoji}<br><span style="font-size:0.55rem">${d.day}</span></div>`
+      : `<div class="mood-dot" style="opacity:0.3" title="${d.key}"><span style="font-size:0.6rem">${d.day}</span></div>`
+  ).join('');
+}
+
+function recordMood(index) {
+  const data = getMoodData();
+  data[getTodayKey()] = index;
+  saveMoodData(data);
+  showMood();
+}
+function setPending(list) {
+  localStorage.setItem('msgs_pending', JSON.stringify(list));
+}
+function addPending(msg) {
+  const p = getPending();
+  // 去重
+  if (!p.find(m => m.id === msg.id)) p.push(msg);
+  setPending(p);
+}
+
+// 同步到 Gist（静默后台运行）
+// 推送完整数据（留言+朋友）到 Gist
+async function pushToGist() {
+  const token = localStorage.getItem('gist_token') || GIST_TOKEN;
+  if (!token) return false;
+  try {
+    const data = { messages, friends, updatedAt: new Date().toISOString() };
+    const res = await fetch(GIST_API, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: 'fun-data', files: { 'data.json': { content: JSON.stringify(data) } } })
+    });
+    return res.ok;
+  } catch (e) { return false; }
+}
+
+// 自动同步：页面加载时静默执行，把待同步消息推上去
+async function autoSync() {
+  const token = localStorage.getItem('gist_token') || GIST_TOKEN;
+  if (!token) return;
+
+  const pending = getPending();
+  if (pending.length === 0) return;
+
+  try {
+    const res = await fetch(GIST_RAW + '?t=' + Date.now());
+    if (res.ok) {
+      const cloud = await res.json();
+      const cloudMessages = Array.isArray(cloud) ? cloud : (cloud.messages || []);
+      const cloudFriends = cloud.friends || friends;
+      const cloudIds = new Set(cloudMessages.map(m => m.id));
+      const newOnes = pending.filter(m => !cloudIds.has(m.id));
+      if (newOnes.length > 0) {
+        messages = [...newOnes, ...cloudMessages].slice(0, 200);
+        friends = cloudFriends;
+        if (await pushToGist()) {
+          setPending([]);
+          renderMessages();
+          renderFriends();
+        }
+      }
+    }
+  } catch (e) {}
+}
+
+// 加载数据：留言 + 朋友（优先云端，本地作为备份）
+async function loadData() {
+  // 1. 先尝试从本地读取（离线时可用）
+  const localMsgs = getMessages();
+  const localFriends = getFriends();
+  if (localMsgs.length > 0) messages = localMsgs;
+  if (localFriends.length > 0) friends = localFriends;
+
+  // 2. 尝试从云端加载（会覆盖本地 + 合并待同步）
+  try {
+    const res = await fetch(GIST_RAW + '?t=' + Date.now());
+    if (res.ok) {
+      const cloud = await res.json();
+
+      // 新格式：{ messages: [...], friends: [...] }
+      if (cloud.messages) {
+        // 云端有数据则优先用云端
+        messages = cloud.messages;
+        friends = cloud.friends || friends;
+        // 保存到本地缓存
+        setMessages(messages);
+        setFriends(friends);
+        renderMessages();
+        renderFriends();
+        // 后台静默同步（合并本地待同步消息）
+        autoSync();
+        return;
+      }
+
+      // 兼容旧格式（纯数组 = 纯留言）
+      if (Array.isArray(cloud)) {
+        messages = cloud;
+        setMessages(messages);
+        renderMessages();
+      }
+    }
+  } catch (e) {}
+
+  // 3. 纯离线：渲染本地数据
+  renderMessages();
+  renderFriends();
+}
+
+// 保存朋友数据（本地 + 自动同步 Gist）
+async function saveFriends() {
+  localStorage.setItem('friends', JSON.stringify(friends));
+  renderFriends();
+
+  const token = localStorage.getItem('gist_token');
+  if (!token) return;
+
+  // 静默同步到 Gist
+  const synced = await pushToGist();
+  if (!synced) addPending({ type: 'friend_sync', friends: [...friends] });
+}
+
+// 添加留言（本地显示 + 静默同步）
+async function addMessage(name, text, time) {
+  const msg = {
+    id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+    name, text, time,
+    createdAt: new Date().toISOString()
+  };
+  messages.unshift(msg);
+  if (messages.length > 200) messages = messages.slice(0, 200);
+  renderMessages();
+
+  // 静默同步到 Gist（优先用内置 Token）
+  const token = localStorage.getItem('gist_token') || GIST_TOKEN;
+  if (!token) return;
+
+  const synced = await pushToGist();
+  if (!synced) addPending(msg);
+}
+
+// 渲染留言板
+function renderMessages() {
+  const msgs = document.getElementById('mbMsgs');
+  const isAdmin = adminPanel.classList.contains('active');
+  msgs.innerHTML = messages.map(m => `
+    <div class="mb-msg">
+      <div class="msg-name">${m.name}</div>
+      <div class="msg-text">${m.text}</div>
+      <div class="msg-time">${m.time}</div>
+      ${isAdmin ? `<button class="delete-msg-btn" onclick="deleteMessage('${m.id}')" title="删除">🗑️</button>` : ''}
+    </div>
+  `).join('');
+}
+
+// 删除留言（管理员）
+async function deleteMessage(id) {
+  if (!confirm('确定删除这条留言吗？')) return;
+  
+  messages = messages.filter(m => m.id !== id);
+  setMessages(messages);
+  renderMessages();
+  
+  // 同步到 Gist
+  const synced = await pushToGist();
+  if (!synced) {
+    alert('删除成功，但同步失败。数据已保存本地，稍后会自动重试。');
+  }
+}
+
+// 页面加载时获取数据
+loadData();
+
+// 纪念日
+const ANNIVERSARY_DATE = "2025-12-25";
+
+// 默契问答
+const quizQuestions = [
+  // E/I 维度（外向-内向）
+  { q: "周末你更喜欢？", options: ["和朋友一起出去玩", "一个人安静待着"] },
+  { q: "在聚会上你通常会？", options: ["主动和陌生人聊天", "只和认识的人交流"] },
+  { q: "独处一天后，你感觉？", options: ["有点无聊，想找人说话", "精力充沛，充电完成"] },
+  { q: "你更喜欢什么样的工作环境？", options: ["热闹的团队协作", "安静的独立思考"] },
+  { q: "和朋友聊天时，你更多是？", options: ["说很多，分享想法", "倾听为主，默默陪伴"] },
+  
+  // S/N 维度（实际-直觉）
+  { q: "你看重的是？", options: ["具体的事实和数据", "未来的可能性"] },
+  { q: "读小说时你更在意？", options: ["情节怎么发展的", "背后有什么含义"] },
+  { q: "面对新项目，你更关注？", options: ["具体的执行步骤", "整体的创意和愿景"] },
+  { q: "你更擅长记住？", options: ["具体的细节和事实", "抽象的概念和联系"] },
+  { q: "解决问题时你习惯？", options: ["用已有经验方法", "尝试全新的方式"] },
+  
+  // T/F 维度（理性-感性）
+  { q: "做重要决定时，你更看重？", options: ["客观的逻辑和分析", "内心的感受和价值观"] },
+  { q: "朋友向你抱怨烦恼时，你更想说？", options: ["我来帮你分析问题", "我能理解你的感受"] },
+  { q: "你觉得什么更重要？", options: ["公平和原则", "和谐和关系"] },
+  { q: "当你不同意别人的观点时？", options: ["直接说出来", "委婉地表达"] },
+  { q: "你更容易被什么打动？", options: ["有道理的分析", "真诚的情感表达"] },
+  
+  // J/P 维度（判断-灵活）
+  { q: "你更喜欢提前计划还是随机应变？", options: ["提前计划好一切", "随性而为，看情况"] },
+  { q: "你的房间/桌面一般？", options: ["整洁有序，井井有条", "有点乱，但自己知道在哪"] },
+  { q: "出门旅行你通常？", options: ["提前订好所有行程", "走一步看一步"] },
+  { q: "面对最后期限的态度？", options: ["必须按时完成", "晚一点也没关系"] },
+  { q: "你更喜欢的生活是？", options: ["按部就班，有确定性", "灵活自由，充满新鲜感"] }
+];
+
+// 背景音乐 - 鸟之诗八音盒版
+const musicUrl = "./music.mp3";
+
+const ADMIN_PASSWORD = "5201314";
+
+const searchInput = document.getElementById('searchInput');
+const resultsEl = document.getElementById('results');
+const notFoundEl = document.getElementById('notFound');
+const adminPanel = document.getElementById('adminPanel');
+const hintEl = document.getElementById('hint');
+
+// 音频
+let audio = new Audio();
+audio.src = musicUrl;
+audio.loop = true;
+audio.preload = 'auto';
+audio.load(); // 立即开始加载
+let isPlaying = false;
+let curtainOpened = false;
+
+audio.onerror = () => {
+  document.getElementById('musicTitle').textContent = '音乐加载失败';
+};
+
+audio.oncanplay = () => {
+  document.getElementById('musicTitle').textContent = '点击播放音乐 🎵';
+  // 更新帘子上的文字
+  const musicNote = document.querySelector('.curtain-music span');
+  if (musicNote) musicNote.textContent = '🎵 音乐已就绪';
+};
+
+// 每秒更新一次时间
+let lastTime = 0;
+audio.ontimeupdate = () => {
+  if (!isPlaying) return;
+  const now = Date.now();
+  if (now - lastTime < 1000) return;
+  lastTime = now;
+  const m = Math.floor(audio.currentTime / 60);
+  const s = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
+  document.getElementById('musicTime').textContent = `${m}:${s}`;
+};
+
+// 拉开帘子
+function openCurtain() {
+  if (curtainOpened) return;
+  curtainOpened = true;
+  
+  // 播放音乐
+  audio.play().then(() => {
+    isPlaying = true;
+    document.getElementById('playBtn').textContent = '⏸';
+    document.getElementById('musicTitle').textContent = '🎵 鸟之诗';
+  }).catch(() => {
+    // 播放失败，静默处理
+  });
+  
+  // 隐藏帘子
+  document.getElementById('curtain').classList.add('hidden');
+  
+  // 显示内容
+  setTimeout(() => {
+    document.getElementById('mainContainer').classList.add('visible');
+    showGreeting();
+    showMood();
+  }, 300);
+}
+
+function toggleMusic() {
+  if (isPlaying) {
+    audio.pause();
+    document.getElementById('playBtn').textContent = '▶';
+    document.getElementById('musicTitle').textContent = '点击播放音乐 🎵';
+    isPlaying = false;
+  } else {
+    audio.play().then(() => {
+      document.getElementById('playBtn').textContent = '⏸';
+      document.getElementById('musicTitle').textContent = '🎵 鸟之诗';
+      isPlaying = true;
+    }).catch(() => {
+      document.getElementById('musicTitle').textContent = '点击重试播放';
+    });
+  }
+}
+
+// 搜索防抖
+function debounce(fn, delay = 200) {
+  let timer = null;
+  return function(...args) {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+// 计算相识天数（缓存）
+const daysCache = new Map();
+function getDays(dateStr) {
+  if (!dateStr) return 0;
+  if (daysCache.has(dateStr)) return daysCache.get(dateStr);
+  const meet = new Date(dateStr);
+  const today = new Date();
+  const diff = Math.floor((today - meet) / 86400000);
+  const result = diff > 0 ? diff : 0;
+  daysCache.set(dateStr, result);
+  return result;
+}
+
+// 纪念日倒计时
+function initAnniversary() {
+  const target = new Date(ANNIVERSARY_DATE);
+  const today = new Date();
+  const diff = Math.floor((target - today) / 86400000);
+  document.getElementById('countdown').textContent = diff > 0 ? diff : 0;
+}
+initAnniversary();
+
+// 搜索（防抖优化）
+const handleSearch = debounce((query) => {
+  if (query === ADMIN_PASSWORD) {
+    showAdmin();
+    return;
+  }
+  
+  if (!query) {
+    resultsEl.classList.remove('active');
+    notFoundEl.classList.remove('active');
+    hintEl.style.display = 'block';
+    return;
+  }
+  
+  hintEl.style.display = 'none';
+  const lowerQuery = query.toLowerCase();
+  const matches = friends.filter(f => f.name.toLowerCase().includes(lowerQuery));
+  
+  if (matches.length === 0) {
+    resultsEl.classList.remove('active');
+    notFoundEl.classList.add('active');
+  } else {
+    notFoundEl.classList.remove('active');
+    // 使用 DocumentFragment 减少重排
+    const fragment = document.createDocumentFragment();
+    matches.forEach(f => {
+      const div = document.createElement('div');
+      div.className = 'result-item';
+      div.innerHTML = `
+        <div class="r-top">
+          <span class="r-avatar">${f.avatar}</span>
+          <div>
+            <div class="r-name">${f.name}</div>
+            <div class="r-tag">${f.tag} · 认识${getDays(f.meetDate)}天</div>
+          </div>
+        </div>
+        <div class="r-preview">${f.message ? f.message.substring(0, 15) : '...'}...</div>
+      `;
+      div.onclick = () => openModal(friends.indexOf(f));
+      fragment.appendChild(div);
+    });
+    resultsEl.innerHTML = '';
+    resultsEl.appendChild(fragment);
+    resultsEl.classList.add('active');
+  }
+}, 200);
+
+searchInput.addEventListener('input', (e) => handleSearch(e.target.value.trim()));
+
+searchInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    const query = searchInput.value.trim();
+    if (query === ADMIN_PASSWORD) {
+      showAdmin();
+    } else {
+      const match = friends.find(f => f.name.toLowerCase().includes(query.toLowerCase()));
+      if (match) openModal(friends.indexOf(match));
+    }
+  }
+});
+
+// 弹窗
+function openModal(i) {
+  const f = friends[i];
+  document.getElementById('m-avatar').textContent = f.avatar;
+  document.getElementById('m-name').textContent = f.name;
+  document.getElementById('m-tag').textContent = f.tag + (f.meetDate ? ' · 认识' + getDays(f.meetDate) + '天' : '');
+  document.getElementById('m-text').textContent = f.message;
+  document.getElementById('modal').classList.add('active');
+}
+
+function closeModal(e) {
+  if (e.target.id === 'modal') document.getElementById('modal').classList.remove('active');
+}
+
+// 秘密暗号
+function toggleSecret() {
+  document.getElementById('secretInput').classList.toggle('active');
+}
+
+function checkSecret(e) {
+  if (e.key === 'Enter') {
+    const code = document.getElementById('secretCode').value.trim();
+    const matchedFriend = friends.find(f => f.secretCode && f.secretCode === code);
+    if (matchedFriend) {
+      document.getElementById('s-emoji').textContent = matchedFriend.avatar;
+      document.getElementById('s-title').textContent = matchedFriend.name + '的专属惊喜！';
+      document.getElementById('s-text').textContent = matchedFriend.secretMessage || matchedFriend.message || "你找到了我们的秘密暗号！";
+      document.getElementById('secretModal').classList.add('active');
+      document.getElementById('secretInput').classList.remove('active');
+      document.getElementById('secretCode').value = '';
+    } else if (code === ADMIN_PASSWORD) {
+      showAdmin();
+      document.getElementById('secretInput').classList.remove('active');
+      document.getElementById('secretCode').value = '';
+    } else {
+      alert('暗号不对哦～再想想？');
+    }
+  }
+}
+
+function closeSecret(e) {
+  if (e.target.id === 'secretModal') document.getElementById('secretModal').classList.remove('active');
+}
+
+// 默契问答
+let currentQ = 0;
+let answers = [];
+
+function startQuiz() {
+  currentQ = 0;
+  answers = [];
+  showQuestion();
+  document.getElementById('quizModal').classList.add('active');
+}
+
+function showQuestion() {
+  const q = quizQuestions[currentQ];
+  const dimNames = ['E/I 外向-内向', 'S/N 实际-直觉', 'T/F 理性-感性', 'J/P 判断-灵活'];
+  const dim = Math.floor(currentQ / 5);
+  document.getElementById('qNumber').textContent = `第 ${currentQ + 1}/${quizQuestions.length} 题 · ${dimNames[dim]}`;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('qOptions').innerHTML = q.options.map((opt, i) => 
+    `<div class="option" onclick="selectOption(${i})" style="padding:12px;border:2px solid #eee;border-radius:10px;text-align:center;cursor:pointer;margin-bottom:8px;transition:all 0.2s">${opt}</div>`
+  ).join('');
+}
+
+function selectOption(i) {
+  answers.push(i);
+  if (currentQ < quizQuestions.length - 1) {
+    currentQ++;
+    showQuestion();
+  } else {
+    // 计算 MBTI
+    const mbti = calculateMBTI(answers);
+    const match = compareMBTI(mbti, userMBTI);
+    
+    const mbtiDesc = {
+      'INTJ': '建筑师', 'INTP': '逻辑学家', 'ENTJ': '指挥官', 'ENTP': '辩论家',
+      'INFJ': '提倡者', 'INFP': '调停者', 'ENFJ': '主人公', 'ENFP': '竞选者',
+      'ISTJ': '物流师', 'ISFJ': '守卫者', 'ESTJ': '总经理', 'ESFJ': '执政官',
+      'ISTP': '鉴赏家', 'ISFP': '探险家', 'ESTP': '企业家', 'ESFP': '表演者'
+    };
+    
+    const yourType = mbtiDesc[mbti] || '';
+    const friendType = mbtiDesc[userMBTI] || '';
+    const matchDesc = getMatchDescription(match, mbti, userMBTI, yourType, friendType);
+    
+    document.getElementById('qText').textContent = `你的MBTI: ${mbti} ${yourType}`;
+    document.getElementById('qOptions').innerHTML = `
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2rem;margin-bottom:12px">${match}%</div>
+        <div style="font-size:0.85rem;color:#666;margin-bottom:16px">${matchDesc}</div>
+        <div style="font-size:0.75rem;color:#888;padding:12px;background:#f5f5f5;border-radius:8px">
+          <div>你的类型: <b>${mbti}</b> (${yourType})</div>
+          <div style="margin-top:6px">对方的类型: <b>${userMBTI}</b> (${friendType})</div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function calculateMBTI(answers) {
+  // 每个维度取多数票: 前5题E/I, 中5题S/N, 后5题T/F, 最后5题J/P
+  // 选第一个选项多 -> E/S/T/J, 选第二个多 -> I/N/F/P
+  const e = answers.slice(0, 5).filter(a => a === 0).length;
+  const s = answers.slice(5, 10).filter(a => a === 0).length;
+  const t = answers.slice(10, 15).filter(a => a === 0).length;
+  const j = answers.slice(15, 20).filter(a => a === 0).length;
+  
+  return (e >= 3 ? 'E' : 'I') + (s >= 3 ? 'S' : 'N') + (t >= 3 ? 'T' : 'F') + (j >= 3 ? 'J' : 'P');
+}
+
+function compareMBTI(yourMBTI, friendMBTI) {
+  // 计算四个维度匹配的百分比
+  let match = 0;
+  for (let i = 0; i < 4; i++) {
+    if (yourMBTI[i] === friendMBTI[i]) match += 25;
+  }
+  return match;
+}
+
+function getMatchDescription(match, yourMBTI, friendMBTI, yourType, friendType) {
+  if (match === 100) return `完全相同！🎉 你们是完美搭档，性格高度一致！`;
+  if (match >= 75) return `高度契合！😊 你们在${match/4}个维度相同，非常默契～`;
+  if (match >= 50) return `部分契合 🤔 你们有${match/4}个维度相同，各有千秋～`;
+  if (match >= 25) return `互补型 💫 你们在${match/4}个维度不同，恰好互补～`;
+  return `完全互补！🌟 你们性格完全相反，却是最佳拍档！`;
+}
+
+// 你的MBTI类型（可从管理后台修改）
+const userMBTI = "ISTP";
+
+function closeQuiz() {
+  document.getElementById('quizModal').classList.remove('active');
+}
+
+// 留言板
+function submitMessage() {
+  const name = document.getElementById('msgName').value.trim();
+  const text = document.getElementById('msgText').value.trim();
+  
+  if (!name || !text) {
+    alert('请填写名字和留言～');
+    return;
+  }
+  
+  const now = new Date();
+  const time = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
+  
+  // 添加留言
+  addMessage(name, text, time);
+  
+  // 重新渲染留言板
+  renderMessages();
+  
+  // 清空输入
+  document.getElementById('msgName').value = '';
+  document.getElementById('msgText').value = '';
+  
+  alert('留言成功！💕');
+}
+
+// 同步设置
+function saveSyncToken() {
+  const token = document.getElementById('gistToken').value.trim();
+  if (!token) {
+    alert('请输入 GitHub Token');
+    return;
+  }
+  if (!token.startsWith('ghp_')) {
+    alert('Token 格式错误，请输入以 ghp_ 开头的 Personal Access Token');
+    return;
+  }
+  localStorage.setItem('gist_token', token);
+  document.getElementById('syncStatus').textContent = '✅ 已开启';
+  document.getElementById('syncStatus').classList.add('active');
+  document.getElementById('gistToken').value = '';
+  alert('✅ 同步已开启！你的留言将自动保存到云端');
+}
+
+function promptAdminPassword() {
+  const input = prompt('请输入管理密码：');
+  if (input === ADMIN_PASSWORD) {
+    showAdmin();
+  } else if (input !== null) {
+    alert('密码错误');
+  }
+}
+
+function showAdmin() {
+  searchInput.value = '';
+  resultsEl.classList.remove('active');
+  notFoundEl.classList.remove('active');
+  hintEl.style.display = 'none';
+  adminPanel.classList.add('active');
+  renderFriends();
+  renderMessages(); // 重新渲染留言，显示删除按钮
+  
+  // 显示同步状态
+  const token = localStorage.getItem('gist_token');
+  const status = document.getElementById('syncStatus');
+  if (token) {
+    status.textContent = '✅ 已开启';
+    status.classList.add('active');
+  } else {
+    status.textContent = '未开启（留言只保存在本地）';
+    status.classList.remove('active');
+  }
+}
+
+function logoutAdmin() {
+  adminPanel.classList.remove('active');
+  hintEl.style.display = 'block';
+}
+
+function renderFriends() {
+  document.getElementById('friendList').innerHTML = friends.map((f, i) => `
+    <div class="friend-item" onclick="editFriend(${i})">
+      <span class="f-avatar">${f.avatar}</span>
+      <span class="f-name">${f.name}</span>
+    </div>
+  `).join('');
+}
+
+function addFriend() {
+  // 添加一个空白朋友
+  friends.push({ avatar: '👤', name: '', tag: '', meetDate: '', secretCode: '', message: '', secretMessage: '' });
+  editFriend(friends.length - 1);
+}
+
+function deleteFriend(i) {
+  if (!confirm('确定删除 ' + friends[i].name + ' 吗？')) return;
+  friends.splice(i, 1);
+  cancelEdit();
+  renderFriends();
+  saveFriends();
+}
+
+function editFriend(i) {
+  const f = friends[i];
+  document.getElementById('editIndex').value = i;
+  document.getElementById('editAvatar').value = f.avatar;
+  document.getElementById('editName').value = f.name;
+  document.getElementById('editTag').value = f.tag;
+  document.getElementById('editMeetDate').value = f.meetDate || '';
+  document.getElementById('editSecretCode').value = f.secretCode || '';
+  document.getElementById('editMessage').value = f.message || '';
+  document.getElementById('editSecretMessage').value = f.secretMessage || '';
+  document.getElementById('editForm').classList.add('active');
+}
+
+function saveFriend() {
+  const i = parseInt(document.getElementById('editIndex').value);
+  friends[i] = {
+    avatar: document.getElementById('editAvatar').value || '👤',
+    name: document.getElementById('editName').value || '未命名',
+    tag: document.getElementById('editTag').value || '',
+    meetDate: document.getElementById('editMeetDate').value || '',
+    secretCode: document.getElementById('editSecretCode').value || '',
+    message: document.getElementById('editMessage').value || '',
+    secretMessage: document.getElementById('editSecretMessage').value || ''
+  };
+  cancelEdit();
+  renderFriends();
+  saveFriends();
+  alert('保存成功！✅');
+}
+
+function cancelEdit() {
+  document.getElementById('editForm').classList.remove('active');
+}
+
+function deleteFriendFromForm() {
+  const i = parseInt(document.getElementById('editIndex').value);
+  deleteFriend(i);
+}
+
+function copyData() {
+  const data = `const friends = ${JSON.stringify(friends, null, 2)};`;
+  navigator.clipboard.writeText(data).then(() => {
+    alert('✅ 已复制！发给我帮你更新～');
+  });
+}
+</script>
+</body>
+</html>
