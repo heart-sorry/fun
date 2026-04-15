@@ -1,22 +1,30 @@
 /**
- * 学习计划功能 v3（GitHub Actions 方案）
- * 三条线：🌐 个人网站 | ⚡ 电赛硬件 | 🤖 本地大模型
- * 勾选状态 → GitHub Gist（任何人可读）
- * 写入 → GitHub Actions workflow（需 repository_dispatch PAT）
- * PAT 存在 GitHub Secrets，仓库内不可见
+ * 学习计划 v4 — Gist 直写 + token 存 localStorage
+ *
+ * 架构：
+ *   读取 → 公开 Gist API，无需认证，任何人可见进度
+ *   写入 → 用 localStorage 里的 PAT 直接 PATCH Gist
+ *   首次使用 → 弹出输入框让 owner 填入 PAT（只存本地，不进代码）
+ *
+ * 安全性：
+ *   - 代码仓库里零 token
+ *   - 其他访客只能读，无法写
+ *   - PAT 只需 gist scope
  */
 
 (function () {
-    const GIST_ID = '6b52e4fa1e68d7ce2afb3807a181c686';
-    const GIST_URL = 'https://api.github.com/gists/' + GIST_ID;
-    const WORKFLOW_TOKEN = ''; // ← 在 GitHub Secrets 中配置，不在代码里
-    const WORKFLOW_REPO = 'heart-sorry/fun';
-    const WORKFLOW_EVENT = 'study-plan-update';
-    const STORAGE_KEY = 'aurora_study_local';
-    let currentCat = 'website';
-    let gistState = null;
+    const GIST_ID   = '6b52e4fa1e68d7ce2afb3807a181c686';
+    const GIST_FILE = 'study-plan.json';
+    const GIST_URL  = 'https://api.github.com/gists/' + GIST_ID;
+    const TOKEN_KEY = 'aurora_gist_token';   // localStorage key for PAT
+    const CACHE_KEY = 'aurora_study_cache';  // localStorage key for state cache
 
-    // ===== 任务数据 =====
+    let currentCat = 'website';
+    let gistState  = null;
+
+    // ─────────────────────────────────────────
+    // 任务数据
+    // ─────────────────────────────────────────
     const defaultTasks = {
         website: [
             {
@@ -30,7 +38,7 @@
             {
                 section: 'JavaScript',
                 items: [
-                    { text: 'ES6+ 语法（let / const / 箭头函数 / async-await）', path: 'MDN / 廖雪峰JS教程' },
+                    { text: 'ES6+ 语法（let/const/箭头函数/async-await）', path: 'MDN / 廖雪峰JS教程' },
                     { text: 'DOM 操作与事件监听', path: 'MDN Web Docs' },
                     { text: 'Fetch API + 异步编程', path: 'MDN Fetch指南' },
                     { text: 'localStorage / sessionStorage 本地存储', path: 'MDN Storage API' },
@@ -39,7 +47,7 @@
             {
                 section: 'Git 工作流',
                 items: [
-                    { text: 'Git 分支管理（feature / dev / main）', path: '廖雪峰Git教程 / Git官方文档' },
+                    { text: 'Git 分支管理（feature/dev/main）', path: '廖雪峰Git教程 / Git官方文档' },
                     { text: '规范 commit message（Conventional Commits）', path: 'GitHub Commit规范' },
                     { text: 'Pull Request 协作流程', path: 'GitHub 官方教程' },
                 ]
@@ -112,7 +120,7 @@
                 items: [
                     { text: '准备"成为我"数据集（微信/QQ聊天记录 → JSONL）', path: '自己整理 / 数据清洗脚本' },
                     { text: 'QLoRA 微调环境搭建（conda + transformers + peft）', path: 'Hugging Face PEFT文档 / 知乎教程' },
-                    { text: 'LoRA 微调 Qwen2.5-3B 并测试效果', path: 'GitHub: lllyasviel/qlora-papers / Qwen官方' },
+                    { text: 'LoRA 微调 Qwen2.5-3B 并测试效果', path: 'GitHub qlora / Qwen官方' },
                     { text: '用微调后的模型回答"你是谁"验证个性', path: 'LM Studio / llama.cpp' },
                 ]
             },
@@ -127,72 +135,87 @@
         ]
     };
 
-    // ===== 初始化默认状态 =====
-    function buildDefaultState() {
-        var state = {};
-        for (var cat in defaultTasks) {
-            state[cat] = {};
-            for (var si = 0; si < defaultTasks[cat].length; si++) {
-                var items = defaultTasks[cat][si].items;
-                for (var ii = 0; ii < items.length; ii++) {
-                    state[cat][items[ii].text] = false;
-                }
-            }
-        }
-        return state;
+    // ─────────────────────────────────────────
+    // 工具函数
+    // ─────────────────────────────────────────
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    // ===== 读取 Gist（公开，无需认证）=====
+    function buildDefaultState() {
+        var s = {};
+        for (var cat in defaultTasks) {
+            s[cat] = {};
+            defaultTasks[cat].forEach(function (sec) {
+                sec.items.forEach(function (item) { s[cat][item.text] = false; });
+            });
+        }
+        return s;
+    }
+
+    function getToken() {
+        return localStorage.getItem(TOKEN_KEY) || '';
+    }
+
+    function isOwner() {
+        return !!getToken();
+    }
+
+    // ─────────────────────────────────────────
+    // Gist 读取（公开，无需 token）
+    // ─────────────────────────────────────────
     function loadFromGist() {
         return fetch(GIST_URL, {
-            method: 'GET',
             headers: { 'Accept': 'application/vnd.github.v3+json' }
         })
         .then(function (r) { return r.json(); })
         .then(function (data) {
-            if (data.files && data.files['study-plan.json'] && data.files['study-plan.json'].content) {
-                try {
-                    return JSON.parse(data.files['study-plan.json'].content);
-                } catch (e) {
-                    return buildDefaultState();
-                }
+            var f = data.files && data.files[GIST_FILE];
+            if (f && f.content) {
+                try { return JSON.parse(f.content); } catch (e) {}
             }
             return buildDefaultState();
         })
         .catch(function () {
-            try {
-                var cached = localStorage.getItem(STORAGE_KEY);
-                return cached ? JSON.parse(cached) : buildDefaultState();
-            } catch (e2) {
-                return buildDefaultState();
+            var cached = localStorage.getItem(CACHE_KEY);
+            return cached ? JSON.parse(cached) : buildDefaultState();
+        });
+    }
+
+    // ─────────────────────────────────────────
+    // Gist 写入（需要 token，只有 owner 能做）
+    // ─────────────────────────────────────────
+    function saveToGist(state) {
+        var token = getToken();
+        if (!token) return Promise.resolve();
+
+        var body = JSON.stringify({
+            files: {
+                [GIST_FILE]: { content: JSON.stringify(state, null, 2) }
             }
         });
-    }
 
-    // ===== 触发 Actions workflow 更新 Gist =====
-    function syncToGist(state) {
-        var stateJson = JSON.stringify(state);
-        // 缓存到本地，防止网络失败后数据丢失
-        try { localStorage.setItem(STORAGE_KEY, stateJson); } catch (e) {}
-
-        fetch('https://api.github.com/repos/' + WORKFLOW_REPO + '/dispatches', {
-            method: 'POST',
+        return fetch(GIST_URL, {
+            method: 'PATCH',
             headers: {
                 'Accept': 'application/vnd.github.v3+json',
-                'Authorization': 'Bearer ' + WORKFLOW_TOKEN,
-                'Content-Type': 'application/json',
-                'X-GitHub-Api-Version': '2022-11-28'
+                'Authorization': 'token ' + token,
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                event_type: WORKFLOW_EVENT,
-                client_payload: { state: stateJson }
-            })
-        }).catch(function (err) {
-            console.warn('Actions trigger failed:', err);
+            body: body
+        })
+        .then(function (r) {
+            if (!r.ok) throw new Error('Gist write failed: ' + r.status);
+            // 更新本地缓存
+            try { localStorage.setItem(CACHE_KEY, JSON.stringify(state)); } catch (e) {}
         });
     }
 
-    // ===== 进度条 =====
+    // ─────────────────────────────────────────
+    // 进度条
+    // ─────────────────────────────────────────
     function renderProgress(state) {
         var total = 0, done = 0;
         for (var cat in state) {
@@ -201,24 +224,25 @@
                 if (state[cat][k]) done++;
             }
         }
-        $('#study-progress-text').text('已完成 ' + done + ' / ' + total + ' 项');
+        var pct = total ? Math.round(done / total * 100) : 0;
+        $('#study-progress-text').text('已完成 ' + done + ' / ' + total + ' 项（' + pct + '%）');
     }
 
-    // ===== 渲染任务列表 =====
+    // ─────────────────────────────────────────
+    // 渲染任务列表
+    // ─────────────────────────────────────────
     function renderTasks(cat, state) {
         var sections = defaultTasks[cat] || [];
         var catState = state[cat] || {};
         var $content = $('#study-content');
         $content.empty();
 
-        for (var si = 0; si < sections.length; si++) {
-            var section = sections[si];
-            $('<div class="study-section-title">' + escHtml(section.section) + '</div>').appendTo($content);
-            for (var ii = 0; ii < section.items.length; ii++) {
-                var item = section.items[ii];
+        sections.forEach(function (sec) {
+            $content.append('<div class="study-section-title">' + escHtml(sec.section) + '</div>');
+            sec.items.forEach(function (item) {
                 var done = !!catState[item.text];
                 var $item = $(
-                    '<div class="study-item' + (done ? ' done' : '') + '" data-text="' + escHtml(item.text) + '">' +
+                    '<div class="study-item' + (done ? ' done' : '') + '">' +
                         '<div class="study-checkbox"><i class="fa-solid fa-check"></i></div>' +
                         '<div class="study-item-content">' +
                             '<div class="study-item-text">' + escHtml(item.text) + '</div>' +
@@ -226,53 +250,128 @@
                         '</div>' +
                     '</div>'
                 );
-                $item.on('click', (function (theItem) {
-                    return function () { toggleItem(theItem.text, cat); };
-                })(item));
+                if (isOwner()) {
+                    $item.css('cursor', 'pointer').on('click', (function (t) {
+                        return function () { toggleItem(t, cat); };
+                    })(item.text));
+                } else {
+                    $item.css('cursor', 'default').attr('title', '仅作者可修改');
+                }
                 $content.append($item);
-            }
+            });
+        });
+
+        // 非 owner 提示
+        if (!isOwner()) {
+            $content.append(
+                '<div class="study-readonly-tip">' +
+                '<i class="fa-solid fa-eye"></i> 访客模式 · 仅可查看' +
+                '</div>'
+            );
         }
     }
 
-    function escHtml(str) {
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
-    }
-
-    // ===== 打勾切换 =====
+    // ─────────────────────────────────────────
+    // 打勾切换
+    // ─────────────────────────────────────────
     function toggleItem(text, cat) {
-        if (!gistState) return;
+        if (!gistState || !isOwner()) return;
         gistState[cat][text] = !gistState[cat][text];
+        var nowDone = gistState[cat][text];
+
         renderTasks(cat, gistState);
         renderProgress(gistState);
-        syncToGist(gistState); // 异步触发 Actions → 写 Gist
-        iziToast.show({
-            timeout: 1500,
-            icon: gistState[cat][text] ? 'fa-solid fa-check-circle' : 'fa-solid fa-circle',
-            message: gistState[cat][text] ? '✅ 已同步' : '⭕ 已取消'
+
+        // 乐观更新本地缓存
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify(gistState)); } catch (e) {}
+
+        // 异步写 Gist
+        saveToGist(gistState).then(function () {
+            showToast(nowDone ? '✅ 已完成并同步' : '⭕ 已取消并同步', nowDone ? 'success' : 'info');
+        }).catch(function () {
+            showToast('⚠️ 本地已更新，云端同步失败', 'warning');
         });
     }
 
-    // ===== 打开/关闭 =====
+    function showToast(msg, type) {
+        if (typeof iziToast !== 'undefined') {
+            iziToast.show({ timeout: 2000, message: msg, color: type === 'success' ? 'green' : type === 'warning' ? 'yellow' : 'blue' });
+        }
+    }
+
+    // ─────────────────────────────────────────
+    // Token 设置弹窗（owner 首次使用）
+    // ─────────────────────────────────────────
+    function showTokenPrompt() {
+        var existing = getToken();
+        var html =
+            '<div id="token-prompt-overlay" style="' +
+                'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;' +
+                'display:flex;align-items:center;justify-content:center;">' +
+            '<div style="background:#1e1e2e;border-radius:16px;padding:28px 32px;width:360px;' +
+                        'box-shadow:0 8px 32px rgba(0,0,0,.5);color:#cdd6f4;">' +
+                '<div style="font-size:18px;font-weight:700;margin-bottom:8px;">🔑 设置 Gist Token</div>' +
+                '<div style="font-size:13px;color:#a6adc8;margin-bottom:16px;">' +
+                    '仅需 <code style="background:#313244;padding:2px 6px;border-radius:4px;">gist</code> 权限的 Classic PAT。' +
+                    '只存在你的浏览器 localStorage，不会上传到任何地方。' +
+                '</div>' +
+                '<input id="token-input" type="password" placeholder="ghp_xxxxxxxxxxxx" ' +
+                    'style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid #45475a;' +
+                           'background:#313244;color:#cdd6f4;font-size:14px;outline:none;box-sizing:border-box;" ' +
+                    'value="' + escHtml(existing) + '">' +
+                '<div style="display:flex;gap:10px;margin-top:16px;">' +
+                    '<button id="token-save" style="flex:1;padding:10px;border-radius:8px;border:none;' +
+                        'background:#89b4fa;color:#1e1e2e;font-weight:700;cursor:pointer;">保存</button>' +
+                    '<button id="token-cancel" style="flex:1;padding:10px;border-radius:8px;border:none;' +
+                        'background:#45475a;color:#cdd6f4;cursor:pointer;">取消</button>' +
+                '</div>' +
+                (existing ? '<div style="margin-top:12px;text-align:center;">' +
+                    '<span id="token-clear" style="font-size:12px;color:#f38ba8;cursor:pointer;">清除 Token（切换为访客模式）</span>' +
+                '</div>' : '') +
+            '</div></div>';
+
+        $('body').append(html);
+
+        $('#token-save').on('click', function () {
+            var val = $('#token-input').val().trim();
+            if (val) {
+                localStorage.setItem(TOKEN_KEY, val);
+                $('#token-prompt-overlay').remove();
+                showToast('✅ Token 已保存，刷新后生效', 'success');
+                // 重新渲染以启用打勾
+                if (gistState) renderTasks(currentCat, gistState);
+            }
+        });
+        $('#token-cancel').on('click', function () { $('#token-prompt-overlay').remove(); });
+        $('#token-clear').on('click', function () {
+            localStorage.removeItem(TOKEN_KEY);
+            $('#token-prompt-overlay').remove();
+            showToast('已切换为访客模式', 'info');
+            if (gistState) renderTasks(currentCat, gistState);
+        });
+        // Enter 键保存
+        $('#token-input').on('keydown', function (e) {
+            if (e.key === 'Enter') $('#token-save').click();
+        });
+    }
+
+    // ─────────────────────────────────────────
+    // 打开 / 关闭
+    // ─────────────────────────────────────────
     function openStudyPlan() {
         $('#study-box').fadeIn(200);
-        $('#study-content').css({ opacity: 0 });
 
         if (gistState) {
             renderProgress(gistState);
             renderTasks(currentCat, gistState);
-            setTimeout(function () { $('#study-content').css({ opacity: 1 }); }, 50);
         } else {
-            $('#study-progress-text').text('加载中…');
-            $('#study-content').html('<div class="study-empty">从云端同步中…</div>');
+            $('#study-progress-text').text('同步中…');
+            $('#study-content').html('<div class="study-empty"><i class="fa-solid fa-spinner fa-spin"></i> 从云端加载中…</div>');
             loadFromGist().then(function (state) {
                 gistState = state;
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify(state)); } catch (e) {}
                 renderProgress(state);
                 renderTasks(currentCat, state);
-                setTimeout(function () { $('#study-content').css({ opacity: 1 }); }, 50);
             });
         }
     }
@@ -281,7 +380,9 @@
         $('#study-box').fadeOut(200);
     }
 
-    // ===== 初始化 =====
+    // ─────────────────────────────────────────
+    // 初始化
+    // ─────────────────────────────────────────
     $(function () {
         $('#open-study-plan').on('click', openStudyPlan);
         $('#close-study').on('click', closeStudyPlan);
@@ -289,16 +390,23 @@
             if (e.target === this) closeStudyPlan();
         });
         $(document).on('keydown', function (e) {
-            if (e.key === 'Escape' && $('#study-box').is(':visible') === true) {
-                closeStudyPlan();
-            }
+            if (e.key === 'Escape' && $('#study-box').is(':visible')) closeStudyPlan();
         });
+
+        // 分类 tab
         $('.study-tab').on('click', function () {
-            var cat = $(this).data('cat');
-            currentCat = cat;
+            currentCat = $(this).data('cat');
             $('.study-tab').removeClass('active');
             $(this).addClass('active');
-            if (gistState) renderTasks(cat, gistState);
+            if (gistState) renderTasks(currentCat, gistState);
+        });
+
+        // 长按标题 3 秒 → 弹出 token 设置（隐藏入口，只有 owner 知道）
+        var pressTimer = null;
+        $('#study-box').on('mousedown touchstart', '.study-title', function () {
+            pressTimer = setTimeout(function () { showTokenPrompt(); }, 3000);
+        }).on('mouseup mouseleave touchend', '.study-title', function () {
+            clearTimeout(pressTimer);
         });
     });
 })();
