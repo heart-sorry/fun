@@ -1,0 +1,18 @@
+name: Study Plan Sync
+
+on:
+  repository_dispatch:
+    types: [study-plan-update]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Gist
+        run: |
+          curl -s -X PATCH \
+            -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -d "{\"description\":\"Aurora Study Plan - Heart-Sorry\",\"files\":{\"study-plan.json\":{\"content\":$(echo '${{ github.event.client_payload.state }}' | jq -c .)}}}}" \
+            "https://api.github.com/gists/6b52e4fa1e68d7ce2afb3807a181c686"

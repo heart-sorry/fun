@@ -1038,3 +1038,203 @@ footer {
     border-radius: 10px;
     background-color: #eeeeee;
 }
+
+/* ========== 学习计划 ========== */
+
+/* 学习计划弹窗 */
+#study-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.study-wrapper {
+    position: relative;
+    width: 90%;
+    max-width: 680px;
+    max-height: 85vh;
+    background: rgb(0 0 0 / 30%);
+    backdrop-filter: blur(20px);
+    border-radius: 12px;
+    padding: 28px 24px 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.study-close {
+    right: 16px !important;
+    top: 12px !important;
+    font-size: 1.5rem;
+}
+
+/* 标题区 */
+.study-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgb(255 255 255 / 15%);
+}
+
+.study-title {
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.study-progress-text {
+    font-size: 0.95rem;
+    background: rgb(255 255 255 / 15%);
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+/* 分类标签 */
+.study-categories {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.study-tab {
+    flex: 1;
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    background: rgb(255 255 255 / 10%);
+    transition: 0.3s;
+    border: 1px solid transparent;
+    user-select: none;
+}
+
+.study-tab:hover {
+    background: rgb(255 255 255 / 20%);
+}
+
+.study-tab.active {
+    background: rgb(255 255 255 / 25%);
+    border-color: rgb(255 255 255 / 40%);
+    font-weight: bold;
+}
+
+/* 任务列表 */
+.study-content {
+    overflow-y: auto;
+    flex: 1;
+    padding-right: 4px;
+}
+
+.study-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    background: rgb(255 255 255 / 8%);
+    border-radius: 8px;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.study-item:hover {
+    background: rgb(255 255 255 / 16%);
+}
+
+.study-item.done {
+    opacity: 0.55;
+}
+
+.study-item.done .study-item-text {
+    text-decoration: line-through;
+}
+
+/* 复选框 */
+.study-checkbox {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid rgb(255 255 255 / 40%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+    margin-top: 2px;
+}
+
+.study-item.done .study-checkbox {
+    background: #4caf50;
+    border-color: #4caf50;
+}
+
+.study-checkbox i {
+    font-size: 0.7rem;
+    color: white;
+    opacity: 0;
+    transition: 0.2s;
+}
+
+.study-item.done .study-checkbox i {
+    opacity: 1;
+}
+
+/* 任务文字 */
+.study-item-content {
+    flex: 1;
+}
+
+.study-item-text {
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.study-item-path {
+    font-size: 0.78rem;
+    color: rgb(255 255 255 / 50%);
+    margin-top: 4px;
+}
+
+/* 分类标题 */
+.study-section-title {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: rgb(255 255 255 / 60%);
+    padding: 8px 14px 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* 空状态 */
+.study-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgb(255 255 255 / 40%);
+    font-size: 1rem;
+}
+
+/* 移动端适配 */
+@media (max-width: 600px) {
+    .study-wrapper {
+        width: 95%;
+        padding: 20px 16px 16px;
+    }
+
+    .study-categories {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .study-tab {
+        font-size: 0.9rem;
+        padding: 7px 12px;
+    }
+
+    .study-item-text {
+        font-size: 0.95rem;
+    }
+}
