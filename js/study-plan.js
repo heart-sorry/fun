@@ -182,6 +182,7 @@
     }
 
     // 用密码解锁：XOR 解密 → 验证格式 → 存 localStorage
+    // token 存入 localStorage 后刷新页面不需要重新输入密码
     function unlockWithPassword(pwd) {
         var token = xorDecrypt(ENCRYPTED_PAT, pwd);
         if (token && token.startsWith('ghp_')) {

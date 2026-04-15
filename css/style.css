@@ -1217,6 +1217,31 @@ footer {
     font-size: 1rem;
 }
 
+/* 访客模式提示 */
+.study-readonly-tip {
+    text-align: center;
+    padding: 14px;
+    margin-top: 16px;
+    background: rgb(255 255 255 / 5%);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: rgb(255 255 255 / 35%);
+}
+
+.study-readonly-tip i {
+    margin-right: 6px;
+}
+
+/* 敬请期待卡片 */
+.link-card.cards[style*="opacity"] {
+    border: 1px dashed rgb(255 255 255 / 25%);
+}
+
+.link-card.cards[style*="opacity"]:hover {
+    opacity: 0.4 !important;
+    transform: none;
+}
+
 /* 移动端适配 */
 @media (max-width: 600px) {
     .study-wrapper {
