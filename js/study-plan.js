@@ -454,7 +454,21 @@
             if (gistState) renderTasks(currentCat, gistState);
         });
 
-        // 长按标题 3 秒 → 弹出 token 设置（隐藏入口，只有 owner 知道）
+        // 点击解锁按钮 → 弹出密码框
+        $('#study-unlock-btn').on('click', showPasswordPrompt);
+
+        // 每次渲染任务后更新按钮状态
+        var origRender = renderTasks;
+        renderTasks = function (cat, state) {
+            origRender(cat, state);
+            if (isOwner()) {
+                $('#study-unlock-btn').addClass('unlocked').html('<i class="fa-solid fa-lock-open"></i>');
+            } else {
+                $('#study-unlock-btn').removeClass('unlocked').html('<i class="fa-solid fa-lock"></i>');
+            }
+        };
+
+        // 保留长按标题作为备用入口（仅 owner 知道）
         var pressTimer = null;
         $('#study-box').on('mousedown touchstart', '.study-title', function () {
             pressTimer = setTimeout(function () { showPasswordPrompt(); }, 3000);

@@ -1242,6 +1242,31 @@ footer {
     transform: none;
 }
 
+/* 解锁按钮 */
+.study-unlock-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgb(255 255 255 / 12%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 14px;
+    color: rgb(255 255 255 / 60%);
+    flex-shrink: 0;
+}
+
+.study-unlock-btn:hover {
+    background: rgb(255 255 255 / 25%);
+    color: #fff;
+}
+
+.study-unlock-btn.unlocked {
+    color: #4caf50;
+}
+
 /* 移动端适配 */
 @media (max-width: 600px) {
     .study-wrapper {
