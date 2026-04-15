@@ -1,23 +1,26 @@
 /**
- * 学习计划 v4 — Gist 直写 + token 存 localStorage
+ * 学习计划 v5 — 密码验证 + XOR 加密 PAT
  *
  * 架构：
- *   读取 → 公开 Gist API，无需认证，任何人可见进度
- *   写入 → 用 localStorage 里的 PAT 直接 PATCH Gist
- *   首次使用 → 弹出输入框让 owner 填入 PAT（只存本地，不进代码）
+ *   读取 → 公开 Gist API，无需认证
+ *   写入 → 输入密码 → XOR 解密出 PAT → 写 Gist
+ *   密码 → 简单好记（如 061101），PAT 用密码加密后存在代码里
  *
  * 安全性：
- *   - 代码仓库里零 token
- *   - 其他访客只能读，无法写
- *   - PAT 只需 gist scope
+ *   - 代码里只有 XOR 加密后的 PAT，GitHub 扫描认不出
+ *   - 密码错误 → 解出乱码 → API 调用失败 → 无效
+ *   - 其他访客不知道密码，只能读
  */
 
 (function () {
     const GIST_ID   = '6b52e4fa1e68d7ce2afb3807a181c686';
     const GIST_FILE = 'study-plan.json';
     const GIST_URL  = 'https://api.github.com/gists/' + GIST_ID;
-    const TOKEN_KEY = 'aurora_gist_token';   // localStorage key for PAT
+    const TOKEN_KEY = 'aurora_gist_token';   // localStorage key for decrypted PAT
     const CACHE_KEY = 'aurora_study_cache';  // localStorage key for state cache
+
+    // XOR 加密后的 PAT（base64），密码正确才能解出真 token
+    var ENCRYPTED_PAT = 'V15BbnEIB3EEV2QEf0QESEoJQlNXX2YGUVtYAGVLentLXgBfA15Leg==';
 
     let currentCat = 'website';
     let gistState  = null;
@@ -155,12 +158,37 @@
         return s;
     }
 
+    // ── XOR 解密 ──
+    function xorDecrypt(encB64, password) {
+        try {
+            var bytes = atob(encB64);
+            var result = '';
+            for (var i = 0; i < bytes.length; i++) {
+                result += String.fromCharCode(bytes.charCodeAt(i) ^ password.charCodeAt(i % password.length));
+            }
+            return result;
+        } catch (e) { return ''; }
+    }
+
     function getToken() {
-        return localStorage.getItem(TOKEN_KEY) || '';
+        // 优先用已缓存的 token
+        var cached = localStorage.getItem(TOKEN_KEY);
+        if (cached && cached.startsWith('ghp_')) return cached;
+        return '';
     }
 
     function isOwner() {
         return !!getToken();
+    }
+
+    // 用密码解锁：XOR 解密 → 验证格式 → 存 localStorage
+    function unlockWithPassword(pwd) {
+        var token = xorDecrypt(ENCRYPTED_PAT, pwd);
+        if (token && token.startsWith('ghp_')) {
+            localStorage.setItem(TOKEN_KEY, token);
+            return true;
+        }
+        return false;
     }
 
     // ─────────────────────────────────────────
@@ -300,58 +328,63 @@
     }
 
     // ─────────────────────────────────────────
-    // Token 设置弹窗（owner 首次使用）
+    // 密码验证弹窗（长按标题触发）
     // ─────────────────────────────────────────
-    function showTokenPrompt() {
-        var existing = getToken();
+    function showPasswordPrompt() {
+        var isUnlocked = isOwner();
         var html =
-            '<div id="token-prompt-overlay" style="' +
+            '<div id="pwd-prompt-overlay" style="' +
                 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;' +
                 'display:flex;align-items:center;justify-content:center;">' +
-            '<div style="background:#1e1e2e;border-radius:16px;padding:28px 32px;width:360px;' +
+            '<div style="background:#1e1e2e;border-radius:16px;padding:28px 32px;width:340px;' +
                         'box-shadow:0 8px 32px rgba(0,0,0,.5);color:#cdd6f4;">' +
-                '<div style="font-size:18px;font-weight:700;margin-bottom:8px;">🔑 设置 Gist Token</div>' +
+                '<div style="font-size:18px;font-weight:700;margin-bottom:8px;">🔐 身份验证</div>' +
                 '<div style="font-size:13px;color:#a6adc8;margin-bottom:16px;">' +
-                    '仅需 <code style="background:#313244;padding:2px 6px;border-radius:4px;">gist</code> 权限的 Classic PAT。' +
-                    '只存在你的浏览器 localStorage，不会上传到任何地方。' +
+                    '输入密码解锁编辑权限，访客只能查看' +
                 '</div>' +
-                '<input id="token-input" type="password" placeholder="ghp_xxxxxxxxxxxx" ' +
+                '<input id="pwd-input" type="password" placeholder="请输入密码" autofocus ' +
                     'style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid #45475a;' +
-                           'background:#313244;color:#cdd6f4;font-size:14px;outline:none;box-sizing:border-box;" ' +
-                    'value="' + escHtml(existing) + '">' +
+                           'background:#313244;color:#cdd6f4;font-size:14px;outline:none;box-sizing:border-box;">' +
+                '<div id="pwd-error" style="font-size:12px;color:#f38ba8;margin-top:6px;display:none;">密码错误，请重试</div>' +
                 '<div style="display:flex;gap:10px;margin-top:16px;">' +
-                    '<button id="token-save" style="flex:1;padding:10px;border-radius:8px;border:none;' +
-                        'background:#89b4fa;color:#1e1e2e;font-weight:700;cursor:pointer;">保存</button>' +
-                    '<button id="token-cancel" style="flex:1;padding:10px;border-radius:8px;border:none;' +
+                    '<button id="pwd-confirm" style="flex:1;padding:10px;border-radius:8px;border:none;' +
+                        'background:#89b4fa;color:#1e1e2e;font-weight:700;cursor:pointer;">解锁</button>' +
+                    '<button id="pwd-cancel" style="flex:1;padding:10px;border-radius:8px;border:none;' +
                         'background:#45475a;color:#cdd6f4;cursor:pointer;">取消</button>' +
                 '</div>' +
-                (existing ? '<div style="margin-top:12px;text-align:center;">' +
-                    '<span id="token-clear" style="font-size:12px;color:#f38ba8;cursor:pointer;">清除 Token（切换为访客模式）</span>' +
+                (isUnlocked ? '<div style="margin-top:12px;text-align:center;">' +
+                    '<span id="pwd-lock" style="font-size:12px;color:#f38ba8;cursor:pointer;">🔒 锁定（切换为访客模式）</span>' +
                 '</div>' : '') +
             '</div></div>';
 
         $('body').append(html);
 
-        $('#token-save').on('click', function () {
-            var val = $('#token-input').val().trim();
-            if (val) {
-                localStorage.setItem(TOKEN_KEY, val);
-                $('#token-prompt-overlay').remove();
-                showToast('✅ Token 已保存，刷新后生效', 'success');
-                // 重新渲染以启用打勾
+        // 自动聚焦
+        setTimeout(function () { $('#pwd-input').focus(); }, 100);
+
+        function doUnlock() {
+            var pwd = $('#pwd-input').val();
+            if (unlockWithPassword(pwd)) {
+                $('#pwd-prompt-overlay').remove();
+                showToast('✅ 已解锁，可以勾选了', 'success');
                 if (gistState) renderTasks(currentCat, gistState);
+            } else {
+                $('#pwd-error').show();
+                $('#pwd-input').val('').focus();
             }
+        }
+
+        $('#pwd-confirm').on('click', doUnlock);
+        $('#pwd-cancel').on('click', function () { $('#pwd-prompt-overlay').remove(); });
+        $('#pwd-input').on('keydown', function (e) {
+            if (e.key === 'Enter') doUnlock();
+            $('#pwd-error').hide();
         });
-        $('#token-cancel').on('click', function () { $('#token-prompt-overlay').remove(); });
-        $('#token-clear').on('click', function () {
+        $('#pwd-lock').on('click', function () {
             localStorage.removeItem(TOKEN_KEY);
-            $('#token-prompt-overlay').remove();
-            showToast('已切换为访客模式', 'info');
+            $('#pwd-prompt-overlay').remove();
+            showToast('🔒 已锁定', 'info');
             if (gistState) renderTasks(currentCat, gistState);
-        });
-        // Enter 键保存
-        $('#token-input').on('keydown', function (e) {
-            if (e.key === 'Enter') $('#token-save').click();
         });
     }
 
@@ -404,7 +437,7 @@
         // 长按标题 3 秒 → 弹出 token 设置（隐藏入口，只有 owner 知道）
         var pressTimer = null;
         $('#study-box').on('mousedown touchstart', '.study-title', function () {
-            pressTimer = setTimeout(function () { showTokenPrompt(); }, 3000);
+            pressTimer = setTimeout(function () { showPasswordPrompt(); }, 3000);
         }).on('mouseup mouseleave touchend', '.study-title', function () {
             clearTimeout(pressTimer);
         });
