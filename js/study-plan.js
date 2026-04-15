@@ -203,14 +203,30 @@
         .then(function (data) {
             var f = data.files && data.files[GIST_FILE];
             if (f && f.content) {
-                try { return JSON.parse(f.content); } catch (e) {}
+                try {
+                    var remote = JSON.parse(f.content);
+                    // merge 远程状态到默认结构（处理新增任务）
+                    return mergeState(remote);
+                } catch (e) {}
             }
             return buildDefaultState();
         })
         .catch(function () {
             var cached = localStorage.getItem(CACHE_KEY);
-            return cached ? JSON.parse(cached) : buildDefaultState();
+            return cached ? mergeState(JSON.parse(cached)) : buildDefaultState();
         });
+    }
+
+    // 合并远程/缓存状态到默认结构（保留勾选，加入新任务）
+    function mergeState(remote) {
+        var base = buildDefaultState();
+        for (var cat in base) {
+            if (!remote[cat]) continue;
+            for (var k in base[cat]) {
+                if (remote[cat][k] !== undefined) base[cat][k] = remote[cat][k];
+            }
+        }
+        return base;
     }
 
     // ─────────────────────────────────────────
@@ -305,6 +321,9 @@
     // ─────────────────────────────────────────
     function toggleItem(text, cat) {
         if (!gistState || !isOwner()) return;
+        // 确保 cat 和 text 键存在
+        if (!gistState[cat]) gistState[cat] = {};
+        if (gistState[cat][text] === undefined) gistState[cat][text] = false;
         gistState[cat][text] = !gistState[cat][text];
         var nowDone = gistState[cat][text];
 
