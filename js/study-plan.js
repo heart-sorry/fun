@@ -211,6 +211,81 @@
                     { text: 'Jetson Nano / Orin 部署实操（可选）', path: 'NVIDIA Jetson官方教程' },
                 ]
             },
+
+            // ═══════════════════════════════════════
+            // 🤖 智能层 — 阶段六：具身智能（Embodied AI）
+            //
+            // 学什么：机器人操作系统、视觉感知、导航规划、Sim-to-Real
+            // 能做什么：把 AI 大脑装进机器人身体——感知环境 + 做决策 + 执行动作
+            //
+            // 三层协作：
+            //   🌐 Web层   → 远程遥控 / 摄像头图传 / 状态仪表盘
+            //   🤖 智能层  → 视觉感知 / SLAM / 导航规划 / 任务推理
+            //   ⚡ 执行层  → 电机控制 / 里程计反馈 / 传感器上报
+            // ═══════════════════════════════════════
+            {
+                // ── 阶段六A：机器人基础 + 操作系统 ──
+                // 学什么：机器人系统架构 + ROS2 基本概念
+                // 能做什么：理解机器人软件栈，能跑起来一个基础 demo
+                // 执行层职责：STM32 接收 ROS2 发来的速度指令，通过串口控制电机
+                section: '🤖 智能层 — 阶段六A：机器人基础 + ROS2',
+                items: [
+                    { text: '机器人系统架构（感知→决策→控制 闭环）', path: '《机器人学导论》/ 深蓝学院机器人基础' },
+                    { text: 'ROS2 基本概念（节点 / Topic / Service / Action）', path: 'ROS2官方文档 / 古月居ROS2入门21讲' },
+                    { text: 'URDF 机器人描述（连杆 / 关节 / 传感器模型）', path: 'ROS2官方URDF教程 / 自动驾驶之心URDF' },
+                    { text: 'rqt 工具链（调试话题 / 可视化节点图）', path: 'ROS2官方rqt教程' },
+                    { text: 'launch 文件（多节点一键启动）', path: 'ROS2 launch官方文档' },
+                    { text: '串口通信（ROS2 → STM32 速度指令下发）', path: 'ROS2 serial包 / 自定义接口' },
+                ]
+            },
+            {
+                // ── 阶段六B：感知——让机器人"看见" ──
+                // 学什么：视觉感知、传感器融合、SLAM 基础
+                // 能做什么：机器人能在未知环境中建图 + 定位自己
+                // 智能层职责：处理摄像头/LiDAR 数据 → 提取环境特征 → 传给规划层
+                section: '🤖 智能层 — 阶段六B：感知（视觉 + SLAM）',
+                items: [
+                    { text: '相机标定（内参 + 畸变校正）', path: 'ROS2 camera_calibration / OpenCV标定' },
+                    { text: '深度相机（Realsense / Astra 驱动 + 点云）', path: 'realsense-ros / astra_camera' },
+                    { text: '2D LiDAR（思岚 / 镭神）驱动 + 点云可视化', path: 'sllidar_ros2 / slam_toolbox' },
+                    { text: 'SLAM 基础（Cartographer / GMapping）', path: 'Cartographer ROS2 / 实验室李永老师SLAM课' },
+                    { text: '视觉里程计（VINS-Fusion / ORB-SLAM3）', path: 'VINS-Fusion GitHub / 深蓝学院SLAM课' },
+                    { text: '目标检测 + 跟踪（YOLOv8 + DeepSort）', path: 'Ultralytics YOLOv8 / FairMOT' },
+                    { text: '手眼标定（机械臂相机安装 + 标定流程）', path: 'easy_handeye / visphandeye_tutorial' },
+                ]
+            },
+            {
+                // ── 阶段六C：决策——让机器人"会想" ──
+                // 学什么：导航规划、任务分解、强化学习基础
+                // 能做什么：机器人能自主导航到目标点，按任务序列执行动作
+                // 智能层职责：接收感知结果 → 全局路径规划 → 局部避障 → 发送速度命令
+                section: '🤖 智能层 — 阶段六C：导航规划 + 决策',
+                items: [
+                    { text: 'Navigation2（全局路径规划 + 局部避障）', path: 'Navigation2官方文档 / 古月居NAV2课程' },
+                    { text: 'DWA / TEB 局部规划器对比调参', path: 'dwa_local_planner / teb_local_planner' },
+                    { text: 'Costmap 代价地图配置（膨胀半径 / 障碍物层）', path: 'Navigation2 Costmap文档' },
+                    { text: 'AMCL 定位（自适应蒙特卡洛定位）', path: 'Navigation2 AMCL / 概率机器人书' },
+                    { text: 'MoveIt2（机械臂运动规划 + 碰撞检测）', path: 'MoveIt2官方文档 / 赖焘然MoveIt2课' },
+                    { text: '任务规划（状态机 / 行为树 BT）', path: 'BehaviorTree.CPP / SMACH状态机' },
+                    { text: '强化学习入门（PPO / SAC 在机器人场景应用）', path: 'OpenAI SpinningUp / Stable-Baselines3' },
+                ]
+            },
+            {
+                // ── 阶段六D：具身智能进阶 ──
+                // 学什么：大模型 + 机器人、Sim-to-Real、强化学习落地
+                // 能做什么：让机器人听懂自然语言指令，训练策略从仿真到真实世界迁移
+                // 智能层职责：大模型理解用户意图 → 拆解为可执行任务序列 → 控制执行层
+                section: '🤖 智能层 — 阶段六D：具身智能进阶',
+                items: [
+                    { text: 'VLA 模型（Vision-Language-Action 模型）', path: 'RT-2论文 / OpenVLA论文 / HuggingFace机器人' },
+                    { text: '大模型 + 机器人（LLM as Robot Brain）', path: 'SayCan / RoboCat / LLM-Planner论文' },
+                    { text: 'Voxposer 可供性分析（语言指令 → 3D 操作点）', path: 'Voxposer论文 / 实验室具身智能课' },
+                    { text: '模仿学习（BC / GAIL，用人类演示训练机器人）', path: '模仿学习综述 / Robomimic框架' },
+                    { text: 'Sim-to-Real 域随机化（光照 / 材质 / 物理参数）', path: 'Isaac Gym / PyBullet域随机化' },
+                    { text: 'Isaac Sim 仿真入门（NVIDIA 高保真物理仿真）', path: 'Isaac Sim官方教程 / Omniverse机器人课' },
+                    { text: '强化学习机器人落地（SAC / PPO 调参与部署）', path: 'RLBench / MetaWorld benchmark' },
+                ]
+            },
         ]
     };
 
