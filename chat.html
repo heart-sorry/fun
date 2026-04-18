@@ -12,7 +12,6 @@
     <link rel="icon" href="./img/icon/favicon.ico">
 </head>
 <body class="chat-body">
-    <!-- 聊天容器 -->
     <div class="chat-container">
         <!-- 头部 -->
         <div class="chat-header">
@@ -24,11 +23,14 @@
             </div>
             <div class="chat-info">
                 <div class="chat-name">Tim</div>
-                <div class="chat-status">在线</div>
+                <div class="chat-status">
+                    <span class="status-dot offline" id="status-dot"></span>
+                    <span id="status-text">检查中</span>
+                </div>
             </div>
             <div class="chat-badge">
-                <i class="fa-solid fa-robot"></i>
-                <span>AI Skill</span>
+                <i class="fa-solid fa-house-laptop"></i>
+                <span>本地模型</span>
             </div>
         </div>
 
@@ -55,7 +57,7 @@
             </div>
             <div class="chat-hint">
                 <i class="fa-solid fa-info-circle"></i>
-                <span>和 Tim 的数字镜像聊天 · 回复风格基于真实聊天记录</span>
+                <span>Tim 数字镜像 · 本地模型运行</span>
             </div>
         </div>
     </div>
