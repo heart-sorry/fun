@@ -188,6 +188,7 @@ class TimChat {
             const isLocal = this.mode === 'local';
             const body = {
                 model: this.modelName,
+                stream: false,
                 messages: [
                     { role: 'system', content: this.getSystemPrompt() },
                     ...this.messages.slice(-10)
