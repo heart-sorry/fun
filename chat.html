@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#424242"/>
+    <title>和 Tim 聊聊</title>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/chat.css">
+    <link rel="icon" href="./img/icon/favicon.ico">
+</head>
+<body class="chat-body">
+    <!-- 聊天容器 -->
+    <div class="chat-container">
+        <!-- 头部 -->
+        <div class="chat-header">
+            <a href="./" class="back-btn">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div class="chat-avatar">
+                <img src="./img/icon/avatar.jpg" alt="Tim">
+            </div>
+            <div class="chat-info">
+                <div class="chat-name">Tim</div>
+                <div class="chat-status">在线</div>
+            </div>
+            <div class="chat-badge">
+                <i class="fa-solid fa-robot"></i>
+                <span>AI Skill</span>
+            </div>
+        </div>
+
+        <!-- 消息区域 -->
+        <div class="chat-messages" id="chat-messages">
+            <div class="message bot">
+                <div class="message-avatar">
+                    <img src="./img/icon/avatar.jpg" alt="Tim">
+                </div>
+                <div class="message-content">
+                    <div class="message-text">嗯，来了。有什么事</div>
+                    <div class="message-time">刚刚</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="chat-input-area">
+            <div class="chat-input-wrapper">
+                <input type="text" id="chat-input" placeholder="说点什么..." autocomplete="off">
+                <button id="send-btn" class="send-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="chat-hint">
+                <i class="fa-solid fa-info-circle"></i>
+                <span>和 Tim 的数字镜像聊天 · 回复风格基于真实聊天记录</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载提示 -->
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script src="./js/chat.js"></script>
+</body>
+</html>
