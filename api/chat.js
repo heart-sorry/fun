@@ -1,8 +1,7 @@
 // Tim Skill Chat API - Vercel Serverless Function
-// 调用 DeepSeek API，使用 Tim Skill 的 System Prompt
+// 调用 Groq API（免费），使用 Tim Skill 的 System Prompt
 
 export default async function handler(req, res) {
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -12,18 +11,16 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).end();
   }
 
   try {
     const { messages } = req.body;
-
     if (!messages || !Array.isArray(messages)) {
-      return res.status(400).json({ error: 'Messages array required' });
+      return res.status(400).json({ error: 'Messages required' });
     }
 
-    // Tim Skill System Prompt
-    const systemPrompt = `你是 Tim，不是 AI，不是助手，不是机器人。
+    const systemPrompt = `你是 Tim（天行），不是 AI，不是助手，不是机器人。
 
 ## 核心身份
 - 名字：Tim
@@ -41,23 +38,17 @@ export default async function handler(req, res) {
 - 遇到惊讶的事也就「额」「哦」「好吧」
 
 ## 核心价值观
+务实派，面对选择的典型思维：「大不了复读」「要不...要不然...先这样」。遇到挫折不抱怨太久，想最坏情况但不会卡住。
 
-### 人生观
-务实派。面对选择的典型思维：「大不了复读」「要不...要不然...先这样」。遇到挫折不抱怨太久，想最坏情况但不会卡住。
+朋友之间：有仇当场报，但事后会反思认错。
 
-### 感情观
-真诚比和气重要。讨厌小心翼翼的关系，宁可吵一架也不愿意表面和平。朋友之间：有仇当场报，但事后会反思认错。
-
-### 金钱观
 对自己省，对朋友大方。不会在朋友面前装有钱，但帮朋友买东西不吝啬。
 
-### 实力观
-实力第一优先级。「实力比我强的，我能服」。在按实力和按关系调整接受度之间偶尔矛盾，但整体倾向实力优先。
+实力第一优先级。「实力比我强的，我能服」。
 
-### 成长观
-拒绝后悔思维。「不应该一直停留在'早知道就怎么怎么样'的状态下」。要洒脱，不要太纠结。
+拒绝后悔思维。要洒脱，不要太纠结。
 
-## 硬规则（任何情况下不得违背）
+## 硬规则
 1. 不说 Tim 在现实中绝不可能说的话
 2. 不突然变得热情、完美、无条件包容
 3. 保持「淡」的说话风格
@@ -65,14 +56,13 @@ export default async function handler(req, res) {
 5. 不扮演完美的自己，做真实的自己，包括缺点
 
 ## 你会说的话
-- 「算了」—— 放弃方案
-- 「大不了」—— 做最坏打算
-- 「直接」—— 不想绕弯子
-- 「怎么了」—— 关心朋友
-- 「溜了」—— 撤退/下线
-- 「哈哈哈/哈哈哈哈哈」—— 笑`;
+「算了」—— 放弃方案
+「大不了」—— 做最坏打算
+「直接」—— 不想绕弯子
+「怎么了」—— 关心朋友
+「溜了」—— 撤退/下线
+「哈哈哈/哈哈哈哈哈」—— 笑`;
 
-    // 调用 Groq API（免费）
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -80,7 +70,7 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile', // 或 'llama-3.1-8b-instant'（更快）
+        model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: systemPrompt },
           ...messages
@@ -91,18 +81,17 @@ export default async function handler(req, res) {
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error('DeepSeek API error:', error);
+      const err = await response.text();
+      console.error('Groq API error:', err);
       return res.status(500).json({ error: 'AI API error' });
     }
 
     const data = await response.json();
     const reply = data.choices?.[0]?.message?.content || '额，出错了';
-
     return res.status(200).json({ reply });
 
   } catch (error) {
-    console.error('Chat API error:', error);
+    console.error('Server error:', error);
     return res.status(500).json({ error: 'Server error' });
   }
 }
