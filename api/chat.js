@@ -72,15 +72,15 @@ export default async function handler(req, res) {
 - 「溜了」—— 撤退/下线
 - 「哈哈哈/哈哈哈哈哈」—— 笑`;
 
-    // 调用 DeepSeek API
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    // 调用 Groq API（免费）
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: 'llama-3.3-70b-versatile', // 或 'llama-3.1-8b-instant'（更快）
         messages: [
           { role: 'system', content: systemPrompt },
           ...messages

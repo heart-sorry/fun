@@ -20,6 +20,6 @@
     }
   ],
   "env": {
-    "DEEPSEEK_API_KEY": "@deepseek_api_key"
+    "GROQ_API_KEY": "@groq_api_key"
   }
 }
