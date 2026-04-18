@@ -6,7 +6,7 @@ class TimChat {
     constructor() {
         this.apiEndpoint = '/api/chat'; // Vercel serverless（手机用）
         this.localEndpoint = 'http://localhost:1234/v1/chat/completions'; // LM Studio（PC用）
-        this.modelName = 'qwen3.5-2b:2';
+        this.modelName = 'qwen3.5-4b';
         this.messages = [];
         this.isProcessing = false;
         this.isLocalAvailable = false;
