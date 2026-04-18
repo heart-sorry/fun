@@ -86,7 +86,13 @@ class TimChat {
     }
 
     getActiveEndpoint() {
-        return this.isLocalAvailable ? this.localEndpoint : this.apiEndpoint;
+        if (this.isLocalAvailable) return this.localEndpoint;
+        if (this.lanEndpoint) return this.lanEndpoint;
+        return this.apiEndpoint; // fallback to online
+    }
+
+    isModelAvailable() {
+        return this.isLocalAvailable || !!this.lanEndpoint;
     }
 
     loadHistory() {
@@ -169,10 +175,19 @@ class TimChat {
         const typingEl = this.showTyping();
 
         try {
+            if (!this.isModelAvailable()) {
+                typingEl.remove();
+                this.renderMessage('bot', '本地模型未启动，先开 LM Studio 吧');
+                this.isProcessing = false;
+                this.elements.sendBtn.disabled = false;
+                this.elements.input.focus();
+                return;
+            }
+
             const endpoint = this.getActiveEndpoint();
-            const isLocal = this.isLocalAvailable;
+            const isLocal = this.mode === 'local';
             const body = {
-                model: isLocal ? this.modelName : undefined,
+                model: this.modelName,
                 messages: [
                     { role: 'system', content: this.getSystemPrompt() },
                     ...this.messages.slice(-10)
@@ -192,7 +207,10 @@ class TimChat {
 
             const data = await response.json();
             // Vercel API 返回 {reply: string}，LM Studio 返回 {choices:[{message:{content}}]}
-            const reply = data.reply || data.choices?.[0]?.message?.content || '额，出问题了';
+            const isOnline = this.mode === 'online';
+            const reply = isOnline
+                ? (data.reply || '额，出问题了')
+                : (data.choices?.[0]?.message?.content || '额，出问题了');
 
             typingEl.remove();
             this.renderMessage('bot', reply);
