@@ -41,28 +41,48 @@ class TimChat {
     }
 
     async detectMode() {
-        try {
-            const ctrl = new AbortController();
-            const id = setTimeout(() => ctrl.abort(), 3000);
-            const res = await fetch('http://localhost:1234/v1/models', {
+        // 并行检测：本地 + LAN，找到任一可用就走对应模式
+        const tasks = [
+            fetch('http://localhost:1234/v1/models', {
                 method: 'GET',
-                signal: ctrl.signal
-            });
-            clearTimeout(id);
-            if (res.ok) {
+                signal: AbortSignal.timeout(2000)
+            }).then(r => ({ ok: r.ok, mode: 'local', base: 'http://localhost:1234' })),
+
+            fetch('http://10.164.252.18:1234/v1/models', {
+                method: 'GET',
+                signal: AbortSignal.timeout(2000)
+            }).then(r => ({ ok: r.ok, mode: 'lan', base: 'http://10.164.252.18:1234' }))
+        ];
+
+        try {
+            const result = await Promise.any(tasks);
+            if (result.ok) {
+                this.lanEndpoint = result.base + '/v1/chat/completions';
                 this.isLocalAvailable = true;
-                this.mode = 'local';
-                if (this.elements.statusDot) this.elements.statusDot.classList.remove('offline');
-                if (this.elements.statusText) this.elements.statusText.textContent = '本地模型';
-            } else {
-                throw new Error('not ok');
+                this.mode = result.mode;
+                this._updateStatus();
             }
         } catch (e) {
             this.isLocalAvailable = false;
             this.mode = 'online';
-            if (this.elements.statusDot) this.elements.statusDot.classList.add('offline');
-            if (this.elements.statusText) this.elements.statusText.textContent = '在线API';
+            this._updateStatus();
         }
+    }
+
+    _updateStatus() {
+        if (!this.elements.statusDot || !this.elements.statusText) return;
+        this.elements.statusDot.classList.remove('offline');
+        const modeMap = { local: '本地模型', lan: 'LAN模型', online: '在线API' };
+        this.elements.statusText.textContent = modeMap[this.mode] || '检查中';
+
+        // 更新头部的徽章
+        const badge = document.querySelector('.chat-badge span');
+        if (badge) badge.textContent = modeMap[this.mode] || '检查中';
+
+        // 更新底部提示
+        const hint = document.querySelector('.chat-hint span');
+        const hintMap = { local: 'Tim 数字镜像 · 本地模型运行', lan: 'Tim 数字镜像 · LAN模型运行', online: 'Tim 数字镜像 · 在线API运行' };
+        if (hint) hint.textContent = hintMap[this.mode] || '';
     }
 
     getActiveEndpoint() {
